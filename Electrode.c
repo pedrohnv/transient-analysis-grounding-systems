@@ -45,6 +45,7 @@ int electrodes_file(const char file_name[], Electrode* electrodes,
     double start_point[3], end_point[3];
     double radius, rezi, imzi;
     int success = 9;
+    int pop_error = 0;
     for (int i = 0; i < num_electrodes; i++)
     {
         success = fscanf(stream, "%lf %lf %lf %lf %lf %lf %lf %lf %lf",
@@ -56,11 +57,45 @@ int electrodes_file(const char file_name[], Electrode* electrodes,
             printf("error reading line %i of file %s\n", i+1, file_name);
             break;
         }
-        populate_electrode(&(electrodes[i]), start_point, end_point, radius,
+        success = populate_electrode(&(electrodes[i]), start_point, end_point, radius,
             rezi + I*imzi);
+        if (success != 0)
+        {
+            printf("Bad input: could not create electrode %i from file %s\n",
+                i+1, file_name);
+            pop_error = success;
+            break;
+        }
     }
     fclose(stream);
-    return (success - 9);
+    if (pop_error == 0)
+    {
+        return (success - 9);
+    } else {
+        return (pop_error);
+    }
+}
+
+int nodes_file(const char file_name[], double nodes[][3], int num_nodes)
+{
+    FILE* stream = fopen(file_name, "r");
+    if (stream == NULL) {
+        printf("Cannot open file %s\n", file_name);
+        exit(1);
+    }
+    int success = 3;
+    for (int i = 0; i < num_nodes; i++)
+    {
+        success = fscanf(stream, "%lf %lf %lf",
+            &nodes[i][0], &nodes[i][1], &nodes[i][2]);
+        if (success != 3)
+        {
+            printf("error reading line %i of file %s\n", i+1, file_name);
+            break;
+        }
+    }
+    fclose(stream);
+    return (success - 3);
 }
 
 int segment_electrode(

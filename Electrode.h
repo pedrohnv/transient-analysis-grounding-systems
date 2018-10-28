@@ -92,10 +92,25 @@ Any line number greater than `num_electrodes` will be ignored.
 @param file_name path to the file
 @param electrodes pointer to an array of Electrode to be filled
 @param num_electrodes number of electrodes to read (number of lines in file)
-@return number of missing arguments from last line read (as a negative integer)
+@return error
+    error == 0 on success
+    error < 0: number of missing arguments from last line read (as a negative integer)
+    error > 0: bad input
 */
 int electrodes_file(const char file_name[], Electrode* electrodes,
     int num_electrodes);
+
+/**
+Fill a nodes array from a file. Each node must be defined in a single line
+with parameters: "x y z".
+The @param `num_nodes` is the number of lines in the file to be read.
+Any line number greater than `num_nodes` will be ignored.
+@param file_name path to the file
+@param nodes array of double[3] to be filled
+@param num_nodes number of nodes to read (number of lines in file)
+@return number of missing arguments from last line read (as a negative integer)
+*/
+int nodes_file(const char file_name[], double nodes[][3], int num_nodes);
 
 /**
 Segments an electrode (conductor) populating a passed array of electrodes and
