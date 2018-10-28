@@ -85,6 +85,19 @@ int populate_electrode(
     double radius, _Complex double zi);
 
 /**
+Populates an Electrode array from a file. Each Electrode must be defined in
+a single line with parameters: "x0 y0 z0 x1 y1 z1 radius Re(zi) Im(zi)".
+The @param `num_electrodes` is the number of lines in the file to be read.
+Any line number greater than `num_electrodes` will be ignored.
+@param file_name path to the file
+@param electrodes pointer to an array of Electrode to be filled
+@param num_electrodes number of electrodes to read (number of lines in file)
+@return number of missing arguments from last line read (as a negative integer)
+*/
+int electrodes_file(const char file_name[], Electrode* electrodes,
+    int num_electrodes);
+
+/**
 Segments an electrode (conductor) populating a passed array of electrodes and
 an array of nodes.
 @param electrodes pointer to an array of Electrode to be filled
@@ -101,11 +114,6 @@ int segment_electrode(
     Electrode* electrodes, double nodes[][3], int num_segments,
     double* start_point, double* end_point, double radius,
     _Complex double unit_zi);
-
-/**
-Segments a group o Electrodes.
-*/
-int segment_group();
 
 /**
 Calculates the integrand \f$ \frac{e^{-\gamma r}}{r} \f$ to be integrated

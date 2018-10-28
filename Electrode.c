@@ -2,6 +2,8 @@
 #include <auxiliary.h>
 #include <cubature.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
 //#include <omp.h>
 #include <mkl_lapacke.h>
@@ -32,6 +34,35 @@ int populate_electrode(
     return 0;
 }
 
+int electrodes_file(const char file_name[], Electrode* electrodes,
+    int num_electrodes)
+{
+    FILE* stream = fopen(file_name, "r");
+    if (stream == NULL) {
+        printf("Cannot open file %s\n", file_name);
+        exit(1);
+    }
+    double start_point[3], end_point[3];
+    double radius, rezi, imzi;
+    int success = 9;
+    for (int i = 0; i < num_electrodes; i++)
+    {
+        success = fscanf(stream, "%lf %lf %lf %lf %lf %lf %lf %lf %lf",
+            &start_point[0], &start_point[1], &start_point[2],
+            &end_point[0], &end_point[1], &end_point[2],
+            &radius, &rezi, &imzi);
+        if (success != 9)
+        {
+            printf("error reading line %i of file %s\n", i+1, file_name);
+            break;
+        }
+        populate_electrode(&(electrodes[i]), start_point, end_point, radius,
+            rezi + I*imzi);
+    }
+    fclose(stream);
+    return (success - 9);
+}
+
 int segment_electrode(
     Electrode* electrodes, double nodes[][3], int num_segments,
     double* start_point, double* end_point, double radius,
@@ -60,15 +91,8 @@ int segment_electrode(
     _Complex double zi = unit_zi*total_length/num_segments;
     for (i = 0; i < num_segments; i++)
     {
-        populate_electrode(
-            &(electrodes[i]), nodes[i], nodes[i + 1], radius, zi);
+        populate_electrode(&(electrodes[i]), nodes[i], nodes[i + 1], radius, zi);
     }
-    return 0;
-}
-
-int segment_group()
-{
-    //TODO create
     return 0;
 }
 
