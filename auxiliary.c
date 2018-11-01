@@ -1,5 +1,7 @@
 #include <auxiliary.h>
 #include <math.h>
+#include <complex.h>
+#include <stdio.h>
 
 double* linspace(double a, double b, int n, double u[])
 {
@@ -80,3 +82,34 @@ int copy_array(_Complex double* source, _Complex double* target, int size)
     }
     return 0;
 }
+
+int print_zmatrix_file(int m, int n, _Complex double* a, int lda, FILE* fp)
+{
+    int i, j;
+    for( i = 0; i < m; i++ )
+    {
+        for( j = 0; j < n; j++ )
+        {
+            fprintf(fp, "(%.6f%+.6fj)", creal(a[i*lda+j]), cimag(a[i*lda+j]) );
+            if (j < n - 1) fprintf(fp, ",");
+        }
+        fprintf(fp, "\n");
+    }
+    return 0;
+}
+
+int print_dmatrix_file(int m, int n, double* a, int lda, FILE* fp)
+{
+    int i, j;
+    for( i = 0; i < m; i++ )
+    {
+        for( j = 0; j < n; j++ )
+        {
+            fprintf(fp, "%.6f", a[i*lda+j]);
+            if (j < n - 1) fprintf(fp, ",");
+        }
+        fprintf(fp, "\n");
+    }
+    return 0;
+}
+

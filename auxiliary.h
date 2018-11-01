@@ -11,6 +11,9 @@ Constants, auxiliary functions and routines.
 #ifndef AUXILIARY_H_
 #define AUXILIARY_H_
 
+#include <complex.h>
+#include <stdio.h>
+
 //constants
 #define PI 3.1415926535897932384626433832795029L
 #define TWO_PI 6.283185307179586
@@ -79,6 +82,28 @@ Copy `source` array into `target` array of complex numbers.
 @return 0 on success
 */
 int copy_array(_Complex double* source, _Complex double* target, int size);
+
+/*
+Prints a complex (double) matrix to a file.
+@param m number of rows
+@param n number of columns
+@param a pointer to array where matrix is stored
+@param lda leading dimension of `a`
+@param fp pointer to file stream
+@return 0 on success
+*/
+int print_zmatrix_file(int m, int n, _Complex double* a, int lda, FILE* fp);
+
+/*
+Prints a real (double) matrix to a file.
+@param m number of rows
+@param n number of columns
+@param a pointer to array where matrix is stored
+@param lda leading dimension of `a`
+@param fp pointer to file stream
+@return 0 on success
+*/
+int print_dmatrix_file(int m, int n, double* a, int lda, FILE* fp);
 
 /*
 FORTRAN subroutine to calculate I-Bessel function, i.e., modified Bessel
