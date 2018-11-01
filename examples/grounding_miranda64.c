@@ -72,7 +72,7 @@ int main()
             electrodes, num_electrodes, zl, zt, gamma, w, MU0, kappa1,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         zinternal = internal_impedance(w, rho_c, radius, MU0)*electrodes[0].length;
-        for (k = 0; k < 0/*num_electrodes*/; k++) // FIXME
+        for (k = 0; k < num_electrodes; k++)
         {
             zl[k*num_electrodes] += zinternal;
         }
