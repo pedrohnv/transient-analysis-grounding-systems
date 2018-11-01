@@ -3,7 +3,7 @@ INTELLINK = -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_
 INTELFLAGS = -DMKL_ILP64 -m64
 CUBATUREPATH = ./cubature/
 INCLUDE = -I. -I$(CUBATUREPATH)
-LINK = -L. -lm $(INTELLINK) -lslatec -llapack
+LINK = -L. $(INTELLINK) -lslatec -llapack
 CFLAGS = -Wall -fno-exceptions -std=c11 $(INTELFLAGS) -Werror -g
 OBJECTS = Electrode.o auxiliary.o hcubature.o
 
@@ -26,3 +26,5 @@ example51emc03grcev	:	$(OBJECTS)
 		gcc $(CFLAGS) $(INCLUDE) -o 51emc03grcev.a examples/51emc03grcev.c $(OBJECTS) $(LINK)
 timing	:	$(OBJECTS)
 		gcc $(CFLAGS) $(INCLUDE) -o timing.a examples/timing.c $(OBJECTS) $(LINK)
+miranda64	:	$(OBJECTS)
+		gcc $(CFLAGS) $(INCLUDE) -o examples/miranda64.a examples/grounding_miranda64.c $(OBJECTS) $(LINK)
