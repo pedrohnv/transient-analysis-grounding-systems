@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-//#include <omp.h>
+#include <mkl.h>
 #include <mkl_lapacke.h>
+//#include <omp.h>
 
 int populate_electrode(
     Electrode* electrode, double start_point[3], double end_point[3],
@@ -334,6 +335,7 @@ _Complex double transversal_mutual(
     return 1.0/(FOUR_PI*kappa*ls*lr)*intg;
 }
 
+// TODO store ZT and ZL as upper/lower triangular matrices, as they are symmetric
 int calculate_impedances(
     Electrode* electrodes, int num_electrodes, _Complex double* zl,
     _Complex double* zt, _Complex double gamma, double w, double mu,
@@ -447,10 +449,9 @@ int fill_incidence(
     _Complex double* we, Electrode* electrodes, int num_electrodes,
     double nodes[][3], int num_nodes)
 {
-    int e, n, condition, node_is_start, node_is_end, a, b, c, d;
-    int jump = (2*num_electrodes + num_nodes)*num_electrodes;
-    int jump_2 = 2*jump;
-    int no_incidence;
+    int e, n, condition, node_is_start, node_is_end, a, b, c, d, no_incidence;
+    int ld = (2*num_electrodes + num_nodes)*num_electrodes;
+    int ld_2 = 2*ld;
     //TODO use a more efficient search or fill-up method if possible
     for (n = 0; n < num_nodes; n++)
     {
@@ -476,8 +477,8 @@ int fill_incidence(
             }
             //================================================
             a = 2*num_electrodes*(e + 1) + e*num_nodes + n;
-            b = jump + a;
-            c = jump_2 + n*(2*num_electrodes + num_nodes) + e;
+            b = ld + a;
+            c = ld_2 + n*(2*num_electrodes + num_nodes) + e;
             d = num_electrodes + c;
             if (condition == 1)
             {
@@ -485,7 +486,6 @@ int fill_incidence(
                 we[b] = -0.5; //B
                 we[c] = 1.0; //C
                 we[d] = 0.0; //D
-
             }
             else if (condition == 2)
             {
@@ -510,7 +510,7 @@ int fill_incidence(
         if (no_incidence)
         {
             printf("No electrode is connected to node[%i]\n", n);
-            exit(2);
+            return 1;
         }
     }
     return 0;
@@ -523,23 +523,23 @@ int fill_impedance(
 {
     int i, k;
     int row_size = num_electrodes*2 + num_nodes;
-    int jump = row_size*num_electrodes;
+    int ld = row_size*num_electrodes;
     for (i = 0; i < num_electrodes; i++)
     {
         for (k = 0; k < num_electrodes; k++)
         {
             we[i*row_size + k] = zl[i*num_electrodes + k]/2.0;
             we[i*row_size + num_electrodes + k] = -zl[i*num_electrodes + k]/2.0;
-            we[jump + i*row_size + k] = zt[i*num_electrodes + k];
-            we[jump + i*row_size + num_electrodes + k] = zt[i*num_electrodes + k];
+            we[ld + i*row_size + k] = zt[i*num_electrodes + k];
+            we[ld + i*row_size + num_electrodes + k] = zt[i*num_electrodes + k];
         }
     }
-    int jump_2 = jump*2 + 2*num_electrodes;
+    int ld_2 = ld*2 + 2*num_electrodes;
     for (i = 0; i < num_nodes; i++)
     {
         for (k = 0; k < num_nodes; k++)
         {
-            we[jump_2 + i*row_size + k] = yn[i*num_nodes + k];
+            we[ld_2 + i*row_size + k] = yn[i*num_nodes + k];
         }
     }
     return 0;
@@ -561,3 +561,138 @@ int solve_electrodes(
     }
     return info;
 }
+
+// Alternative approach using equivalent Ynodal
+int incidence_alt(
+    double* a, double* b, Electrode* electrodes, int num_electrodes,
+    double nodes[][3], int num_nodes)
+{
+    int e, n, condition, node_is_start, node_is_end, no_incidence, pos;
+    //TODO use a more efficient search or fill-up method if possible
+    for (n = 0; n < num_nodes; n++)
+    {
+        no_incidence = 1;
+        for (e = 0; e < num_electrodes; e++)
+        {
+            node_is_start = equal_points(electrodes[e].start_point, nodes[n]);
+            node_is_end = 0;
+            /* it is assumed that start_point and end_point of an electrode
+            are never equal */
+            condition = 0;
+            if (node_is_start)
+            {
+                condition = 1;
+            }
+            else
+            {
+                node_is_end = equal_points(electrodes[e].end_point, nodes[n]);
+                if (node_is_end)
+                {
+                    condition = 2;
+                }
+            }
+            //================================================
+            pos = num_nodes*e + n;
+            if (condition == 1)
+            {
+                a[pos] = 0.5; //A
+                b[pos] = 1.0; //B
+            }
+            else if (condition == 2)
+            {
+                a[pos] = 0.5; //A
+                b[pos] = -1.0; //B
+            }
+            else
+            {
+                a[pos] = 0.0; //A
+                b[pos] = 0.0; //B
+            }
+            //================================================
+            if (condition > 0)
+            {
+                no_incidence = 0; //false
+            }
+        }
+        if (no_incidence)
+        {
+            printf("No electrode is connected to node[%i]\n", n);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int ynodal_eq(
+    _Complex double* yn, double* a, double* b, _Complex double* zl,
+    _Complex double* zt, int num_electrodes, int num_nodes)
+{
+    // TODO use COLUMN_MAJOR matrices, to avoid LAPACKE doing the matrix
+    // copying when they are ROW_MAJOR
+    // FIXME copy arrays a and b into complex arr, else the zgemm will give
+    // wrong results.
+    //Force a and b to be (_Complex double*) arguments instead of (double*)?
+    lapack_complex_double* arr = (lapack_complex_double*) malloc(
+        sizeof(lapack_complex_double)*(num_electrodes*num_nodes));
+
+    // yn = aT*(zt^-1)*a + bT*(zl^-1)*b
+    lapack_int* ipiv = (MKL_INT*) malloc(sizeof(lapack_int)*num_electrodes);
+    // invert zl and zt taking advantage of its symmetry
+    /* inv(ZT) is "exploding" (~10e280)
+    LAPACKE_zsytrf(LAPACK_ROW_MAJOR, 'U', num_electrodes, zt, num_electrodes, ipiv);
+    LAPACKE_zsytri(LAPACK_ROW_MAJOR, 'U', num_electrodes, zt, num_electrodes, ipiv);
+    LAPACKE_zsytrf(LAPACK_ROW_MAJOR, 'U', num_electrodes, zl, num_electrodes, ipiv);
+    LAPACKE_zsytri(LAPACK_ROW_MAJOR, 'U', num_electrodes, zl, num_electrodes, ipiv);*/
+    // invert zl and zt by general matrix LU factorization
+    LAPACKE_zgetrf(LAPACK_ROW_MAJOR, num_electrodes, num_electrodes,
+        zt, num_electrodes, ipiv);
+    LAPACKE_zgetri(LAPACK_ROW_MAJOR, num_electrodes, zt, num_electrodes, ipiv);
+    LAPACKE_zgetrf(LAPACK_ROW_MAJOR, num_electrodes, num_electrodes,
+        zl, num_electrodes, ipiv);
+    LAPACKE_zgetri(LAPACK_ROW_MAJOR, num_electrodes, zl, num_electrodes, ipiv);
+    free(ipiv);
+    const double alpha = 1.0;
+    const double beta = 0.0;
+    lapack_complex_double* c = (lapack_complex_double*) malloc(
+        sizeof(lapack_complex_double)*(num_electrodes*num_nodes));
+    // c = yt*a
+    for (int i = 0; i < num_electrodes*num_nodes; i++)
+    {
+        arr[i] = a[i];
+    }
+    /*cblas_zsymm(CblasRowMajor, CblasLeft, CblasUpper,
+                num_electrodes, num_nodes,
+                &alpha, zt, num_electrodes, a, num_nodes,
+                &beta, c, num_nodes);*/
+    cblas_zgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+                num_electrodes, num_nodes, num_electrodes,
+                &alpha, zt, num_electrodes, arr, num_nodes,
+                &beta, c, num_nodes);
+    // yn = aT*c
+    cblas_zgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
+                num_nodes, num_nodes, num_electrodes,
+                &alpha, arr, num_nodes, c, num_nodes,
+                &beta, yn, num_nodes);
+    // c = yl*b
+    for (int i = 0; i < num_electrodes*num_nodes; i++)
+    {
+        arr[i] = b[i];
+    }
+    /*cblas_zsymm(CblasRowMajor, CblasLeft, CblasUpper,
+                num_electrodes, num_nodes,
+                &alpha, zl, num_electrodes, b, num_nodes,
+                &beta, c, num_nodes);*/
+    cblas_zgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+                num_electrodes, num_nodes, num_electrodes,
+                &alpha, zl, num_electrodes, arr, num_nodes,
+                &beta, c, num_nodes);
+    // yn = bT*c + yn
+    cblas_zgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
+                num_nodes, num_nodes, num_electrodes,
+                &alpha, arr, num_nodes, c, num_nodes,
+                &alpha, yn, num_nodes);
+    free(c);
+    free(arr);
+    return 0;
+}
+

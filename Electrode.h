@@ -369,7 +369,7 @@ int fill_incidence(
 
 /**
 Fills the imitance matrix `we` = `[[ZL/2, -ZL/2, A], [ZT, ZT, B], [C, D, Yn]]`
-with the impedance matrices `ZT` and `ZL`, and the nodal admitance Yn.
+with the impedance matrices `ZT` and `ZL`, and the nodal admittance Yn.
 @param we imitance matrix as flat array of size
 `(2*num_electrodes + num_nodes)^2`
 @param electrodes array of electrodes
@@ -379,7 +379,7 @@ with the impedance matrices `ZT` and `ZL`, and the nodal admitance Yn.
 `num_electrodes^2`
 @param zl longitudinal impedance matrix as a flat array of size
 `num_electrodes^2`
-@param yn nodal admitance matrix as a flat array of size `num_nodes^2`
+@param yn nodal admittance matrix as a flat array of size `num_nodes^2`
 @return 0 on success
 @see fill_incidence
 */
@@ -404,5 +404,17 @@ this array in-place
 int solve_electrodes(
     _Complex double* we, _Complex double* ie, int num_electrodes, int num_nodes);
 
+// Alternative approach using an equivalent Ynodal
+int incidence_alt(
+    double* a, double* b, Electrode* electrodes, int num_electrodes,
+    double nodes[][3], int num_nodes);
+
+/*
+Finds the equivalent nodal admittance matrix of the electrode system.
+This funtion takes advantage of the symmetry of zl and zt.
+*/
+int ynodal_eq(
+    _Complex double* yn, double* a, double *b, _Complex double* zl,
+    _Complex double* zt, int num_electrodes, int num_nodes);
 
 #endif /* ELECTRODE_H_ */
