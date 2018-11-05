@@ -13,13 +13,13 @@ auxiliary.o	:	auxiliary.c
 		gcc -fPIC $(CFLAGS) $(INCLUDE) -c auxiliary.c $(LINK)
 Electrode.o	:	Electrode.c auxiliary.o hcubature.o
 		gcc -fPIC $(CFLAGS) $(INCLUDE) -c Electrode.c $(LINK)
-hem_c.so	:
-		gcc -fPIC $(CFLAGS) $(INCLUDE) -shared -o hem.so Electrode.c auxiliary.c $(CUBATUREPATH)hcubature.c $(LINK)
+dynamicLibrary	:
+		gcc -fPIC -shared $(CFLAGS) $(INCLUDE) -o libhem.so Electrode.c auxiliary.c $(CUBATUREPATH)hcubature.c $(LINK)
 test	:	$(OBJECTS)
 		gcc $(CFLAGS) $(INCLUDE) -o testing.a testing.c $(OBJECTS) $(LINK)
 .PHONY	:	clean
 clean	:
-		rm -f *.[ao] hem.so $(CUBATUREPATH)*.o *.dat examples/*.dat examples/*.[ao]
+		rm -f *.[ao] *.so $(CUBATUREPATH)*.o *.dat examples/*.dat examples/*.[ao]
 timing	:	$(OBJECTS)
 		gcc $(CFLAGS) $(INCLUDE) -o timing.a examples/timing.c $(OBJECTS) $(LINK)
 example20pwrd02grcev	:	$(OBJECTS)
