@@ -658,7 +658,7 @@ int ynodal_eq(
     // c = yt*a
     for (int i = 0; i < num_electrodes*num_nodes; i++)
     {
-        arr[i] = a[i];
+        arr[i] = (lapack_complex_double) a[i];
     }
     /*cblas_zsymm(CblasRowMajor, CblasLeft, CblasUpper,
                 num_electrodes, num_nodes,
@@ -676,7 +676,7 @@ int ynodal_eq(
     // c = yl*b
     for (int i = 0; i < num_electrodes*num_nodes; i++)
     {
-        arr[i] = b[i];
+        arr[i] = (lapack_complex_double) b[i];
     }
     /*cblas_zsymm(CblasRowMajor, CblasLeft, CblasUpper,
                 num_electrodes, num_nodes,
