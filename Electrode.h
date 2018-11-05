@@ -328,10 +328,6 @@ limit)
 @param error_norm (enumeration defined in cubature.h) error checking scheme
 @param integration_type type of integration to be done. If NONE, the value
 `result[0] + result[1]*I` will be used and no integration is done.
-@param result array[2] where to store the integral result (real and imaginary
-parts)
-@param error array[2] where to store the integral error (real and imaginary
-parts)
 @return 0 on sucess
 @see integral
 @see Integration_type
