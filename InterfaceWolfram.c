@@ -75,9 +75,6 @@ DLLEXPORT int Mcalculate_impedances(
     calculate_impedances(electrodes, ne, zl, zt, gamma1, w1, mu1,
             kappa1, max_eval1, req_abs_error1, req_rel_error1, error_norm1,
             integration_type1);
-    free(electrodes);
-    free(zl);
-    free(zt);
 
     MTensor zlzt;
     mreal *data;
@@ -97,5 +94,8 @@ DLLEXPORT int Mcalculate_impedances(
         data[i + 3*ne2] = cimag(zt[i]);
     }
     MArgument_setMTensor(Res, zlzt);
+    free(electrodes);
+    free(zl);
+    free(zt);
     return LIBRARY_NO_ERROR;
 }
