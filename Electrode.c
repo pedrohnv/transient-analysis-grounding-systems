@@ -372,19 +372,11 @@ int calculate_impedances(
                     k2 = (electrodes[k].end_point[m] - electrodes[k].start_point[m]);
                     cost += k1*k2;
                 }
-                if (cost != 0.0)
-                {
-                    cost = cost/(ls*lr);
-                    integral(
-                        &(electrodes[i]), &(electrodes[k]), gamma, max_eval,
-                        req_abs_error, req_rel_error, error_norm,
-                        integration_type, result, error);
-                    intg = result[0] + I*result[1];
-                }
-                else
-                {
-                    intg = 0.0;
-                }
+                cost = cost/(ls*lr);
+                integral(&(electrodes[i]), &(electrodes[k]), gamma, max_eval,
+                         req_abs_error, req_rel_error, error_norm,
+                         integration_type, result, error);
+                intg = result[0] + I*result[1];
                 zl[i*num_electrodes + k] = iwu_4pi*intg*cost;
                 zt[i*num_electrodes + k] = one_4pik/(ls*lr)*intg;
 
@@ -422,21 +414,11 @@ int impedances_images(
                 k2 = (images[k].end_point[m] - images[k].start_point[m]);
                 cost += k1*k2;
             }
-            if (cost != 0.0)
-            {
-                cost = cost/(ls*lr);
-                integral(
-                    &(electrodes[i]), &(images[k]), gamma, max_eval,
-                    req_abs_error, req_rel_error, error_norm,
-                    integration_type, result, error);
-                intg = result[0] + I*result[1];
-            }
-            else
-            {
-                intg = 0.0;
-            }
-            zl[i*num_electrodes + k] += iwu_4pi*intg*cost;
-            zt[i*num_electrodes + k] += one_4pik/(ls*lr)*intg;
+            cost = cost/(ls*lr);
+            integral(&(electrodes[i]), &(images[k]), gamma, max_eval,
+                     req_abs_error, req_rel_error, error_norm,
+                     integration_type, result, error);
+            intg = result[0] + I*result[1];
 
             zl[k*num_electrodes + i] = zl[i*num_electrodes + k];
             zt[k*num_electrodes + i] = zt[i*num_electrodes + k];
@@ -696,3 +678,4 @@ int ynodal_eq(
     return 0;
 }
 
+int solve_alt();
