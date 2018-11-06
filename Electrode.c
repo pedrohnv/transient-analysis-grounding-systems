@@ -419,6 +419,8 @@ int impedances_images(
                      req_abs_error, req_rel_error, error_norm,
                      integration_type, result, error);
             intg = result[0] + I*result[1];
+            zl[i*num_electrodes + k] += ref_l*iwu_4pi*intg*cost;
+            zt[i*num_electrodes + k] += ref_t*one_4pik/(ls*lr)*intg;
 
             zl[k*num_electrodes + i] = zl[i*num_electrodes + k];
             zt[k*num_electrodes + i] = zt[i*num_electrodes + k];
