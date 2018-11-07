@@ -21,7 +21,7 @@ int main()
     FILE* save_file = fopen("examples/malha01.dat", "w");
     // parameters
     double h = 1.0; // burial depth
-    double radius = 12.5e-3; // radius
+    double radius = 0.7e-3;//12.5e-3; // radius
     double sigma1 = 0.001; // soil conductivity
     double er1 = 30.0; //soil rel. permitivitty
     double rho_c = 1.9e-6; // copper resistivity
@@ -66,10 +66,10 @@ int main()
         calculate_impedances(
             electrodes, num_electrodes, zl, zt, gamma, w, MU0, kappa1,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
-        zinternal = internal_impedance(w, rho_c, radius, MU0)*electrodes[0].length;
+        zinternal = internal_impedance(w, rho_c, radius, MU0);
         for (k = 0; k < num_electrodes; k++)
         {
-            zl[k*num_electrodes + k] += zinternal;
+            zl[k*num_electrodes + k] += zinternal*electrodes[k].length;
         }
         ref_t = (kappa1 - I*w*EPS0)/(kappa1 + I*w*EPS0);
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
