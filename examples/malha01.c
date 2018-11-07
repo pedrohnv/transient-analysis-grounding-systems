@@ -69,7 +69,7 @@ int main()
         zinternal = internal_impedance(w, rho_c, radius, MU0)*electrodes[0].length;
         for (k = 0; k < num_electrodes; k++)
         {
-            zl[k*num_electrodes] += zinternal;
+            zl[k*num_electrodes + k] += zinternal;
         }
         ref_t = (kappa1 - I*w*EPS0)/(kappa1 + I*w*EPS0);
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,

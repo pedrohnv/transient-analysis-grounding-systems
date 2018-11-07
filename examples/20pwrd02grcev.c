@@ -96,7 +96,7 @@ int run_case(double length, double rho, char file_name[])
         zinternal = internal_impedance(w, rho_c, r, MU0)*electrodes[0].length;
         for (k = 0; k < num_electrodes; k++)
         {
-            zl[k*num_electrodes] += zinternal;
+            zl[k*num_electrodes + k] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
             w, MU0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);

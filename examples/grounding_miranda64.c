@@ -74,7 +74,7 @@ int main()
         zinternal = internal_impedance(w, rho_c, radius, MU0)*electrodes[0].length;
         for (k = 0; k < num_electrodes; k++)
         {
-            zl[k*num_electrodes] += zinternal;
+            zl[k*num_electrodes + k] += zinternal;
         }
         // considering up to 28 reflections, which gives 28*2 image groups
         // they can be divided into 4 airthmetic sequences of images
