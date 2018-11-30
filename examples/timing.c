@@ -303,13 +303,8 @@ int run_51emc03grcev(double length, double rho, char file_name[],
     return 0;
 }
 
-int main(int argc, char *argv[])
+int run_timing(int intg_type, char *file_name, int loops)
 {
-    //int intg_type = INTG_DOUBLE;
-    //char file_name[] = "timing_intg_double.dat";
-    int intg_type = INTG_LOGNF;
-    char file_name[] = "timing_intg_single.dat";
-    int loops = 99; //loop + 1 iterations
     remove(file_name);
     FILE* save_file = fopen(file_name, "w");
     if (save_file == NULL)
@@ -449,4 +444,10 @@ int main(int argc, char *argv[])
     time_spent = (double) (end - full_begin)/CLOCKS_PER_SEC;
     printf("total CPU time spent: %f\n", time_spent);
     return 0;
+}
+
+int main(int argc, char *argv[])
+{
+    run_timing(INTG_DOUBLE, "timing_intg_double.dat", 1);
+    run_timing(INTG_LOGNF, "timing_intg_single.dat", 1);
 }
