@@ -217,6 +217,8 @@ int integral(
 
         case NONE:
             failure = 0;
+            result[0] = 1.0;
+            result[1] = 0.0;
         break;
 
         case INTG_EXP_LOGNF:
@@ -679,5 +681,3 @@ int ynodal_eq(
     free(arr);
     return 0;
 }
-
-int solve_alt();
