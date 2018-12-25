@@ -300,7 +300,7 @@ _Complex double longitudinal_mutual(
         k2 = (receiver->end_point[i] - receiver->start_point[i]);
         cost += k1*k2;
     }
-    cost = cost/(sender->length * receiver->length);
+    cost = abs(cost/(sender->length * receiver->length));
     if (cost == 0.0)
     {
         return 0.0;
@@ -374,7 +374,7 @@ int calculate_impedances(
                     k2 = (electrodes[k].end_point[m] - electrodes[k].start_point[m]);
                     cost += k1*k2;
                 }
-                cost = cost/(ls*lr);
+                cost = abs(cost/(ls*lr));
                 integral(&(electrodes[i]), &(electrodes[k]), gamma, max_eval,
                          req_abs_error, req_rel_error, error_norm,
                          integration_type, result, error);
@@ -416,12 +416,12 @@ int impedances_images(
                 k2 = (images[k].end_point[m] - images[k].start_point[m]);
                 cost += k1*k2;
             }
-            cost = cost/(ls*lr);
+            cost = abs(cost/(ls*lr));
             integral(&(electrodes[i]), &(images[k]), gamma, max_eval,
                      req_abs_error, req_rel_error, error_norm,
                      integration_type, result, error);
             intg = result[0] + I*result[1];
-            zl[i*num_electrodes + k] += ref_l*iwu_4pi*intg*cost;
+            /*if (i != k)*/ zl[i*num_electrodes + k] += ref_l*iwu_4pi*intg*cost;
             zt[i*num_electrodes + k] += ref_t*one_4pik/(ls*lr)*intg;
 
             zl[k*num_electrodes + i] = zl[i*num_electrodes + k];
