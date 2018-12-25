@@ -4,7 +4,8 @@ INTELFLAGS = -DMKL_ILP64 -m64
 CUBATUREPATH = ./cubature/
 INCLUDE = -I. -I$(CUBATUREPATH)
 LINK = -L. $(INTELLINK) -lslatec -llapack
-CFLAGS = -Wall -fno-exceptions -std=c11 $(INTELFLAGS) -Werror -g
+#CFLAGS = -Wall -fno-exceptions -std=c11 $(INTELFLAGS) -Werror -O3
+CFLAGS = -Wall -std=c11 $(INTELFLAGS) -g
 OBJECTS = Electrode.o auxiliary.o hcubature.o
 
 hcubature.o	:	$(CUBATUREPATH)hcubature.c
@@ -26,6 +27,8 @@ example20pwrd02grcev	:	$(OBJECTS)
 		gcc $(CFLAGS) $(INCLUDE) -o 20pwrd02grcev.a examples/20pwrd02grcev.c $(OBJECTS) $(LINK)
 example51emc03grcev	:	$(OBJECTS)
 		gcc $(CFLAGS) $(INCLUDE) -o 51emc03grcev.a examples/51emc03grcev.c $(OBJECTS) $(LINK)
+example12pwrd01grcev	:	$(OBJECTS)
+		gcc $(CFLAGS) $(INCLUDE) -o 12pwrd01grcev.a examples/ex12pwrd01grcev/12pwrd01grcev.c $(OBJECTS) $(LINK)
 exampleAlipioSchroederRCA	:	$(OBJECTS)
 		gcc $(CFLAGS) $(INCLUDE) -o AlipioSchroederRCA.a examples/AlipioSchroederRCA.c $(OBJECTS) $(LINK)
 miranda64	:	$(OBJECTS)
