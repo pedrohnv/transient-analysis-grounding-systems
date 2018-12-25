@@ -30,7 +30,7 @@ DLLEXPORT int Mcalculate_impedances(
     int err; // error code
     MTensor electensor = MArgument_getMTensor(Args[0]);
     mcomplex gamma = MArgument_getComplex(Args[1]);
-    mcomplex s = MArgument_getReal(Args[2]);
+    mcomplex s = MArgument_getComplex(Args[2]);
     mreal mu = MArgument_getReal(Args[3]);
     mcomplex kappa = MArgument_getComplex(Args[4]);
     mint max_eval = MArgument_getInteger(Args[5]);
@@ -64,7 +64,8 @@ DLLEXPORT int Mcalculate_impedances(
     _Complex double* zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
     _Complex double gamma1 = gamma.ri[0] + I*gamma.ri[1];
     _Complex double kappa1 = kappa.ri[0] + I*kappa.ri[1];
-    calculate_impedances(electrodes, num_electrodes, zl, zt, gamma1, s, mu,
+    _Complex double s1 = s.ri[0] + I*s.ri[1];
+    calculate_impedances(electrodes, num_electrodes, zl, zt, gamma1, s1, mu,
             kappa1, max_eval, req_abs_error, req_rel_error, error_norm,
             integration_type);
     MTensor zlzt;
@@ -117,7 +118,7 @@ DLLEXPORT int Mimpedances_images(
     int err; // error code
     MTensor electensor = MArgument_getMTensor(Args[0]);
     mcomplex gamma = MArgument_getComplex(Args[1]);
-    mcomplex s = MArgument_getReal(Args[2]);
+    mcomplex s = MArgument_getComplex(Args[2]);
     mreal mu = MArgument_getReal(Args[3]);
     mcomplex kappa = MArgument_getComplex(Args[4]);
     mint max_eval = MArgument_getInteger(Args[5]);
@@ -167,8 +168,9 @@ DLLEXPORT int Mimpedances_images(
     _Complex double kappa1 = kappa.ri[0] + I*kappa.ri[1];
     _Complex double ref_l1 = ref_l.ri[0] + I*ref_l.ri[1];
     _Complex double ref_t1 = ref_t.ri[0] + I*ref_t.ri[1];
+    _Complex double s1 = s.ri[0] + I*s.ri[1];
     impedances_images(
-            electrodes, images, num_electrodes, zl, zt, gamma1, s, mu, kappa1,
+            electrodes, images, num_electrodes, zl, zt, gamma1, s1, mu, kappa1,
             ref_l1, ref_t1, max_eval, req_abs_error, req_rel_error, error_norm,
             integration_type);
     MTensor zlzt;
