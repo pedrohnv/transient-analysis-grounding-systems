@@ -63,7 +63,7 @@ int run_case(double length, double rho, char file_name[])
     int nn2 = num_nodes*num_nodes;
     int ss1 = (2*num_electrodes + num_nodes);
     int ss2 = ss1*ss1;
-    double w;
+    _Complex double s;
     _Complex double kappa, gamma, zinternal;
     _Complex double* zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
     _Complex double* zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
@@ -86,20 +86,20 @@ int run_case(double length, double rho, char file_name[])
     // solve for each frequency: WE*VE = IE
     for (i = 0; i < nf; i++)
     {
-        w = TWO_PI*freq[i];
-        kappa = (sigma + I*w*er*EPS0); //soil complex conductivity
-        gamma = csqrt(I*w*MU0*kappa); //soil propagation constant
+        s = I*TWO_PI*freq[i];
+        kappa = (sigma + s*er*EPS0); //soil complex conductivity
+        gamma = csqrt(s*MU0*kappa); //soil propagation constant
         //TODO especialized impedance calculation taking advantage of symmetry
         calculate_impedances(
-            electrodes, num_electrodes, zl, zt, gamma, w, MU0, kappa,
+            electrodes, num_electrodes, zl, zt, gamma, s, MU0, kappa,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
-        zinternal = internal_impedance(w, rho_c, r, MU0)*electrodes[0].length;
+        zinternal = internal_impedance(s, rho_c, r, MU0)*electrodes[0].length;
         for (k = 0; k < num_electrodes; k++)
         {
             zl[k*num_electrodes + k] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-            w, MU0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+            s, MU0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         //The matrices are pivoted in-place. To recover them, copy
         copy_array(we, we_cp, ss2);

@@ -12,11 +12,11 @@ for each integration type */
 
 int impedances_single(
     Electrode* electrodes, int num_electrodes, _Complex double* zl,
-    _Complex double* zt, _Complex double gamma, double w, double mu,
+    _Complex double* zt, _Complex double gamma, _Complex double s, double mu,
     _Complex double kappa, _Complex double* mpot)
 {
     double ls, lr, k1, k2, cost, rbar;
-    _Complex double iwu_4pi = I*w*mu/(FOUR_PI);
+    _Complex double iwu_4pi = s*mu/(FOUR_PI);
     _Complex double one_4pik = 1.0/(FOUR_PI*kappa);
     _Complex double intg;
     int i, k, m;
@@ -110,7 +110,7 @@ int run_20pwrd02grcev(double length, double rho, char file_name[],
     int nn2 = num_nodes*num_nodes;
     int ss1 = (2*num_electrodes + num_nodes);
     int ss2 = ss1*ss1;
-    double w;
+    _Complex double s;
     _Complex double kappa, gamma, zinternal;
     _Complex double* mpot = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
     _Complex double* zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
@@ -140,26 +140,26 @@ int run_20pwrd02grcev(double length, double rho, char file_name[],
     // solve for each frequency: WE*VE = IE
     for (i = 0; i < nf; i++)
     {
-        w = TWO_PI*freq[i];
-        kappa = (sigma + I*w*er*EPS0); //soil complex conductivity
-        gamma = csqrt(I*w*MU0*kappa); //soil propagation constant
+        s = I*TWO_PI*freq[i];
+        kappa = (sigma + s*er*EPS0); //soil complex conductivity
+        gamma = csqrt(s*MU0*kappa); //soil propagation constant
         //TODO especialized impedance calculation taking advantage of symmetry
         if (intg_type == INTG_LOGNF)
         {
             impedances_single(
-                electrodes, num_electrodes, zl, zt, gamma, w, MU0, kappa, mpot);
+                electrodes, num_electrodes, zl, zt, gamma, s, MU0, kappa, mpot);
         } else {
             calculate_impedances(
-                electrodes, num_electrodes, zl, zt, gamma, w, MU0, kappa,
+                electrodes, num_electrodes, zl, zt, gamma, s, MU0, kappa,
                 200, 1e-3, 1e-4, ERROR_PAIRED, intg_type);
         }
-        zinternal = internal_impedance(w, rho_c, r, MU0)*electrodes[0].length;
+        zinternal = internal_impedance(s, rho_c, r, MU0)*electrodes[0].length;
         for (k = 0; k < num_electrodes; k++)
         {
             zl[k*num_electrodes] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-            w, MU0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, intg_type);
+            s, MU0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, intg_type);
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         //The matrices are pivoted in-place. To recover them, copy
         copy_array(we, we_cp, ss2);
@@ -182,8 +182,7 @@ int run_20pwrd02grcev(double length, double rho, char file_name[],
     return 0;
 }
 
-int run_51emc03grcev(double length, double rho, char file_name[],
-    int intg_type)
+int run_51emc03grcev(double length, double rho, char file_name[], int intg_type)
 {
     // parameters
     double h = 0.8; //burial depth
@@ -231,7 +230,7 @@ int run_51emc03grcev(double length, double rho, char file_name[],
     int nn2 = num_nodes*num_nodes;
     int ss1 = (2*num_electrodes + num_nodes);
     int ss2 = ss1*ss1;
-    double w;
+    _Complex double s;
     _Complex double kappa, gamma, zinternal;
     _Complex double* mpot = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
     _Complex double* zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
@@ -261,17 +260,17 @@ int run_51emc03grcev(double length, double rho, char file_name[],
     // solve for each frequency: WE*VE = IE
     for (i = 0; i < nf; i++)
     {
-        w = TWO_PI*freq[i];
-        kappa = (sigma + I*w*er*EPS0); //soil complex conductivity
-        gamma = csqrt(I*w*MU0*kappa); //soil propagation constant
+        s = I*TWO_PI*freq[i];
+        kappa = (sigma + s*er*EPS0); //soil complex conductivity
+        gamma = csqrt(s*MU0*kappa); //soil propagation constant
         //TODO especialized impedance calculation taking advantage of symmetry
         if (intg_type == INTG_LOGNF)
         {
             impedances_single(
-                electrodes, num_electrodes, zl, zt, gamma, w, MU0, kappa, mpot);
+                electrodes, num_electrodes, zl, zt, gamma, s, MU0, kappa, mpot);
         } else {
             calculate_impedances(
-                electrodes, num_electrodes, zl, zt, gamma, w, MU0, kappa,
+                electrodes, num_electrodes, zl, zt, gamma, s, MU0, kappa,
                 200, 1e-3, 1e-4, ERROR_PAIRED, intg_type);
         }
         zinternal = internal_impedance(w, rho_c, r, MU0)*electrodes[0].length;
@@ -280,7 +279,7 @@ int run_51emc03grcev(double length, double rho, char file_name[],
             zl[k*num_electrodes] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-            w, MU0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, intg_type);
+            s, MU0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, intg_type);
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         //The matrices are pivoted in-place. To recover them, copy
         copy_array(we, we_cp, ss2);

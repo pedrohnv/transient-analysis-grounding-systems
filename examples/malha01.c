@@ -22,7 +22,7 @@ int main()
     // parameters
     double h = 1.0; // burial depth
     double radius = 0.7e-3;//12.5e-3; // radius
-    double sigma1 = 0.001; // soil conductivity
+    double sigma1 = 1e-3/5.0;//0.001; // soil conductivity
     double er1 = 30.0; //soil rel. permitivitty
     double rho_c = 1.9e-6; // copper resistivity
     // frequencies of interest
@@ -40,8 +40,9 @@ int main()
     electrodes_file("examples/malha01_electrodes.txt", images, num_electrodes);
     for (int m = 0; m < num_electrodes; m++)
     {
-        images[m].start_point[2] = h;
-        images[m].end_point[2] = h;
+        images[m].start_point[2] = -images[m].start_point[2];
+        images[m].end_point[2] = -images[m].end_point[2];
+        images[m].middle_point[2] = -images[m].middle_point[2];
     }
     int ne2 = num_electrodes*num_electrodes;
     int nn2 = num_nodes*num_nodes;
@@ -55,14 +56,14 @@ int main()
     incidence_alt(a, b, electrodes, num_electrodes, nodes, num_nodes);
     // for each frequency
     _Complex double kappa1, gamma, zinternal;
-    double w;
+    _Complex double s;
     int i, k;
     for (i = 0; i < nf; i++)
     {
         printf("i = %i\n", i);
-        w = TWO_PI*freq[i];
-        kappa1 = (sigma1 + I*w*er1*EPS0); //soil complex conductivity
-        gamma = csqrt(I*w*MU0*kappa1); //soil 1 propagation constant
+        s = I*TWO_PI*freq[i];
+        kappa1 = (sigma1 + s*er1*EPS0); //soil complex conductivity
+        gamma = csqrt(s*MU0*kappa1); //soil 1 propagation constant
         calculate_impedances(
             electrodes, num_electrodes, zl, zt, gamma, w, MU0, kappa1,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
@@ -71,9 +72,9 @@ int main()
         {
             zl[k*num_electrodes + k] += zinternal*electrodes[k].length;
         }
-        ref_t = (kappa1 - I*w*EPS0)/(kappa1 + I*w*EPS0);
+        ref_t = (kappa1 - s*EPS0)/(kappa1 + s*EPS0);
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-            w, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+            s, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         /*ynodal_eq(yn, a, b, zl, zt, num_electrodes, num_nodes);
         print_zmatrix_file(num_nodes, num_nodes, yn, num_nodes, save_file);
         fprintf(save_file, "f = %f\n", freq[i]);*/

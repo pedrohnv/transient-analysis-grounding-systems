@@ -59,19 +59,19 @@ int main()
     incidence_alt(a, b, electrodes, num_electrodes, nodes, num_nodes);
     // for each frequency
     _Complex double kappa1, kappa2, gamma, zinternal;
-    double w;
+    _Complex double s;
     int i, k, m;
     for (i = 0; i < nf; i++)
     {
         printf("i = %i\n", i);
-        w = TWO_PI*freq[i];
-        kappa1 = (sigma1 + I*w*er1*EPS0); //soil complex conductivity
-        kappa2 = (sigma2 + I*w*er2*EPS0);
-        gamma = csqrt(I*w*MU0*kappa1); //soil 1 propagation constant
+        s = I*TWO_PI*freq[i];
+        kappa1 = (sigma1 + s*er1*EPS0); //soil complex conductivity
+        kappa2 = (sigma2 + s*er2*EPS0);
+        gamma = csqrt(s*MU0*kappa1); //soil 1 propagation constant
         calculate_impedances(
-            electrodes, num_electrodes, zl, zt, gamma, w, MU0, kappa1,
+            electrodes, num_electrodes, zl, zt, gamma, s, MU0, kappa1,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
-        zinternal = internal_impedance(w, rho_c, radius, MU0)*electrodes[0].length;
+        zinternal = internal_impedance(s, rho_c, radius, MU0)*electrodes[0].length;
         for (k = 0; k < num_electrodes; k++)
         {
             zl[k*num_electrodes + k] += zinternal;
@@ -82,7 +82,7 @@ int main()
         for (k = 1; k < 15; k++)
         {
             // === AIR ===
-            ref_t = (kappa1 - I*w*EPS0)/(kappa1 + I*w*EPS0);
+            ref_t = (kappa1 - s*EPS0)/(kappa1 + s*EPS0);
             // first group, Air
             h = 2*(k - 1)*layer_depth + 2*mesh_depth;
             for (m = 0; m < num_electrodes; m++)
@@ -91,7 +91,7 @@ int main()
                 images[m].end_point[2] = h;
             }
             impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-                w, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+                s, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
             // second group, Air
             h = 2*k*layer_depth;
             for (m = 0; m < num_electrodes; m++)
@@ -100,14 +100,14 @@ int main()
                 images[m].end_point[2] = h;
             }
             impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-                w, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+                s, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
 
             // === 2nd SOIL ===
             ref_t = (kappa1 - kappa2)/(kappa1 + kappa2);
             // third group, Soil
             // this group has the same distance as the second one (in air)
             impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-                w, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+                s, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
             // fourth group, Soil
             h = 2*k*layer_depth - 2*mesh_depth;
             for (m = 0; m < num_electrodes; m++)
@@ -116,7 +116,7 @@ int main()
                 images[m].end_point[2] = h;
             }
             impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-                w, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+                s, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         }
         /*print_dmatrix_file(num_electrodes, num_nodes, a, num_nodes, a_file);
         print_dmatrix_file(num_electrodes, num_nodes, b, num_nodes, b_file);

@@ -187,7 +187,7 @@ int execution_example(int argc, char *argv[])
     double w = arguments[3]*TWO_PI;
     double sigma = arguments[4];
     double epsr = arguments[5];
-    _Complex double gamma = csqrt(sigma + I*w*epsr*EPS0);
+    _Complex double gamma = csqrt(sigma + s*epsr*EPS0);
     printf("gamma = %f + %fim\n", creal(gamma), cimag(gamma));
     // build electrodes
     int nn = round(length/(10*radius));
@@ -411,7 +411,7 @@ int test_case(double rho, double length, double frac)
     }
     rhs[n2en1 - num_nodes] = 1.0;
     fill_incidence(incidence, electrodes, num_electrodes, nodes, num_nodes);
-    double w;
+    _Complex double s;
     _Complex double rt, rl; // reflection coefficients
     rt = 1.0; // TODO calculate for each frequency
     rl = 1.0;
@@ -421,20 +421,20 @@ int test_case(double rho, double length, double frac)
     for (i = 0; i < nf; i++)
     {
         //printf("\nf = %.2f Hz\n", freq[i]);
-        w = TWO_PI*freq[i];
+        s = I*TWO_PI*freq[i];
         memcpy(ie, rhs, sizeof(ie));
         memcpy(we, incidence, sizeof(we));
-        zinternal = internal_impedance(w, rho_c, radius, MU0)*l;
+        zinternal = internal_impedance(s, rho_c, radius, MU0)*l;
         for (int k = 0; k < num_electrodes; k++)
         {
             electrodes[k].zi = zinternal;
         }
-        c = (sigma + I*w*eps);
-        k1 = csqrt(I*w*mu*c); //gamma
-        calculate_impedances(electrodes, num_electrodes, zl, zt, k1, w, mu, c,
+        c = (sigma + s*eps);
+        k1 = csqrt(s*mu*c); //gamma
+        calculate_impedances(electrodes, num_electrodes, zl, zt, k1, s, mu, c,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         impedances_images(
-            electrodes, images, num_electrodes, zl, zt, k1, w, mu, c, rt, rl,
+            electrodes, images, num_electrodes, zl, zt, k1, s, mu, c, rt, rl,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         solve_electrodes(we, ie, num_electrodes, num_nodes);
@@ -450,11 +450,11 @@ int test_case(double rho, double length, double frac)
 
 int zi_bessel()
 {
-    double w = 377;
+    _Complex double s = I*377;
     double rho = 1.9e-6;
     double radius = 7e-3;
     double mu = MU0;
-    _Complex double zi = internal_impedance(w, rho, radius, mu);
+    _Complex double zi = internal_impedance(s, rho, radius, mu);
     assert(abs(creal(zi) - 0.0123426) < 1e-6);
     assert(abs(cimag(zi) - 0.00001885) < 1e-6);
     printf("Internal impedance: passed\n");
@@ -489,13 +489,14 @@ int integration()
     end_point[2] = -h;
     Electrode* receiver = (Electrode*) malloc(sizeof(Electrode));
     populate_electrode(receiver, start_point, end_point, r1, 0.0);
-    double w, result[2], error[2];
+    double result[2], error[2];
+    _Complex double s;
     _Complex double kappa, k1;
     for (int i = 0; i < nf; i++)
     {
-        w = TWO_PI*freq[i];
-        kappa = (sigma + I*w*er*EPS0); //soil complex conductivity
-        k1 = csqrt(I*w*MU0*kappa); //soil propagation constant
+        s = I*TWO_PI*freq[i];
+        kappa = (sigma + s*er*EPS0); //soil complex conductivity
+        k1 = csqrt(s*MU0*kappa); //soil propagation constant
         integral(sender, receiver, k1, 200, 1e-3, 1e-4,
             ERROR_PAIRED, INTG_DOUBLE, result, error);
         fprintf(save_file, "%f %f\n", result[0], result[1]);

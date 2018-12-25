@@ -191,30 +191,29 @@ int integral(
 
 /**
 Calculates the internal impedance per unit length of cylindrical conductors.
-@param w angular frequency in rad/s
+@param s complex angular frequency `c + I*w` (rad/s)
 @param rho conductor resistivity
 @param radius conductor radius
 @param mu relative magnetic permeability of the conductor
 @return zin (Ohm/m)
 */
-_Complex double internal_impedance(
-    double w, double rho, double radius, double mu);
+_Complex double internal_impedance(_Complex double s, double rho, double radius, double mu);
 
 // Longitudinal impedance
 /**
 Calculates the self longitudinal impedance of a given electrode.
 @param electrode
-@param w angular frequency in rad/s
+@param s complex angular frequency `c + I*w` (rad/s)
 @param mu magnetic permeability of the medium
 @return zlp
 */
-_Complex double longitudinal_self(Electrode* electrode, double w, double mu);
+_Complex double longitudinal_self(Electrode* electrode, _Complex double s, double mu);
 
 /**
 Calculates the mutual longitudinal impedance of given electrodes.
 @param sender Electrode
 @param receiver Electrode
-@param w angular frequency in rad/s
+@param s complex angular frequency `c + I*w` (rad/s)
 @param mu magnetic permeability of the medium
 @param gamma medium propagation constant
 @param max_eval specifies a maximum number of function evaluations (0 for no
@@ -234,7 +233,7 @@ parts)
 @see https://github.com/stevengj/cubature
 */
 _Complex double longitudinal_mutual(
-    Electrode* sender, Electrode* receiver, double w, double mu,
+    Electrode* sender, Electrode* receiver, _Complex double s, double mu,
     _Complex double gamma, size_t max_eval, double req_abs_error,
     double req_rel_error, int error_norm, int integration_type,
     double result[2], double error[2]);
@@ -286,7 +285,7 @@ Calculates the impedance matrices.
 `num_electrodes^2`
 @param zl longitudinal impedance matrix as a flat array of size
 `num_electrodes^2`
-@param w angular frequency in rad/s
+@param s complex angular frequency `c + I*w` (rad/s)
 @param mu magnetic permeability of the medium
 @param kappa medium complex conductivity `(sigma + j*w*eps)` in S/m
 @param max_eval specifies a maximum number of function evaluations (0 for no
@@ -303,7 +302,7 @@ limit)
 */
 int calculate_impedances(
     Electrode* electrodes, int num_electrodes, _Complex double* zl,
-    _Complex double* zt, _Complex double gamma, double w, double mu,
+    _Complex double* zt, _Complex double gamma, _Complex double s, double mu,
     _Complex double kappa, size_t max_eval, double req_abs_error,
     double req_rel_error, int error_norm, int integration_type);
 
@@ -316,7 +315,7 @@ Add the images effect to the impedance matrices.
 `num_electrodes^2`
 @param zl longitudinal impedance matrix as a flat array of size
 `num_electrodes^2`
-@param w angular frequency in rad/s
+@param s complex angular frequency `c + I*w` (rad/s)
 @param mu magnetic permeability of the medium
 @param kappa medium complex conductivity `(sigma + j*w*eps)` in S/m
 @param ref_l longitudinal current reflection coefficient
@@ -335,7 +334,7 @@ limit)
 */
 int impedances_images(
     Electrode* electrodes, Electrode* images, int num_electrodes,
-    _Complex double* zl, _Complex double* zt, _Complex double gamma, double w,
+    _Complex double* zl, _Complex double* zt, _Complex double gamma, _Complex double s,
     double mu, _Complex double kappa, _Complex double ref_l,
     _Complex double ref_t, size_t max_eval, double req_abs_error,
     double req_rel_error, int error_norm, int integration_type);

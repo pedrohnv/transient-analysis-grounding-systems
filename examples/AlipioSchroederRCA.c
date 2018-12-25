@@ -14,7 +14,7 @@ Reproducing the results in [1].
 //#include <omp.h>
 
 int run_case(double length, double rho, char file_name[],
-    _Complex double* ifonte, _Complex double* w, int nf)
+    _Complex double* ifonte, _Complex double* s, int nf)
 {
     // parameters
     double h = 0.6; //burial depth
@@ -61,7 +61,7 @@ int run_case(double length, double rho, char file_name[],
     int nn2 = num_nodes*num_nodes;
     int ss1 = (2*num_electrodes + num_nodes);
     int ss2 = ss1*ss1;
-    //double w;
+    //_Complex double s;
     _Complex double kappa, gamma, zinternal;
     _Complex double* zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
     _Complex double* zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
@@ -84,8 +84,8 @@ int run_case(double length, double rho, char file_name[],
     for (i = 0; i < nf; i++)
     {
         ie[ss1 - num_nodes] = ifonte[i];
-        kappa = (sigma + I*w[i]*er*EPS0); //soil complex conductivity
-        gamma = csqrt(I*w[i]*MU0*kappa); //soil propagation constant
+        kappa = (sigma + s[i]*er*EPS0); //soil complex conductivity
+        gamma = csqrt(s[i]*MU0*kappa); //soil propagation constant
         //TODO especialized impedance calculation taking advantage of symmetry
         calculate_impedances(
             electrodes, num_electrodes, zl, zt, gamma, w[i], MU0, kappa,
@@ -139,7 +139,7 @@ int main()
     int ns = 1024/2; //half the frequency sample (because symmetry)
     _Complex double* s = malloc(sizeof(_Complex double)*ns);
     double dt = t[nt - 1]/(2*ns);
-    double dw = TWO_PI/(2*ns*dt);
+    double ds = I*TWO_PI/(2*ns*dt);
     double sigma = log(0.001)/t[nt - 1];
     for (int k = 0; k < ns; k++)
     {

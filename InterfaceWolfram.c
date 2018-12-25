@@ -14,7 +14,7 @@ Calculates the impedances of the electrode systems.
 @param Args[0] Rank 2 tensor `9*num_electrodes`, each element is a flat list
 describing an electrode as "{x0, y0, z0, x1, y1, z1, radius, Re(zi), Im(zi)}".
 @param Args[1] complex wave propagation constant
-@param Args[2] angular frequency in rad/s
+@param Args[2] complex angular frequency `c + jw` (rad/s)
 @param Args[3] magnetic permeability of the medium
 @param Args[4] medium complex conductivity `(sigma + j*w*eps)` in S/m
 @param Args[5] specifies a maximum number of function evaluations (0 for no
@@ -30,7 +30,7 @@ DLLEXPORT int Mcalculate_impedances(
     int err; // error code
     MTensor electensor = MArgument_getMTensor(Args[0]);
     mcomplex gamma = MArgument_getComplex(Args[1]);
-    mreal w = MArgument_getReal(Args[2]);
+    mcomplex s = MArgument_getReal(Args[2]);
     mreal mu = MArgument_getReal(Args[3]);
     mcomplex kappa = MArgument_getComplex(Args[4]);
     mint max_eval = MArgument_getInteger(Args[5]);
@@ -64,7 +64,7 @@ DLLEXPORT int Mcalculate_impedances(
     _Complex double* zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
     _Complex double gamma1 = gamma.ri[0] + I*gamma.ri[1];
     _Complex double kappa1 = kappa.ri[0] + I*kappa.ri[1];
-    calculate_impedances(electrodes, num_electrodes, zl, zt, gamma1, w, mu,
+    calculate_impedances(electrodes, num_electrodes, zl, zt, gamma1, s, mu,
             kappa1, max_eval, req_abs_error, req_rel_error, error_norm,
             integration_type);
     MTensor zlzt;
@@ -96,7 +96,7 @@ Calculates the mutual impedances of the electrode systems and its image.
 @param Args[0] Rank 2 tensor `9*num_electrodes`, each element is a flat list
 describing an electrode as "{x0, y0, z0, x1, y1, z1, radius, Re(zi), Im(zi)}".
 @param Args[1] complex wave propagation constant
-@param Args[2] angular frequency in rad/s
+@param Args[2] complex angular frequency `c + jw` (rad/s)
 @param Args[3] magnetic permeability of the medium
 @param Args[4] medium complex conductivity `(sigma + j*w*eps)` in S/m
 @param Args[5] specifies a maximum number of function evaluations (0 for no
@@ -117,7 +117,7 @@ DLLEXPORT int Mimpedances_images(
     int err; // error code
     MTensor electensor = MArgument_getMTensor(Args[0]);
     mcomplex gamma = MArgument_getComplex(Args[1]);
-    mreal w = MArgument_getReal(Args[2]);
+    mcomplex s = MArgument_getReal(Args[2]);
     mreal mu = MArgument_getReal(Args[3]);
     mcomplex kappa = MArgument_getComplex(Args[4]);
     mint max_eval = MArgument_getInteger(Args[5]);
@@ -168,7 +168,7 @@ DLLEXPORT int Mimpedances_images(
     _Complex double ref_l1 = ref_l.ri[0] + I*ref_l.ri[1];
     _Complex double ref_t1 = ref_t.ri[0] + I*ref_t.ri[1];
     impedances_images(
-            electrodes, images, num_electrodes, zl, zt, gamma1, w, mu, kappa1,
+            electrodes, images, num_electrodes, zl, zt, gamma1, s, mu, kappa1,
             ref_l1, ref_t1, max_eval, req_abs_error, req_rel_error, error_norm,
             integration_type);
     MTensor zlzt;
