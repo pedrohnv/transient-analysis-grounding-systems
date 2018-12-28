@@ -1,0 +1,3 @@
+[submodule "cubature"]
+	path = cubature
+	url = https://github.com/stevengj/cubature
