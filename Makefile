@@ -2,6 +2,19 @@
 #source mklvars.sh intel64
 INTELLINK = -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
 INTELFLAGS = -DMKL_ILP64 -m64
+#MKLROOT is defined by a bash script that is shipped together with intel's MKL.
+#Run in the terminal "source mklvars.sh intel64"
+
+#The shared libraries slatec and lapack  are assumed to be in your path.
+#If they are not, append their location to the INCLUDE variable or
+#build and install them with "make slatec" and make "make lapack"
+
+# intel MKL: dynamic link
+#INTELLINK = -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
+#INTELFLAGS = -DMKL_ILP64 -m64
+# intel MKL: static link
+INTELLINK =  -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_gnu_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lgomp -lpthread -lm -ldl
+INTELFLAGS = -DMKL_ILP64 -m64 -I${MKLROOT}/include
 CUBATUREPATH = cubature/
 SLATECPATH = slatec/
 LINK = -L. $(INTELLINK) -lslatec -llapack
@@ -15,6 +28,9 @@ OBJECTS = Electrode.o auxiliary.o hcubature.o
 
 clean	:
 		rm -f *.[ao] *.so *.dat examples/*.dat examples/*.[ao]
+
+allclean	:
+		make clean
 		cd $(SLATECPATH) && $(MAKE) clean
 		cd $(CUBATUREPATH) && $(MAKE) clean
 
