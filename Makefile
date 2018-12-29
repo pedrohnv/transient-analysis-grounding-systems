@@ -9,15 +9,13 @@ INTELFLAGS = -DMKL_ILP64 -m64
 #If they are not, append their location to the INCLUDE variable or
 #build and install them with "make slatec" and make "make lapack"
 
-# intel MKL: dynamic link
-#INTELLINK = -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
-#INTELFLAGS = -DMKL_ILP64 -m64
-# intel MKL: static link
-INTELLINK =  -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_gnu_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lgomp -lpthread -lm -ldl
-INTELFLAGS = -DMKL_ILP64 -m64 -I${MKLROOT}/include
+INTELLINK = -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
+INTELFLAGS = -DMKL_ILP64 -m64
 CUBATUREPATH = cubature/
 SLATECPATH = slatec/
-LINK = -L. $(INTELLINK) -lslatec -llapack
+PYTHONPATH = /usr/local/include/python3.7m
+INCLUDE = -I. -I$(CUBATUREPATH) -I$(PYTHONPATH)
+LINK = -L. $(INTELLINK) -lslatec -lgfortran
 CFLAGS = -Wall -fno-exceptions -std=c11 $(INTELFLAGS) -Werror -O3
 #CFLAGS = -Wall -std=c11 $(INTELFLAGS) -g
 OBJECTS = Electrode.o auxiliary.o hcubature.o
