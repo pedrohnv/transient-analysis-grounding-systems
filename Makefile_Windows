@@ -1,0 +1,69 @@
+#MKLROOT is defined by a bash script that is shipped together with intel's MKL
+#source mklvars.sh intel64
+#"C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.1.144\windows\mkl\bin\mklvars.bat" intel64
+#manual set:
+MKLROOT = "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.1.144\windows\mkl"
+INTELLINK = "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.1.144\windows\mkl\lib\intel64_win\mkl_rt.lib"
+INTELFLAGS = -DMKL_ILP64
+#The shared library slatecis assumed to be in your path.
+#If it is not, append its location to the INCLUDE variable or
+#build and install it with "make slatec"
+
+CUBATUREPATH = cubature
+SLATECPATH = slatec
+INCLUDE = -I. -I$(CUBATUREPATH) -I$(MKLROOT)\\include -I$(SLATECPATH)\\lib
+LINK = -L. $(INTELLINK) $(SLATECPATH)\\lib\\libslatec.a -lgfortran
+CFLAGS = -Wall -fno-exceptions -std=c11 $(INTELFLAGS) -Werror -O3
+#CFLAGS = -Wall -std=c11 $(INTELFLAGS) -g
+OBJECTS = Electrode.o auxiliary.o hcubature.o
+
+.DEFAULT_GOAL := dynamicLibrary
+
+.PHONY	:	clean slatec
+
+clean	:
+		rm -f *.exe *.obj *.dll *.dat examples\\*.dat examples\\*.exe examples\\*.obj
+
+allclean	:
+		make clean
+		cd $(SLATECPATH) && $(MAKE) clean
+		cd $(CUBATUREPATH) && $(MAKE) clean
+
+hcubature.o	:	$(CUBATUREPATH)\\hcubature.c
+		gcc -fPIC $(CFLAGS) $(INCLUDE) -c $(CUBATUREPATH)\\hcubature.c $(LINK)
+
+auxiliary.o	:	auxiliary.c
+		gcc -fPIC $(CFLAGS) $(INCLUDE) -c auxiliary.c $(LINK)
+
+Electrode.o	:	Electrode.c auxiliary.o hcubature.o
+		gcc -fPIC $(CFLAGS) $(INCLUDE) -c Electrode.c $(LINK)
+
+dynamicLibrary	:	Electrode.c auxiliary.c $(CUBATUREPATH)\\hcubature.c
+		gcc -fPIC -shared $(CFLAGS) $(INCLUDE) -o libhem.dll Electrode.c auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
+
+test	:	$(OBJECTS)
+		gcc $(CFLAGS) $(INCLUDE) -o testing.exe testing.c $(OBJECTS) $(LINK)
+
+timing	:	$(OBJECTS)
+		gcc $(CFLAGS) $(INCLUDE) -o timing.exe examples\\timing.c $(OBJECTS) $(LINK)
+
+example20pwrd02grcev	:	$(OBJECTS)
+		gcc $(CFLAGS) $(INCLUDE) -o 20pwrd02grcev.exe examples\\20pwrd02grcev.c $(OBJECTS) $(LINK)
+
+example51emc03grcev	:	$(OBJECTS)
+		gcc $(CFLAGS) $(INCLUDE) -o 51emc03grcev.exe examples\\51emc03grcev.c $(OBJECTS) $(LINK)
+
+example12pwrd01grcev	:	$(OBJECTS)
+		gcc $(CFLAGS) $(INCLUDE) -o 12pwrd01grcev.exe examples\\ex12pwrd01grcev\12pwrd01grcev.c $(OBJECTS) $(LINK)
+
+exampleAlipioSchroederRCA	:	$(OBJECTS)
+		gcc $(CFLAGS) $(INCLUDE) -o AlipioSchroederRCA.exe examples\\AlipioSchroederRCA.c $(OBJECTS) $(LINK)
+
+miranda64	:	$(OBJECTS)
+		gcc $(CFLAGS) $(INCLUDE) -o examples\\miranda64.exe examples\\grounding_miranda64.c $(OBJECTS) $(LINK)
+
+malha01	:	$(OBJECTS)
+		gcc $(CFLAGS) $(INCLUDE) -o examples\\malha01.exe examples\\malha01.c $(OBJECTS) $(LINK)
+
+slatec	:
+		cd $(SLATECPATH) && $(MAKE) FC=gfortran all
