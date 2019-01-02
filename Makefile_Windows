@@ -20,13 +20,17 @@ CFLAGS = -Wall -fno-exceptions -std=c11 $(INTELFLAGS) -Werror -O3
 #CFLAGS = -Wall -std=c11 $(INTELFLAGS) -g
 OBJECTS = Electrode.o auxiliary.o hcubature.o
 
+#Compilers
+CC = gcc
+FC = gfortran
+
 .DEFAULT_GOAL := dynamicLibrary
 
-.PHONY	:	clean cleanout allclean slatec
+.PHONY	:	clean cleanout allclean slatec libhem.so dynamicLibrary wolfram
 
 clean	:
 		rm -f *.o *.obj *.dat examples\\*.o examples\\*.obj examples\\*.dat
-		
+
 cleanout	:
 		rm -f *.a *.exe *.dll examples\\*.a examples\\*.exe
 
@@ -37,49 +41,49 @@ allclean	:
 		cd $(CUBATUREPATH) && $(MAKE) clean
 
 hcubature.o	:	$(CUBATUREPATH)\\hcubature.c
-		gcc -fPIC $(CFLAGS) $(INCLUDE) -c $(CUBATUREPATH)\\hcubature.c $(LINK)
+		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c $(CUBATUREPATH)\\hcubature.c $(LINK)
 
 auxiliary.o	:	auxiliary.c
-		gcc -fPIC $(CFLAGS) $(INCLUDE) -c auxiliary.c $(LINK)
+		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c auxiliary.c $(LINK)
 
 Electrode.o	:	Electrode.c auxiliary.o hcubature.o
-		gcc -fPIC $(CFLAGS) $(INCLUDE) -c Electrode.c $(LINK)
+		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c Electrode.c $(LINK)
 
 libhem.dll	:
 		make dynamicLibrary
 
-dynamicLibrary	:	libhem.dll
-		gcc -fPIC -shared $(CFLAGS) $(INCLUDE) -o libhem.dll Electrode.c auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
+dynamicLibrary	:
+		$(CC) -fPIC -shared $(CFLAGS) $(INCLUDE) -o libhem.dll Electrode.c auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
 
 test	:	$(OBJECTS)
-		gcc $(CFLAGS) $(INCLUDE) -o testing.exe testing.c $(OBJECTS) $(LINK)
+		$(CC) $(CFLAGS) $(INCLUDE) -o testing.exe testing.c $(OBJECTS) $(LINK)
 
 testDLL	:	libhem.dll
-		gcc $(CFLAGS) $(INCLUDE) -o testingDLL.exe testing.c libhem.dll
-
-timing	:	$(OBJECTS)
-		gcc $(CFLAGS) $(INCLUDE) -o timing.exe examples\\timing.c $(OBJECTS) $(LINK)
-
-example20pwrd02grcev	:	$(OBJECTS)
-		gcc $(CFLAGS) $(INCLUDE) -o 20pwrd02grcev.exe examples\\20pwrd02grcev.c $(OBJECTS) $(LINK)
-
-example51emc03grcev	:	$(OBJECTS)
-		gcc $(CFLAGS) $(INCLUDE) -o 51emc03grcev.exe examples\\51emc03grcev.c $(OBJECTS) $(LINK)
-
-example12pwrd01grcev	:	$(OBJECTS)
-		gcc $(CFLAGS) $(INCLUDE) -o 12pwrd01grcev.exe examples\\ex12pwrd01grcev\12pwrd01grcev.c $(OBJECTS) $(LINK)
-
-exampleAlipioSchroederRCA	:	$(OBJECTS)
-		gcc $(CFLAGS) $(INCLUDE) -o AlipioSchroederRCA.exe examples\\AlipioSchroederRCA.c $(OBJECTS) $(LINK)
-
-miranda64	:	$(OBJECTS)
-		gcc $(CFLAGS) $(INCLUDE) -o examples\\miranda64.exe examples\\grounding_miranda64.c $(OBJECTS) $(LINK)
-
-malha01	:	$(OBJECTS)
-		gcc $(CFLAGS) $(INCLUDE) -o examples\\malha01.exe examples\\malha01.c $(OBJECTS) $(LINK)
+		$(CC) $(CFLAGS) $(INCLUDE) -o testingDLL.a testing.c '-Wl,-rpath,$$ORIGIN' $(LINK) libhem.dll
 
 slatec	:
-		cd $(SLATECPATH) && $(MAKE) FC=gfortran all
+		cd $(SLATECPATH) && $(MAKE) FC=$(FC) all
 
 wolfram	:
-		gcc -fPIC -shared -std=c11 $(INTELFLAGS) -Werror -O3 $(INCLUDE) -I$(WOLFRAMPATH) -o libhem_mma.dll InterfaceWolfram.c Electrode.c auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
+		$(CC) -fPIC -shared -std=c11 $(INTELFLAGS) -Werror -O3 $(INCLUDE) -I$(WOLFRAMPATH) -o libhem_mma.dll InterfaceWolfram.c Electrode.c auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
+
+timing	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o timing.exe examples\\timing.c $(OBJECTS) $(LINK)
+
+example20pwrd02grcev	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o 20pwrd02grcev.exe examples\\20pwrd02grcev.c $(OBJECTS) $(LINK)
+
+example51emc03grcev	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o 51emc03grcev.exe examples\\51emc03grcev.c $(OBJECTS) $(LINK)
+
+example12pwrd01grcev	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o 12pwrd01grcev.exe examples\\ex12pwrd01grcev\12pwrd01grcev.c $(OBJECTS) $(LINK)
+
+exampleAlipioSchroederRCA	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o AlipioSchroederRCA.exe examples\\AlipioSchroederRCA.c $(OBJECTS) $(LINK)
+
+miranda64	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o examples\\miranda64.exe examples\\grounding_miranda64.c $(OBJECTS) $(LINK)
+
+malha01	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o examples\\malha01.exe examples\\malha01.c $(OBJECTS) $(LINK)
