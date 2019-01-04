@@ -9,6 +9,7 @@ INTELLINK = -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_
 INTELFLAGS = -DMKL_ILP64 -m64
 CUBATUREPATH = cubature/
 SLATECPATH = slatec/
+WOLFRAMPATH = /usr/local/Wolfram/Mathematica/11.3/SystemFiles/IncludeFiles/C/
 INCLUDE = -I. -I$(CUBATUREPATH)
 LINK = -L. $(INTELLINK) -lslatec -lgfortran
 CFLAGS = -Wall -fno-exceptions -std=c11 $(INTELFLAGS) -Werror -O3
