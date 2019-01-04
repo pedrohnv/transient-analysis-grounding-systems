@@ -3,19 +3,20 @@ Funtions to interface the C code to Wolfram Mathematica.
 */
 #include <WolframLibrary.h>
 #include <Electrode.h>
+#include <auxiliary.h>
 #include <complex.h>
 
 DLLEXPORT mint WolframLibrary_getVersion(){return WolframLibraryVersion;}
 DLLEXPORT int WolframLibrary_initialize( WolframLibraryData libData) {return 0;}
 DLLEXPORT void WolframLibrary_uninitialize( WolframLibraryData libData) {}
 
-/**
+/** Mcalculate_impedances
 Calculates the impedances of the electrode systems.
 @param Args[0] Rank 2 tensor `9*num_electrodes`, each element is a flat list
 describing an electrode as "{x0, y0, z0, x1, y1, z1, radius, Re(zi), Im(zi)}".
 @param Args[1] complex wave propagation constant
 @param Args[2] complex angular frequency `c + jw` (rad/s)
-@param Args[3] magnetic permeability of the medium
+@param Args[3] relative magnetic permeability of the medium
 @param Args[4] medium complex conductivity `(sigma + j*w*eps)` in S/m
 @param Args[5] specifies a maximum number of function evaluations (0 for no
 limit)
@@ -31,7 +32,7 @@ DLLEXPORT int Mcalculate_impedances(
     MTensor electensor = MArgument_getMTensor(Args[0]);
     mcomplex gamma = MArgument_getComplex(Args[1]);
     mcomplex s = MArgument_getComplex(Args[2]);
-    mreal mu = MArgument_getReal(Args[3]);
+    mreal mu = MU0*MArgument_getReal(Args[3]);
     mcomplex kappa = MArgument_getComplex(Args[4]);
     mint max_eval = MArgument_getInteger(Args[5]);
     mreal req_abs_error = MArgument_getReal(Args[6]);
@@ -92,13 +93,13 @@ DLLEXPORT int Mcalculate_impedances(
     return LIBRARY_NO_ERROR;
 }
 
-/**
+/** Mimpedances_images
 Calculates the mutual impedances of the electrode systems and its image.
 @param Args[0] Rank 2 tensor `9*num_electrodes`, each element is a flat list
 describing an electrode as "{x0, y0, z0, x1, y1, z1, radius, Re(zi), Im(zi)}".
 @param Args[1] complex wave propagation constant
 @param Args[2] complex angular frequency `c + jw` (rad/s)
-@param Args[3] magnetic permeability of the medium
+@param Args[3] relative magnetic permeability of the medium
 @param Args[4] medium complex conductivity `(sigma + j*w*eps)` in S/m
 @param Args[5] specifies a maximum number of function evaluations (0 for no
 limit)
@@ -119,7 +120,7 @@ DLLEXPORT int Mimpedances_images(
     MTensor electensor = MArgument_getMTensor(Args[0]);
     mcomplex gamma = MArgument_getComplex(Args[1]);
     mcomplex s = MArgument_getComplex(Args[2]);
-    mreal mu = MArgument_getReal(Args[3]);
+    mreal mu = MU0*MArgument_getReal(Args[3]);
     mcomplex kappa = MArgument_getComplex(Args[4]);
     mint max_eval = MArgument_getInteger(Args[5]);
     mreal req_abs_error = MArgument_getReal(Args[6]);

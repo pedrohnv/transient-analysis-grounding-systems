@@ -21,7 +21,7 @@ Constants, auxiliary functions and routines.
 #define MU0 1.256637061435917e-6 //permeability vac.
 #define EPS0 8.854187817620e-12 //permittivity vac.
 
-/**
+/** linspace
 Fill array `u` with `n` linearly spaced numbers between `a` and `b` (included).
 @see Source code taken from https://github.com/ntessore/algo
 @param a first number
@@ -33,7 +33,7 @@ Fill array `u` with `n` linearly spaced numbers between `a` and `b` (included).
 */
 double* linspace(double a, double b, int n, double u[]);
 
-/**
+/** logspace
 Fill array `u` with `n` logarithmically spaced numbers between `10^a` and
 `10^b` (included).
 @see Source code taken from https://github.com/ntessore/algo
@@ -46,7 +46,7 @@ Fill array `u` with `n` logarithmically spaced numbers between `10^a` and
 */
 double* logspace(double a, double b, int n, double u[]);
 
-/**
+/** wave_length
 Computes the harmonic electromagnetic wave length in a lossy medium.
 @see Source code taken from https://github.com/ntessore/algo
 @param f frequency (Hz)
@@ -57,7 +57,7 @@ Computes the harmonic electromagnetic wave length in a lossy medium.
 */
 double wave_length(double f, double sigma, double eps, double mu);
 
-/**
+/** equal_points
 Check if two points are the same.
 @param point_1 first point in \f$ R^3 \f$
 @param point_2 second point in \f$ R^3 \f$
@@ -65,7 +65,7 @@ Check if two points are the same.
 */
 int equal_points(double point_1[3], double point_2[3]);
 
-/**
+/** vector_norm
 Computes the Norm_2 (euclidian length) of the vector which starts at
 start_point ends at end_point.
 @param start_point array `(x,y,z)` that defines the starting point
@@ -74,7 +74,7 @@ start_point ends at end_point.
 */
 double vector_norm(double start_point[3], double end_point[3]);
 
-/**
+/** copy_array
 Copy `source` array into `target` array of complex numbers.
 @param source pointer to the array to be copied
 @param target pointer to array which the copy is to be stored
@@ -83,7 +83,7 @@ Copy `source` array into `target` array of complex numbers.
 */
 int copy_array(_Complex double* source, _Complex double* target, int size);
 
-/*
+/** print_zmatrix_file
 Prints a complex (double) matrix to a file.
 @param m number of rows
 @param n number of columns
@@ -94,7 +94,7 @@ Prints a complex (double) matrix to a file.
 */
 int print_zmatrix_file(int m, int n, _Complex double* a, int lda, FILE* fp);
 
-/*
+/** print_dmatrix_file
 Prints a real (double) matrix to a file.
 @param m number of rows
 @param n number of columns
@@ -105,7 +105,7 @@ Prints a real (double) matrix to a file.
 */
 int print_dmatrix_file(int m, int n, double* a, int lda, FILE* fp);
 
-/*
+/** zbesi_
 FORTRAN subroutine to calculate I-Bessel function, i.e., modified Bessel
 function of the first kind, with complex argument.
     \f$ cy = I_{fnu} (z) \f$

@@ -247,9 +247,9 @@ int integral(
 }
 
 _Complex double internal_impedance(
-    _Complex double s, double rho, double radius, double mu)
+    _Complex double s, double rho, double radius, double mur)
 {
-    _Complex double etapr = csqrt(s*mu/rho);
+    _Complex double etapr = csqrt(s*mur*MU0/rho);
     _Complex double etapr_radius = etapr*radius;
     double zr = creal(etapr_radius);
     double zi = cimag(etapr_radius);
@@ -277,17 +277,17 @@ _Complex double internal_impedance(
 }
 
 // Longitudinal impedance
-_Complex double longitudinal_self(Electrode* electrode, _Complex double s, double mu)
+_Complex double longitudinal_self(Electrode* electrode, _Complex double s, double mur)
 {
     double ls = electrode->length;
     double k1 = electrode->radius/ls;
     double k2 = sqrt(1.0 + k1*k1);
     _Complex double zi = electrode->zi;
-    return s*mu*ls/(TWO_PI)*(log( (k2 + 1.)/k1 ) - k2 + k1) + zi;
+    return s*mur*MU0*ls/(TWO_PI)*(log( (k2 + 1.)/k1 ) - k2 + k1) + zi;
 }
 
 _Complex double longitudinal_mutual(
-    Electrode* sender, Electrode* receiver, _Complex double s, double mu,
+    Electrode* sender, Electrode* receiver, _Complex double s, double mur,
     _Complex double gamma, size_t max_eval, double req_abs_error,
     double req_rel_error, int error_norm, int integration_type,
     double result[2], double error[2])
@@ -310,7 +310,7 @@ _Complex double longitudinal_mutual(
         integral(sender, receiver, gamma, max_eval, req_abs_error,
             req_rel_error, error_norm, integration_type, result, error);
         _Complex double intg = result[0] + I*result[1];
-        return s*mu/(FOUR_PI)*intg*cost;
+        return s*mur*MU0/(FOUR_PI)*intg*cost;
     }
 }
 
@@ -340,12 +340,12 @@ _Complex double transversal_mutual(
 // TODO store ZT and ZL as upper/lower triangular matrices, as they are symmetric
 int calculate_impedances(
     Electrode* electrodes, int num_electrodes, _Complex double* zl,
-    _Complex double* zt, _Complex double gamma, _Complex double s, double mu,
+    _Complex double* zt, _Complex double gamma, _Complex double s, double mur,
     _Complex double kappa, size_t max_eval, double req_abs_error,
     double req_rel_error, int error_norm, int integration_type)
 {
     double result[2], error[2], ls, lr, k1, k2, cost;
-    _Complex double iwu_4pi = s*mu/(FOUR_PI);
+    _Complex double iwu_4pi = s*mur*MU0/(FOUR_PI);
     _Complex double one_4pik = 1.0/(FOUR_PI*kappa);
     _Complex double intg;
     int i, k, m;
@@ -393,12 +393,12 @@ int calculate_impedances(
 int impedances_images(
     Electrode* electrodes, Electrode* images, int num_electrodes,
     _Complex double* zl, _Complex double* zt, _Complex double gamma, _Complex double s,
-    double mu, _Complex double kappa, _Complex double ref_l,
+    double mur, _Complex double kappa, _Complex double ref_l,
     _Complex double ref_t, size_t max_eval, double req_abs_error,
     double req_rel_error, int error_norm, int integration_type)
 {
     double result[2], error[2], ls, lr, k1, k2, cost;
-    _Complex double iwu_4pi = s*mu/(FOUR_PI);
+    _Complex double iwu_4pi = s*mur*MU0/(FOUR_PI);
     _Complex double one_4pik = 1.0/(FOUR_PI*kappa);
     _Complex double intg;
     // _mutual impedances are not used to reduce the number of
