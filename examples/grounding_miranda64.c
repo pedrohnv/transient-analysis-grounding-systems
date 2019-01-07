@@ -69,9 +69,9 @@ int main()
         kappa2 = (sigma2 + s*er2*EPS0);
         gamma = csqrt(s*MU0*kappa1); //soil 1 propagation constant
         calculate_impedances(
-            electrodes, num_electrodes, zl, zt, gamma, s, MU0, kappa1,
+            electrodes, num_electrodes, zl, zt, gamma, s, 1.0, kappa1,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
-        zinternal = internal_impedance(s, rho_c, radius, MU0)*electrodes[0].length;
+        zinternal = internal_impedance(s, rho_c, radius, 1.0)*electrodes[0].length;
         for (k = 0; k < num_electrodes; k++)
         {
             zl[k*num_electrodes + k] += zinternal;
@@ -91,7 +91,7 @@ int main()
                 images[m].end_point[2] = h;
             }
             impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-                s, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+                s, 1.0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
             // second group, Air
             h = 2*k*layer_depth;
             for (m = 0; m < num_electrodes; m++)
@@ -100,14 +100,14 @@ int main()
                 images[m].end_point[2] = h;
             }
             impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-                s, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+                s, 1.0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
 
             // === 2nd SOIL ===
             ref_t = (kappa1 - kappa2)/(kappa1 + kappa2);
             // third group, Soil
             // this group has the same distance as the second one (in air)
             impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-                s, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+                s, 1.0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
             // fourth group, Soil
             h = 2*k*layer_depth - 2*mesh_depth;
             for (m = 0; m < num_electrodes; m++)
@@ -116,7 +116,7 @@ int main()
                 images[m].end_point[2] = h;
             }
             impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-                s, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+                s, 1.0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         }
         /*print_dmatrix_file(num_electrodes, num_nodes, a, num_nodes, a_file);
         print_dmatrix_file(num_electrodes, num_nodes, b, num_nodes, b_file);

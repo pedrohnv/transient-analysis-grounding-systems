@@ -38,7 +38,7 @@ int run_case(double length, double rho, char file_name[],
     //logspace(2, 7, nf, freq);
 
     // electrode definition and segmentation
-    double lambda = wave_length(-cimag(w[nf - 1])/TWO_PI, sigma, er*EPS0, MU0); //smallest
+    double lambda = wave_length(-cimag(w[nf - 1])/TWO_PI, sigma, er*EPS0, 1.0); //smallest
     int num_electrodes = ceil( length/(lambda/6.0) ) ;
     int num_nodes = num_electrodes + 1;
     double nodes[num_nodes][3];
@@ -88,15 +88,15 @@ int run_case(double length, double rho, char file_name[],
         gamma = csqrt(s[i]*MU0*kappa); //soil propagation constant
         //TODO especialized impedance calculation taking advantage of symmetry
         calculate_impedances(
-            electrodes, num_electrodes, zl, zt, gamma, w[i], MU0, kappa,
+            electrodes, num_electrodes, zl, zt, gamma, w[i], 1.0, kappa,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
-        zinternal = internal_impedance(w[i], rho_c, r, MU0)*electrodes[0].length;
+        zinternal = internal_impedance(w[i], rho_c, r, 1.0)*electrodes[0].length;
         for (k = 0; k < num_electrodes; k++)
         {
             zl[k*num_electrodes + k] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-            w[i], MU0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+            w[i], 1.0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         //The matrices are pivoted in-place. To recover them, copy
         copy_array(we, we_cp, ss2);

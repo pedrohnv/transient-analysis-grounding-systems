@@ -12,11 +12,11 @@ for each integration type */
 
 int impedances_single(
     Electrode* electrodes, int num_electrodes, _Complex double* zl,
-    _Complex double* zt, _Complex double gamma, _Complex double s, double mu,
+    _Complex double* zt, _Complex double gamma, _Complex double s, double mur,
     _Complex double kappa, _Complex double* mpot)
 {
     double ls, lr, k1, k2, cost, rbar;
-    _Complex double iwu_4pi = s*mu/(FOUR_PI);
+    _Complex double iwu_4pi = s*mur*MU0/(FOUR_PI);
     _Complex double one_4pik = 1.0/(FOUR_PI*kappa);
     _Complex double intg;
     int i, k, m;
@@ -87,7 +87,7 @@ int run_20pwrd02grcev(double length, double rho, char file_name[],
     logspace(2, 7, nf, freq);
 
     // electrode definition and segmentation
-    double lambda = wave_length(freq[nf - 1], sigma, er*EPS0, MU0); //smallest
+    double lambda = wave_length(freq[nf - 1], sigma, er*EPS0, 1.0); //smallest
     int num_electrodes = ceil( length/(lambda/6.0) ) ;
     int num_nodes = num_electrodes + 1;
     double nodes[num_nodes][3];
@@ -147,19 +147,19 @@ int run_20pwrd02grcev(double length, double rho, char file_name[],
         if (intg_type == INTG_LOGNF)
         {
             impedances_single(
-                electrodes, num_electrodes, zl, zt, gamma, s, MU0, kappa, mpot);
+                electrodes, num_electrodes, zl, zt, gamma, s, 1.0, kappa, mpot);
         } else {
             calculate_impedances(
-                electrodes, num_electrodes, zl, zt, gamma, s, MU0, kappa,
+                electrodes, num_electrodes, zl, zt, gamma, s, 1.0, kappa,
                 200, 1e-3, 1e-4, ERROR_PAIRED, intg_type);
         }
-        zinternal = internal_impedance(s, rho_c, r, MU0)*electrodes[0].length;
+        zinternal = internal_impedance(s, rho_c, r, 1.0)*electrodes[0].length;
         for (k = 0; k < num_electrodes; k++)
         {
             zl[k*num_electrodes] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-            s, MU0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, intg_type);
+            s, 1.0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, intg_type);
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         //The matrices are pivoted in-place. To recover them, copy
         copy_array(we, we_cp, ss2);
@@ -207,7 +207,7 @@ int run_51emc03grcev(double length, double rho, char file_name[], int intg_type)
     logspace(2, 7, nf, freq);
 
     // electrode definition and segmentation
-    double lambda = wave_length(freq[nf - 1], sigma, er*EPS0, MU0); //smallest
+    double lambda = wave_length(freq[nf - 1], sigma, er*EPS0, 1.0); //smallest
     int num_electrodes = ceil( length/(lambda/6.0) ) ;
     int num_nodes = num_electrodes + 1;
     double nodes[num_nodes][3];
@@ -267,19 +267,19 @@ int run_51emc03grcev(double length, double rho, char file_name[], int intg_type)
         if (intg_type == INTG_LOGNF)
         {
             impedances_single(
-                electrodes, num_electrodes, zl, zt, gamma, s, MU0, kappa, mpot);
+                electrodes, num_electrodes, zl, zt, gamma, s, 1.0, kappa, mpot);
         } else {
             calculate_impedances(
-                electrodes, num_electrodes, zl, zt, gamma, s, MU0, kappa,
+                electrodes, num_electrodes, zl, zt, gamma, s, 1.0, kappa,
                 200, 1e-3, 1e-4, ERROR_PAIRED, intg_type);
         }
-        zinternal = internal_impedance(w, rho_c, r, MU0)*electrodes[0].length;
+        zinternal = internal_impedance(w, rho_c, r, 1.0)*electrodes[0].length;
         for (k = 0; k < num_electrodes; k++)
         {
             zl[k*num_electrodes] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-            s, MU0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, intg_type);
+            s, 1.0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, intg_type);
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         //The matrices are pivoted in-place. To recover them, copy
         copy_array(we, we_cp, ss2);

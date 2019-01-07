@@ -65,16 +65,16 @@ int main()
         kappa1 = (sigma1 + s*er1*EPS0); //soil complex conductivity
         gamma = csqrt(s*MU0*kappa1); //soil 1 propagation constant
         calculate_impedances(
-            electrodes, num_electrodes, zl, zt, gamma, w, MU0, kappa1,
+            electrodes, num_electrodes, zl, zt, gamma, w, 1.0, kappa1,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
-        zinternal = internal_impedance(w, rho_c, radius, MU0);
+        zinternal = internal_impedance(w, rho_c, radius, 1.0);
         for (k = 0; k < num_electrodes; k++)
         {
             zl[k*num_electrodes + k] += zinternal*electrodes[k].length;
         }
         ref_t = (kappa1 - s*EPS0)/(kappa1 + s*EPS0);
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-            s, MU0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+            s, 1.0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         /*ynodal_eq(yn, a, b, zl, zt, num_electrodes, num_nodes);
         print_zmatrix_file(num_nodes, num_nodes, yn, num_nodes, save_file);
         fprintf(save_file, "f = %f\n", freq[i]);*/

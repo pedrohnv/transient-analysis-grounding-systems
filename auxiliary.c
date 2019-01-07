@@ -37,10 +37,10 @@ double* logspace(double a, double b, int n, double u[])
     return u; /* done */
 }
 
-double wave_length(double f, double sigma, double eps, double mu)
+double wave_length(double f, double sigma, double eps, double mur)
 {
     double x = sqrt(1 + pow(sigma/(TWO_PI*f*eps), 2.0));
-    double y = sqrt(eps*mu*(1 + x));
+    double y = sqrt(eps*mur*MU0*(1 + x));
     return sqrt(2.)/(f*y);
 }
 
@@ -112,4 +112,3 @@ int print_dmatrix_file(int m, int n, double* a, int lda, FILE* fp)
     }
     return 0;
 }
-

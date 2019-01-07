@@ -355,8 +355,8 @@ int test_case(double rho, double length, double frac)
     double h = 0.001;
     _Complex double zi = 0.0;
     double radius = 1.25e-2;
-    double mu = MU0;
-    double eps = 10.0*MU0;
+    double mur = 1.0;
+    double eps = 10.0*EPS0;
     double sigma = 1/rho;
     double rho_c = 1.9e-6;
     // execute
@@ -424,17 +424,17 @@ int test_case(double rho, double length, double frac)
         s = I*TWO_PI*freq[i];
         memcpy(ie, rhs, sizeof(ie));
         memcpy(we, incidence, sizeof(we));
-        zinternal = internal_impedance(s, rho_c, radius, MU0)*l;
+        zinternal = internal_impedance(s, rho_c, radius, mur)*l;
         for (int k = 0; k < num_electrodes; k++)
         {
             electrodes[k].zi = zinternal;
         }
         c = (sigma + s*eps);
         k1 = csqrt(s*mu*c); //gamma
-        calculate_impedances(electrodes, num_electrodes, zl, zt, k1, s, mu, c,
+        calculate_impedances(electrodes, num_electrodes, zl, zt, k1, s, mur, c,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         impedances_images(
-            electrodes, images, num_electrodes, zl, zt, k1, s, mu, c, rt, rl,
+            electrodes, images, num_electrodes, zl, zt, k1, s, mur, c, rt, rl,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         solve_electrodes(we, ie, num_electrodes, num_nodes);
@@ -453,8 +453,7 @@ int zi_bessel()
     _Complex double s = I*377;
     double rho = 1.9e-6;
     double radius = 7e-3;
-    double mu = MU0;
-    _Complex double zi = internal_impedance(s, rho, radius, mu);
+    _Complex double zi = internal_impedance(s, rho, radius, 1.0);
     assert(abs(creal(zi) - 0.0123426) < 1e-6);
     assert(abs(cimag(zi) - 0.00001885) < 1e-6);
     printf("Internal impedance: passed\n");

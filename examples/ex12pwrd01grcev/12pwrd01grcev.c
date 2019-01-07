@@ -87,16 +87,16 @@ int main(int argc, char *argv[])
         ref_l = (1 - ref_t);
         //TODO especialized impedance calculation taking advantage of symmetry
         calculate_impedances(
-            electrodes, num_electrodes, zl, zt, gamma, s, MU0, kappa,
+            electrodes, num_electrodes, zl, zt, gamma, s, 1.0, kappa,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         zinternal = internal_impedance(s, rho_c,
-            electrodes[0].radius, MU0)*electrodes[0].length;
+            electrodes[0].radius, 1.0)*electrodes[0].length;
         for (k = 0; k < num_electrodes; k++)
         {
             zl[k*num_electrodes + k] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-            s, MU0, kappa, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+            s, 1.0, kappa, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         //The matrices are pivoted in-place. To recover them, copy
         copy_array(we, we_cp, ss2);
