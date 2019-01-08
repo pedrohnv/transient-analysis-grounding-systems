@@ -430,7 +430,7 @@ int test_case(double rho, double length, double frac)
             electrodes[k].zi = zinternal;
         }
         c = (sigma + s*eps);
-        k1 = csqrt(s*mu*c); //gamma
+        k1 = csqrt(s*mur*MU0*c); //gamma
         calculate_impedances(electrodes, num_electrodes, zl, zt, k1, s, mur, c,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         impedances_images(
