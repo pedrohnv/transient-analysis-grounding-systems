@@ -70,21 +70,17 @@ DLLEXPORT int Mcalculate_impedances(
             kappa1, max_eval, req_abs_error, req_rel_error, error_norm,
             integration_type);
     MTensor zlzt;
-    mreal *data;
-    mint out_dim[] = {4*ne2};
-    err = libData->MTensor_new(MType_Real, 1, out_dim, &zlzt);
-    data = libData->MTensor_getRealData(zlzt);
+    mcomplex *data;
+    mint out_dim[] = {2*ne2};
+    err = libData->MTensor_new(MType_Complex, 1, out_dim, &zlzt);
+    data = libData->MTensor_getComplexData(zlzt);
     for (int i = 0; i < ne2; i++) {
-        data[i] = creal(zl[i]);
+        data[i].ri[0] = creal(zl[i]);
+        data[i].ri[1] = cimag(zl[i]);
     }
     for (int i = 0; i < ne2; i++) {
-        data[i + ne2] = cimag(zl[i]);
-    }
-    for (int i = 0; i < ne2; i++) {
-        data[i + 2*ne2] = creal(zt[i]);
-    }
-    for (int i = 0; i < ne2; i++) {
-        data[i + 3*ne2] = cimag(zt[i]);
+        data[i + ne2].ri[0] = creal(zt[i]);
+        data[i + ne2].ri[1] = cimag(zt[i]);
     }
     MArgument_setMTensor(Res, zlzt);
     free(electrodes);
@@ -175,6 +171,26 @@ DLLEXPORT int Mimpedances_images(
             ref_l1, ref_t1, max_eval, req_abs_error, req_rel_error, error_norm,
             integration_type);
     MTensor zlzt;
+    mcomplex *data;
+    mint out_dim[] = {2*ne2};
+    err = libData->MTensor_new(MType_Complex, 1, out_dim, &zlzt);
+    data = libData->MTensor_getComplexData(zlzt);
+    for (int i = 0; i < ne2; i++) {
+        data[i].ri[0] = creal(zl[i]);
+        data[i].ri[1] = cimag(zl[i]);
+    }
+    for (int i = 0; i < ne2; i++) {
+        data[i + ne2].ri[0] = creal(zt[i]);
+        data[i + ne2].ri[1] = cimag(zt[i]);
+    }
+    MArgument_setMTensor(Res, zlzt);
+    free(electrodes);
+    free(images);
+    free(zl);
+    free(zt);
+    return LIBRARY_NO_ERROR;
+}
+
     mreal *data;
     mint out_dim[] = {4*ne2};
     err = libData->MTensor_new(MType_Real, 1, out_dim, &zlzt);
