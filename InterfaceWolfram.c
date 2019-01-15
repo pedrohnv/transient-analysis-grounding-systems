@@ -29,7 +29,7 @@ DLLEXPORT int Mcalculate_impedances(
     WolframLibraryData libData, mint Argc, MArgument *Args, MArgument Res)
 {
     int err; // error code
-    MTensor electensor = MArgument_getMTensor(Args[0]);
+    MTensor elec_tensor = MArgument_getMTensor(Args[0]);
     mcomplex gamma = MArgument_getComplex(Args[1]);
     mcomplex s = MArgument_getComplex(Args[2]);
     mreal mur = MArgument_getReal(Args[3]);
@@ -40,9 +40,9 @@ DLLEXPORT int Mcalculate_impedances(
     mint error_norm = MArgument_getInteger(Args[8]);
     mint integration_type = MArgument_getInteger(Args[9]);
     mint const* dims;
-    dims = libData->MTensor_getDimensions(electensor);
-    mreal* elecdata;
-    elecdata = libData->MTensor_getRealData(electensor);
+    dims = libData->MTensor_getDimensions(elec_tensor);
+    mreal* elec_data;
+    elec_data = libData->MTensor_getRealData(elec_tensor);
     int num_electrodes = dims[0];
     Electrode* electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     double start_point[3], end_point[3];
@@ -50,14 +50,14 @@ DLLEXPORT int Mcalculate_impedances(
     _Complex double zi;
     for (int i = 0; i < num_electrodes; i++)
     {
-        start_point[0] = elecdata[9*i + 0];
-        start_point[1] = elecdata[9*i + 1];
-        start_point[2] = elecdata[9*i + 2];
-        end_point[0] = elecdata[9*i + 3];
-        end_point[1] = elecdata[9*i + 4];
-        end_point[2] = elecdata[9*i + 5];
-        radius = elecdata[9*i + 6];
-        zi = elecdata[9*i + 7] + I*elecdata[9*i + 8];
+        start_point[0] = elec_data[9*i + 0];
+        start_point[1] = elec_data[9*i + 1];
+        start_point[2] = elec_data[9*i + 2];
+        end_point[0] = elec_data[9*i + 3];
+        end_point[1] = elec_data[9*i + 4];
+        end_point[2] = elec_data[9*i + 5];
+        radius = elec_data[9*i + 6];
+        zi = elec_data[9*i + 7] + I*elec_data[9*i + 8];
         populate_electrode(&(electrodes[i]), start_point, end_point, radius, zi);
     }
     int ne2 = num_electrodes*num_electrodes;
@@ -113,7 +113,7 @@ DLLEXPORT int Mimpedances_images(
     WolframLibraryData libData, mint Argc, MArgument *Args, MArgument Res)
 {
     int err; // error code
-    MTensor electensor = MArgument_getMTensor(Args[0]);
+    MTensor elec_tensor = MArgument_getMTensor(Args[0]);
     mcomplex gamma = MArgument_getComplex(Args[1]);
     mcomplex s = MArgument_getComplex(Args[2]);
     mreal mur = MArgument_getReal(Args[3]);
@@ -125,12 +125,12 @@ DLLEXPORT int Mimpedances_images(
     mint integration_type = MArgument_getInteger(Args[9]);
     mcomplex ref_l = MArgument_getComplex(Args[10]);
     mcomplex ref_t = MArgument_getComplex(Args[11]);
-    MTensor imagtensor = MArgument_getMTensor(Args[12]); //TODO error checking
+    MTensor imag_tensor = MArgument_getMTensor(Args[12]); //TODO error checking
     mint const* dims;
-    dims = libData->MTensor_getDimensions(electensor);
-    mreal *elecdata, *imagdata;
-    elecdata = libData->MTensor_getRealData(electensor);
-    imagdata = libData->MTensor_getRealData(imagtensor);
+    dims = libData->MTensor_getDimensions(elec_tensor);
+    mreal *elec_data, *imag_data;
+    elec_data = libData->MTensor_getRealData(elec_tensor);
+    imag_data = libData->MTensor_getRealData(imag_tensor);
     int num_electrodes = dims[0];
     Electrode* electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     Electrode* images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
@@ -139,23 +139,23 @@ DLLEXPORT int Mimpedances_images(
     _Complex double zi;
     for (int i = 0; i < num_electrodes; i++)
     {
-        start_point[0] = elecdata[9*i + 0];
-        start_point[1] = elecdata[9*i + 1];
-        start_point[2] = elecdata[9*i + 2];
-        end_point[0] = elecdata[9*i + 3];
-        end_point[1] = elecdata[9*i + 4];
-        end_point[2] = elecdata[9*i + 5];
-        radius = elecdata[9*i + 6];
-        zi = elecdata[9*i + 7] + I*elecdata[9*i + 8];
+        start_point[0] = elec_data[9*i + 0];
+        start_point[1] = elec_data[9*i + 1];
+        start_point[2] = elec_data[9*i + 2];
+        end_point[0] = elec_data[9*i + 3];
+        end_point[1] = elec_data[9*i + 4];
+        end_point[2] = elec_data[9*i + 5];
+        radius = elec_data[9*i + 6];
+        zi = elec_data[9*i + 7] + I*elec_data[9*i + 8];
         populate_electrode(&(electrodes[i]), start_point, end_point, radius, zi);
-        start_point[0] = imagdata[9*i + 0];
-        start_point[1] = imagdata[9*i + 1];
-        start_point[2] = imagdata[9*i + 2];
-        end_point[0] = imagdata[9*i + 3];
-        end_point[1] = imagdata[9*i + 4];
-        end_point[2] = imagdata[9*i + 5];
-        radius = imagdata[9*i + 6];
-        zi = imagdata[9*i + 7] + I*imagdata[9*i + 8];
+        start_point[0] = imag_data[9*i + 0];
+        start_point[1] = imag_data[9*i + 1];
+        start_point[2] = imag_data[9*i + 2];
+        end_point[0] = imag_data[9*i + 3];
+        end_point[1] = imag_data[9*i + 4];
+        end_point[2] = imag_data[9*i + 5];
+        radius = imag_data[9*i + 6];
+        zi = imag_data[9*i + 7] + I*imag_data[9*i + 8];
         populate_electrode(&(images[i]), start_point, end_point, radius, zi);
     }
     int ne2 = num_electrodes*num_electrodes;
@@ -191,12 +191,6 @@ DLLEXPORT int Mimpedances_images(
     return LIBRARY_NO_ERROR;
 }
 
-    mreal *data;
-    mint out_dim[] = {4*ne2};
-    err = libData->MTensor_new(MType_Real, 1, out_dim, &zlzt);
-    data = libData->MTensor_getRealData(zlzt);
-    for (int i = 0; i < ne2; i++) {
-        data[i] = creal(zl[i]);
     }
     for (int i = 0; i < ne2; i++) {
         data[i + ne2] = cimag(zl[i]);
