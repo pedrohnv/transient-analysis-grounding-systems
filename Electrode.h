@@ -242,7 +242,7 @@ _Complex double longitudinal_mutual(
 /** transversal_self
 Calculates the self transversal impedance of a given electrode.
 @param electrode
-@param kappa medium complex conductivity `(sigma + j*w*eps)` in S/m
+@param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
 @return ztp
 */
 _Complex double transversal_self(Electrode* electrode, _Complex double kappa);
@@ -251,7 +251,7 @@ _Complex double transversal_self(Electrode* electrode, _Complex double kappa);
 Calculates the mutual transversal impedance of given electrodes.
 @param sender Electrode
 @param receiver Electrode
-@param kappa medium complex conductivity `(sigma + j*w*eps)` in S/m
+@param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
 @param gamma medium propagation constant
 @param max_eval specifies a maximum number of function evaluations (0 for no
 limit)
@@ -287,7 +287,7 @@ Calculates the impedance matrices.
 `num_electrodes^2`
 @param s complex angular frequency `c + I*w` (rad/s)
 @param mur relative magnetic permeability of the medium
-@param kappa medium complex conductivity `(sigma + j*w*eps)` in S/m
+@param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
 @param max_eval specifies a maximum number of function evaluations (0 for no
 limit)
 @param reqAbsError the absolute error requested (0 to ignore)
@@ -317,7 +317,7 @@ Add the images effect to the impedance matrices.
 `num_electrodes^2`
 @param s complex angular frequency `c + I*w` (rad/s)
 @param mur relative magnetic permeability of the medium
-@param kappa medium complex conductivity `(sigma + j*w*eps)` in S/m
+@param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
 @param ref_l longitudinal current reflection coefficient
 @param ref_t transversal current reflection coefficient
 @param max_eval specifies a maximum number of function evaluations (0 for no
@@ -340,6 +340,7 @@ int impedances_images(
     double req_rel_error, int error_norm, int integration_type);
 
 // Imitance matrix WE building
+
 /** fill_incidence
 Fills the imitance matrix `we = [[ZL/2, -ZL/2, A], [ZT, ZT, B], [C, D, Yn]]`
 with the incidence matrices `A`, `B`, `C` and `D`. This function is separated from
@@ -395,14 +396,15 @@ this array in-place
 int solve_electrodes(
     _Complex double* we, _Complex double* ie, int num_electrodes, int num_nodes);
 
-// Alternative approach using an equivalent Ynodal
+/** incidence_alt
+Alternative approach using an equivalent Ynodal
+*/
 int incidence_alt(
     double* a, double* b, Electrode* electrodes, int num_electrodes,
     double nodes[][3], int num_nodes);
 
-/*
+/** ynodal_eq
 Finds the equivalent nodal admittance matrix of the electrode system.
-This funtion takes advantage of the symmetry of zl and zt.
 */
 int ynodal_eq(
     _Complex double* yn, double* a, double *b, _Complex double* zl,

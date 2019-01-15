@@ -20,6 +20,7 @@ Constants, auxiliary functions and routines.
 #define FOUR_PI 12.56637061435917
 #define MU0 1.256637061435917e-6 //permeability vac.
 #define EPS0 8.854187817620e-12 //permittivity vac.
+#define RHO_CU 1.689e-8 //copper resistivity
 
 /** linspace
 Fill array `u` with `n` linearly spaced numbers between `a` and `b` (included).
