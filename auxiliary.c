@@ -49,7 +49,7 @@ int equal_points(double point_1[3], double point_2[3])
 {
 	for (int i = 0; i < 3; i++)
     {
-        if (fabs(point_1[i] - point_2[i]) < FLT_EPSILON)
+        if (fabs(point_1[i] - point_2[i]) > FLT_EPSILON)
         {
             return 0;
         }
