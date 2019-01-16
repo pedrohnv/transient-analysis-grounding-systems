@@ -703,47 +703,117 @@ int harmonic_impedance1(
     _Complex double* yn = (_Complex double*) calloc(nn2, sizeof(_Complex double));
     _Complex double* ie = (_Complex double*) malloc(sizeof(_Complex double)*ss1);
     _Complex double* we = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
-    _Complex double* we_cp = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
+    _Complex double* we_incidence = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
     //yn[0] = 1.0/rsource;
-    fill_incidence(we, electrodes, num_electrodes, nodes, num_nodes);
+    fill_incidence(we_incidence, electrodes, num_electrodes, nodes, num_nodes);
     // solve for each frequency: WE*VE = IE
     for (int i = 0; i < ns; i++)
     {
-        ref_l = (kappa1[i] - kappa2[i])/(kappa1[i] + kappa2[i]);
-        ref_t = ref_l;
-        //TODO especialized impedance calculation taking advantage of symmetry
-        calculate_impedances(
-            electrodes, num_electrodes, zl, zt, gamma1[i], s[i], mur1, kappa1[i],
-            max_eval, req_abs_error, req_rel_error, error_norm, INTG_DOUBLE);
-        for (int k = 0; k < num_electrodes; k++)
-        {
-            //FIXME crashing on internal_impedance evaluation. The value of RHO_CU seems to be the source
-            //zinternal = internal_impedance(sk, RHO_CU, electrodes[k].radius, 1.0)*electrodes[k].length;
-            zinternal = 0.0;
-            zl[k*num_electrodes + k] += zinternal;
-        }
-        impedances_images(electrodes, images, num_electrodes, zl, zt, gamma1[i],
-            s[i], mur1, kappa1[i], ref_l, ref_t, max_eval, req_abs_error, req_rel_error,
-            error_norm, INTG_DOUBLE);
-        fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
-        //The matrices are pivoted in-place. To avoid overwriting them, copy.
-        //That way the filling of the incidence, which is costly, needs to be
-        //done only once
-        copy_array(we, we_cp, ss2);
-        solve_electrodes(we_cp, ie, num_electrodes, num_nodes);
-        zh[i] = ie[ss1 - num_nodes];
-        //reset ie as it was overwritten
+        //reset IE
         for (int k = 0; k < ss1; k++)
         {
             ie[k] = 0.0;
         }
         ie[ss1 - num_nodes] = 1.0;
+        ref_l = (kappa1[i] - kappa2[i])/(kappa1[i] + kappa2[i]);
+        ref_t = ref_l;
+        //TODO specialized impedance calculation taking advantage of symmetry
+        calculate_impedances(
+            electrodes, num_electrodes, zl, zt, gamma1[i], s[i], mur1, kappa1[i],
+            max_eval, req_abs_error, req_rel_error, error_norm, INTG_DOUBLE);
+        for (int k = 0; k < num_electrodes; k++)
+        {
+            //FIXME crashing when interfaced with Mathematica because it does not see zbesi_
+            zinternal = internal_impedance(s[i], RHO_CU, electrodes[k].radius, 1.0)*electrodes[k].length;
+            //zinternal = 0.0;
+            zl[k*num_electrodes + k] += zinternal;
+        }
+        impedances_images(electrodes, images, num_electrodes, zl, zt, gamma1[i],
+            s[i], mur1, kappa1[i], ref_l, ref_t, max_eval, req_abs_error, req_rel_error,
+            error_norm, INTG_DOUBLE);
+        //The matrices are pivoted in-place. To avoid overwriting them, copy.
+        //That way the filling of the incidence, which is costly, needs to be
+        //done only once
+        copy_array(we_incidence, we, ss2);
+        fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
+        solve_electrodes(we, ie, num_electrodes, num_nodes);
+        zh[i] = ie[ss1 - num_nodes];
     }
     free(zl);
     free(zt);
     free(yn);
     free(ie);
     free(we);
-    free(we_cp);
+    free(we_incidence);
+    return 0;
+}
+
+int harmonic_impedance1_alt(
+    int ns, _Complex double* s, _Complex double* kappa1, _Complex double* kappa2,
+    _Complex double* gamma1, Electrode* electrodes, Electrode* images, int num_electrodes,
+    double nodes[][3], int num_nodes, size_t max_eval, double req_abs_error,
+    double req_rel_error, int error_norm, double rsource, _Complex double* zh)
+{
+    //TODO extract nodes from electrodes instead of receiving it as an argument?
+    //build system to be solved
+    //TODO take mur1 as argument
+    double mur1 = 1.0;
+    int ne2 = num_electrodes*num_electrodes;
+    int nn2 = num_nodes*num_nodes;
+    _Complex double zinternal, ref_l, ref_t;
+    _Complex double* zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
+    _Complex double* zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
+    _Complex double* yn = (_Complex double*) calloc(nn2, sizeof(_Complex double));
+    _Complex double* ie = (_Complex double*) malloc(sizeof(_Complex double)*num_nodes);
+    double* a = (double*) malloc(sizeof(double)*(num_electrodes*num_nodes));
+    double* b = (double*) malloc(sizeof(double)*(num_electrodes*num_nodes));
+    incidence_alt(a, b, electrodes, num_electrodes, nodes, num_nodes);
+    //yn[0] = 1.0/rsource;
+    // solve for each frequency: YN*VN = IN
+    MKL_INT n = num_electrodes*2 + num_nodes;
+    MKL_INT ipiv[n]; //pivot indices
+    int info;
+    for (int i = 0; i < ns; i++)
+    {
+        //reset IN
+        ie[0] = 1.0;
+        for (int k = 1; k < num_nodes; k++)
+        {
+            ie[k] = 0.0;
+        }
+        ref_l = (kappa1[i] - kappa2[i])/(kappa1[i] + kappa2[i]);
+        ref_t = ref_l;
+        //TODO specialized impedance calculation taking advantage of symmetry
+        calculate_impedances(
+            electrodes, num_electrodes, zl, zt, gamma1[i], s[i], mur1, kappa1[i],
+            max_eval, req_abs_error, req_rel_error, error_norm, INTG_DOUBLE);
+        for (int k = 0; k < num_electrodes; k++)
+        {
+            //FIXME crashing on internal_impedance evaluation. The value of RHO_CU seems to be the source
+            zinternal = internal_impedance(s[i], RHO_CU, electrodes[k].radius, 1.0)*electrodes[k].length;
+            //zinternal = 0.0;
+            zl[k*num_electrodes + k] += zinternal;
+        }
+        impedances_images(electrodes, images, num_electrodes, zl, zt, gamma1[i],
+            s[i], mur1, kappa1[i], ref_l, ref_t, max_eval, req_abs_error, req_rel_error,
+            error_norm, INTG_DOUBLE);
+        ynodal_eq(yn, a, b, zl, zt, num_electrodes, num_nodes);
+        info = LAPACKE_zgesv(LAPACK_ROW_MAJOR, num_nodes, 1, yn, num_nodes, ipiv, ie, 1);
+        // Check for the exact singularity
+        if(info > 0)
+        {
+            printf("The diagonal element of the triangular factor of WE,\n");
+            printf("U(%i,%i) is zero, so that YN is singular;\n", info, info);
+            printf("the solution could not be computed.\n");
+            exit(info);
+        }
+        zh[i] = ie[0];
+    }
+    free(zl);
+    free(zt);
+    free(yn);
+    free(ie);
+    free(a);
+    free(b);
     return 0;
 }

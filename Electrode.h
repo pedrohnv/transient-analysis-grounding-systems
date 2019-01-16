@@ -438,5 +438,10 @@ int harmonic_impedance1(
     double nodes[][3], int num_nodes, size_t max_eval, double req_abs_error,
     double req_rel_error, int error_norm, double rsource, _Complex double* zh);
 
+int harmonic_impedance1_alt(
+    int ns, _Complex double* s, _Complex double* kappa1, _Complex double* kappa2,
+    _Complex double* gamma1, Electrode* electrodes, Electrode* images, int num_electrodes,
+    double nodes[][3], int num_nodes, size_t max_eval, double req_abs_error,
+    double req_rel_error, int error_norm, double rsource, _Complex double* zh);
 
 #endif /* ELECTRODE_H_ */

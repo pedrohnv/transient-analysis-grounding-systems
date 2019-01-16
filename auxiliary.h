@@ -21,6 +21,7 @@ Constants, auxiliary functions and routines.
 #define MU0 1.256637061435917e-6 //permeability vac.
 #define EPS0 8.854187817620e-12 //permittivity vac.
 #define RHO_CU 1.689e-8 //copper resistivity
+//#define RHO_CU 1.9e-6 //copper resistivity FIXME what is the true value?
 
 /** linspace
 Fill array `u` with `n` linearly spaced numbers between `a` and `b` (included).

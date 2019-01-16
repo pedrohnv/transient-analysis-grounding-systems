@@ -63,8 +63,8 @@ int run_case(double length, double rho, char file_name[])
     int nn2 = num_nodes*num_nodes;
     int ss1 = (2*num_electrodes + num_nodes);
     int ss2 = ss1*ss1;
-    _Complex double s;
-    _Complex double kappa, gamma, zinternal;
+    _Complex double s, ref_l, ref_t;
+    _Complex double kappa, gamma, zinternal, kappa_air;
     _Complex double* zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
     _Complex double* zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
     _Complex double* yn = (_Complex double*) malloc(sizeof(_Complex double)*nn2);
@@ -89,6 +89,9 @@ int run_case(double length, double rho, char file_name[])
         s = I*TWO_PI*freq[i];
         kappa = (sigma + s*er*EPS0); //soil complex conductivity
         gamma = csqrt(s*MU0*kappa); //soil propagation constant
+        kappa_air = (s*EPS0);
+        ref_l = (kappa - kappa_air)/(kappa + kappa_air);
+        ref_t = ref_l;
         //TODO especialized impedance calculation taking advantage of symmetry
         calculate_impedances(
             electrodes, num_electrodes, zl, zt, gamma, s, 1.0, kappa,
@@ -99,7 +102,7 @@ int run_case(double length, double rho, char file_name[])
             zl[k*num_electrodes + k] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-            s, 1.0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+            s, 1.0, kappa, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         //The matrices are pivoted in-place. To recover them, copy
         copy_array(we, we_cp, ss2);
@@ -118,6 +121,73 @@ int run_case(double length, double rho, char file_name[])
     free(ie_cp);
     free(we);
     free(we_cp);
+    return 0;
+}
+
+int run_case2(double length, double rho, char file_name[])
+{
+    // parameters
+    double h = 0.001; //burial depth
+    double r = 1.25e-2; //radius
+    double sigma = 1/rho; // soil conductivity
+    double er = 10.0; //soil rel. permitivitty
+    //char file_name[] = "20pwrd02grcev_L<>rho<>.dat";
+    // frequencies of interest
+    int nf = 250;
+    double freq[nf];
+    double start_point[3] = {0., 0., -h};
+    double end_point[3] = {0., 0., -h - length};
+
+    remove(file_name);
+    FILE* save_file = fopen(file_name, "w");
+    if (save_file == NULL)
+    {
+        printf("Cannot open file %s\n",  file_name);
+        exit(1);
+    }
+    logspace(2, 7, nf, freq);
+    // electrode definition and segmentation
+    double lambda = wave_length(freq[nf - 1], sigma, er*EPS0, 1.0); //smallest
+    int num_electrodes = ceil( length/(lambda/6.0) ) ;
+    int num_nodes = num_electrodes + 1;
+    double nodes[num_nodes][3];
+    Electrode* electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    // the internal impedance is added "outside" later
+    segment_electrode(
+        electrodes, nodes, num_electrodes, start_point, end_point, r, 0.0);
+    // create images
+    start_point[2] = h;
+    end_point[2] = h + length;
+    double nodes_images[num_nodes][3];
+    //Electrode images[num_electrodes];
+    Electrode* images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    segment_electrode(
+        images, nodes_images, num_electrodes, start_point, end_point, r, 0.0);
+    _Complex double *s = (_Complex double*) malloc(sizeof(_Complex double)*nf);
+    _Complex double *kappa1 = (_Complex double*) malloc(sizeof(_Complex double)*nf);
+    _Complex double *kappa2 = (_Complex double*) malloc(sizeof(_Complex double)*nf);
+    _Complex double *gamma1 = (_Complex double*) malloc(sizeof(_Complex double)*nf);
+    for (int i = 0; i < nf; i++)
+    {
+        s[i] = I*TWO_PI*freq[i];
+        kappa1[i] = sigma + s[i]*er*EPS0;
+        gamma1[i] = csqrt(s[i]*MU0*kappa1[i]);
+        kappa2[i] = s[i]*EPS0;
+    }
+    _Complex double* zh = (_Complex double*) malloc(sizeof(_Complex double)*nf);
+    double rsource = 0.0;
+    harmonic_impedance1(
+    //harmonic_impedance1_alt(
+        nf, s, kappa1, kappa2, gamma1, electrodes, images, num_electrodes,
+        nodes, num_nodes, 200, 1e-3, 1e-4, ERROR_PAIRED, rsource, zh);
+    for (int i = 0; i < nf; i++)
+    {
+        fprintf(save_file, "%f %f\n", creal(zh[i]), cimag(zh[i]));
+    }
+    fclose(save_file);
+    free(electrodes);
+    free(images);
+    free(zh);
     return 0;
 }
 
