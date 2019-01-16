@@ -410,4 +410,33 @@ int ynodal_eq(
     _Complex double* yn, double* a, double *b, _Complex double* zl,
     _Complex double* zt, int num_electrodes, int num_nodes);
 
+/** harmonic_impedance1
+Calculates the harmonic impedance of a copper electrode system buried in a
+single layer soil.
+No segmentation on the electrodes is done.
+Injection node is considered the first.
+@param s array of complex frequencies `c + I*w`
+@param ns number of frequencies
+@param electrodes array of electrodes
+@param num_electrodes number of electrodes
+@param nodes array of nodes
+@param num_nodes number of nodes
+@param max_eval specifies a maximum number of function evaluations (0 for no
+limit)
+@param reqAbsError the absolute error requested (0 to ignore)
+@param reqRelError the relative error requested (0 to ignore)
+@param error_norm (enumeration defined in cubature.h) error checking scheme
+@param sigma medium conductivity
+@param er medium relative electric permittivity
+@param mur medium relative magnetic permeability
+@param zh harmonic impedance array of size `ns`
+@return 0 on success
+*/
+int harmonic_impedance1(
+    int ns, _Complex double* s, _Complex double* kappa1, _Complex double* kappa2,
+    _Complex double* gamma1, Electrode* electrodes, Electrode* images, int num_electrodes,
+    double nodes[][3], int num_nodes, size_t max_eval, double req_abs_error,
+    double req_rel_error, int error_norm, double rsource, _Complex double* zh);
+
+
 #endif /* ELECTRODE_H_ */
