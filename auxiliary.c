@@ -2,6 +2,7 @@
 #include <math.h>
 #include <complex.h>
 #include <stdio.h>
+#include <float.h>
 
 double* linspace(double a, double b, int n, double u[])
 {
@@ -46,9 +47,9 @@ double wave_length(double f, double sigma, double eps, double mur)
 
 int equal_points(double point_1[3], double point_2[3])
 {
-    for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 3; i++)
     {
-        if (point_1[i] != point_2[i])
+        if (fabs(point_1[i] - point_2[i]) < FLT_EPSILON)
         {
             return 0;
         }

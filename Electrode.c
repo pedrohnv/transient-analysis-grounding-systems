@@ -3,6 +3,7 @@
 #include <cubature.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h>
 #include <string.h>
 #include <math.h>
 #include <mkl.h>
@@ -301,7 +302,7 @@ _Complex double longitudinal_mutual(
         cost += k1*k2;
     }
     cost = abs(cost/(sender->length * receiver->length));
-    if (cost == 0.0)
+    if (fabs(cost - 0.0) < DBL_EPSILON)
     {
         return 0.0;
     }
