@@ -71,13 +71,13 @@ timing	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o timing.exe examples\\timing.c $(OBJECTS) $(LINK)
 
 example20pwrd02grcev	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o 20pwrd02grcev.exe examples\\20pwrd02grcev.c $(OBJECTS) $(LINK)
+		$(CC) $(CFLAGS) $(INCLUDE) -o ex20pwrd02grcev.exe examples\\ex20pwrd02grcev.c $(OBJECTS) $(LINK)
 
 example51emc03grcev	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o 51emc03grcev.exe examples\\51emc03grcev.c $(OBJECTS) $(LINK)
+		$(CC) $(CFLAGS) $(INCLUDE) -o ex51emc03grcev.exe examples\\ex51emc03grcev.c $(OBJECTS) $(LINK)
 
 example12pwrd01grcev	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o 12pwrd01grcev.exe examples\\ex12pwrd01grcev\12pwrd01grcev.c $(OBJECTS) $(LINK)
+		$(CC) $(CFLAGS) $(INCLUDE) -o ex12pwrd01grcev.exe examples\\ex12pwrd01grcev\ex12pwrd01grcev.c $(OBJECTS) $(LINK)
 
 exampleAlipioSchroederRCA	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o AlipioSchroederRCA.exe examples\\AlipioSchroederRCA.c $(OBJECTS) $(LINK)

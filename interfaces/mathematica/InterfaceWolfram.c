@@ -1,5 +1,8 @@
 /**
 Funtions to interface the C code to Wolfram Mathematica.
+
+FIXME in notebook files:
+make sure Mathematica can see all dependencies (MKL and SLATEC)
 */
 #include <WolframLibrary.h>
 #include <Electrode.h>

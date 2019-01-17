@@ -28,7 +28,7 @@ clean	:
 		rm -f *.o *.dat examples/*.o examples/*.dat
 
 cleanout	:
-		rm -f *.a *.so examples*.a
+		rm -f *.a *.so examples/*.a interfaces/mathematica/*.so
 
 allclean	:
 		make clean
@@ -61,25 +61,25 @@ slatec	:
 		cd $(SLATECPATH) && $(MAKE) FC=$(FC) all
 
 wolfram	:
-		$(CC) -fPIC -shared -std=c11 $(INTELFLAGS) -Werror -O3 $(INCLUDE) -I$(WOLFRAMPATH) -o libhem_mma.so InterfaceWolfram.c Electrode.c auxiliary.c $(CUBATUREPATH)hcubature.c $(LINK)
+		$(CC) -fPIC -shared -std=c11 $(INTELFLAGS) -Werror -O3 $(INCLUDE) -I$(WOLFRAMPATH) -Iinterfaces/mathematica -o interfaces/mathematica/libhem_mma.so interfaces/mathematica/InterfaceWolfram.c Electrode.c auxiliary.c $(CUBATUREPATH)hcubature.c $(LINK)
 
 timing	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o timing.a examples/timing.c $(OBJECTS) $(LINK)
 
-example20pwrd02grcev	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o 20pwrd02grcev.a examples/20pwrd02grcev.c $(OBJECTS) $(LINK)
+ex20pwrd02grcev	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o ex20pwrd02grcev.a examples/ex20pwrd02grcev.c $(OBJECTS) $(LINK)
 
-example51emc03grcev	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o 51emc03grcev.a examples/51emc03grcev.c $(OBJECTS) $(LINK)
+ex51emc03grcev	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o ex51emc03grcev.a examples/ex51emc03grcev.c $(OBJECTS) $(LINK)
 
-example12pwrd01grcev	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o 12pwrd01grcev.a examples/ex12pwrd01grcev/12pwrd01grcev.c $(OBJECTS) $(LINK)
+ex12pwrd01grcev	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o ex12pwrd01grcev.a examples/ex12pwrd01grcev/ex12pwrd01grcev.c $(OBJECTS) $(LINK)
 
-exampleAlipioSchroederRCA	:	$(OBJECTS)
+exAlipioSchroederRCA	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o AlipioSchroederRCA.a examples/AlipioSchroederRCA.c $(OBJECTS) $(LINK)
 
-miranda64	:	$(OBJECTS)
+exMiranda64	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o examples/miranda64.a examples/grounding_miranda64.c $(OBJECTS) $(LINK)
 
-malha01	:	$(OBJECTS)
+exMalha01	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o examples/malha01.a examples/malha01.c $(OBJECTS) $(LINK)
