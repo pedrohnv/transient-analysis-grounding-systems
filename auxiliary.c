@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include <float.h>
 
-double* linspace(double a, double b, int n, double u[])
+double* linspace(double a, double b, size_t n, double u[])
 {
     double c;
-    int i;
+    size_t i;
     if (n < 2 || u == 0) /* make sure number of points and array are valid */
     {
         return (void*)0;
@@ -21,10 +21,10 @@ double* linspace(double a, double b, int n, double u[])
     return u; /* done */
 }
 
-double* logspace(double a, double b, int n, double u[])
+double* logspace(double a, double b, size_t n, double u[])
 {
     double c;
-    int i;
+    size_t i;
     if (n < 2 || u == 0) /* make sure number of points and array are valid */
     {
         return (void*)0;
@@ -47,7 +47,7 @@ double wave_length(double f, double sigma, double eps, double mur)
 
 int equal_points(double point_1[3], double point_2[3])
 {
-	for (int i = 0; i < 3; i++)
+	for (size_t i = 0; i < 3; i++)
     {
         if (fabs(point_1[i] - point_2[i]) > FLT_EPSILON)
         {
@@ -75,18 +75,20 @@ double vector_norm(double start_point[3], double end_point[3])
     }
 }
 
-int copy_array(_Complex double* source, _Complex double* target, int size)
+int copy_array(_Complex double* source, _Complex double* target,
+	           size_t size)
 {
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
         target[i] = source[i];
     }
     return 0;
 }
 
-int print_zmatrix_file(int m, int n, _Complex double* a, int lda, FILE* fp)
+int print_zmatrix_file(size_t m, size_t n,
+	                   _Complex double* a, int lda, FILE* fp)
 {
-    int i, j;
+    size_t i, j;
     for( i = 0; i < m; i++ )
     {
         for( j = 0; j < n; j++ )
@@ -99,9 +101,10 @@ int print_zmatrix_file(int m, int n, _Complex double* a, int lda, FILE* fp)
     return 0;
 }
 
-int print_dmatrix_file(int m, int n, double* a, int lda, FILE* fp)
+int print_dmatrix_file(size_t m, size_t n,
+	                   double* a, int lda, FILE* fp)
 {
-    int i, j;
+    size_t i, j;
     for( i = 0; i < m; i++ )
     {
         for( j = 0; j < n; j++ )

@@ -98,7 +98,7 @@ Any line number greater than `num_electrodes` will be ignored.
     error > 0: bad input
 */
 int electrodes_file(const char file_name[], Electrode* electrodes,
-    int num_electrodes);
+    size_t num_electrodes);
 
 /** nodes_file
 Fill a nodes array from a file. Each node must be defined in a single line
@@ -110,7 +110,7 @@ Any line number greater than `num_nodes` will be ignored.
 @param num_nodes number of nodes to read (number of lines in file)
 @return number of missing arguments from last line read (as a negative integer)
 */
-int nodes_file(const char file_name[], double nodes[][3], int num_nodes);
+int nodes_file(const char file_name[], double nodes[][3], size_t num_nodes);
 
 /** segment_electrode
 Segments an electrode (conductor) populating a passed array of electrodes and
@@ -126,7 +126,7 @@ that are created
 @return 0 on success
 */
 int segment_electrode(
-    Electrode* electrodes, double nodes[][3], int num_segments,
+    Electrode* electrodes, double nodes[][3], size_t num_segments,
     double* start_point, double* end_point, double radius,
     _Complex double unit_zi);
 
@@ -301,7 +301,7 @@ limit)
 @see https://github.com/stevengj/cubature
 */
 int calculate_impedances(
-    Electrode* electrodes, int num_electrodes, _Complex double* zl,
+    Electrode* electrodes, size_t num_electrodes, _Complex double* zl,
     _Complex double* zt, _Complex double gamma, _Complex double s, double mur,
     _Complex double kappa, size_t max_eval, double req_abs_error,
     double req_rel_error, int error_norm, int integration_type);
@@ -333,7 +333,7 @@ limit)
 @see https://github.com/stevengj/cubature
 */
 int impedances_images(
-    Electrode* electrodes, Electrode* images, int num_electrodes,
+    Electrode* electrodes, Electrode* images, size_t num_electrodes,
     _Complex double* zl, _Complex double* zt, _Complex double gamma, _Complex double s,
     double mur, _Complex double kappa, _Complex double ref_l,
     _Complex double ref_t, size_t max_eval, double req_abs_error,
@@ -356,8 +356,8 @@ will vary with frequency.
 @see fill_impedance
 */
 int fill_incidence(
-    _Complex double* we, Electrode* electrodes, int num_electrodes,
-    double nodes[][3], int num_nodes);
+    _Complex double* we, Electrode* electrodes, size_t num_electrodes,
+    double nodes[][3], size_t num_nodes);
 
 /** fill_impedance
 Fills the imitance matrix `we` = `[[ZL/2, -ZL/2, A], [ZT, ZT, B], [C, D, Yn]]`
@@ -376,8 +376,8 @@ with the impedance matrices `ZT` and `ZL`, and the nodal admittance Yn.
 @see fill_incidence
 */
 int fill_impedance(
-    _Complex double* we, Electrode* electrodes, int num_electrodes,
-    int num_nodes, _Complex double* zt, _Complex double* zl,
+    _Complex double* we, Electrode* electrodes, size_t num_electrodes,
+    size_t num_nodes, _Complex double* zt, _Complex double* zl,
     _Complex double* yn);
 
 /** solve_electrodes
@@ -394,21 +394,21 @@ this array in-place
 @see https://software.intel.com/en-us/mkl-developer-reference-c-gesv
 */
 int solve_electrodes(
-    _Complex double* we, _Complex double* ie, int num_electrodes, int num_nodes);
+    _Complex double* we, _Complex double* ie, size_t num_electrodes, size_t num_nodes);
 
 /** incidence_alt
 Alternative approach using an equivalent Ynodal
 */
 int incidence_alt(
-    double* a, double* b, Electrode* electrodes, int num_electrodes,
-    double nodes[][3], int num_nodes);
+    double* a, double* b, Electrode* electrodes, size_t num_electrodes,
+    double nodes[][3], size_t num_nodes);
 
 /** ynodal_eq
 Finds the equivalent nodal admittance matrix of the electrode system.
 */
 int ynodal_eq(
     _Complex double* yn, double* a, double *b, _Complex double* zl,
-    _Complex double* zt, int num_electrodes, int num_nodes);
+    _Complex double* zt, size_t num_electrodes, size_t num_nodes);
 
 /** harmonic_impedance1
 Calculates the harmonic impedance of a copper electrode system buried in a
@@ -433,15 +433,15 @@ limit)
 @return 0 on success
 */
 int harmonic_impedance1(
-    int ns, _Complex double* s, _Complex double* kappa1, _Complex double* kappa2,
-    _Complex double* gamma1, Electrode* electrodes, Electrode* images, int num_electrodes,
-    double nodes[][3], int num_nodes, size_t max_eval, double req_abs_error,
+    size_t ns, _Complex double* s, _Complex double* kappa1, _Complex double* kappa2,
+    _Complex double* gamma1, Electrode* electrodes, Electrode* images, size_t num_electrodes,
+    double nodes[][3], size_t num_nodes, size_t max_eval, double req_abs_error,
     double req_rel_error, int error_norm, double rsource, _Complex double* zh);
 
 int harmonic_impedance1_alt(
-    int ns, _Complex double* s, _Complex double* kappa1, _Complex double* kappa2,
-    _Complex double* gamma1, Electrode* electrodes, Electrode* images, int num_electrodes,
-    double nodes[][3], int num_nodes, size_t max_eval, double req_abs_error,
+    size_t ns, _Complex double* s, _Complex double* kappa1, _Complex double* kappa2,
+    _Complex double* gamma1, Electrode* electrodes, Electrode* images, size_t num_electrodes,
+    double nodes[][3], size_t num_nodes, size_t max_eval, double req_abs_error,
     double req_rel_error, int error_norm, double rsource, _Complex double* zh);
 
 #endif /* ELECTRODE_H_ */

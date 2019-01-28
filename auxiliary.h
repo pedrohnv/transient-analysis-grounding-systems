@@ -33,7 +33,7 @@ Fill array `u` with `n` linearly spaced numbers between `a` and `b` (included).
 @return pointer to filled array
 @see https://github.com/ntessore/algo
 */
-double* linspace(double a, double b, int n, double u[]);
+double* linspace(double a, double b, size_t n, double u[]);
 
 /** logspace
 Fill array `u` with `n` logarithmically spaced numbers between `10^a` and
@@ -46,7 +46,7 @@ Fill array `u` with `n` logarithmically spaced numbers between `10^a` and
 @return pointer to filled array
 @see https://github.com/ntessore/algo
 */
-double* logspace(double a, double b, int n, double u[]);
+double* logspace(double a, double b, size_t n, double u[]);
 
 /** wave_length
 Computes the harmonic electromagnetic wave length in a lossy medium.
@@ -83,7 +83,8 @@ Copy `source` array into `target` array of complex numbers.
 @para size size of the array
 @return 0 on success
 */
-int copy_array(_Complex double* source, _Complex double* target, int size);
+int copy_array(_Complex double* source, _Complex double* target,
+               size_t size);
 
 /** print_zmatrix_file
 Prints a complex (double) matrix to a file.
@@ -94,7 +95,8 @@ Prints a complex (double) matrix to a file.
 @param fp pointer to file stream
 @return 0 on success
 */
-int print_zmatrix_file(int m, int n, _Complex double* a, int lda, FILE* fp);
+int print_zmatrix_file(size_t m, size_t n,
+                       _Complex double* a, int lda, FILE* fp);
 
 /** print_dmatrix_file
 Prints a real (double) matrix to a file.
@@ -105,7 +107,8 @@ Prints a real (double) matrix to a file.
 @param fp pointer to file stream
 @return 0 on success
 */
-int print_dmatrix_file(int m, int n, double* a, int lda, FILE* fp);
+int print_dmatrix_file(size_t m, size_t n,
+                       double* a, int lda, FILE* fp);
 
 /** zbesi_
 FORTRAN subroutine to calculate I-Bessel function, i.e., modified Bessel
