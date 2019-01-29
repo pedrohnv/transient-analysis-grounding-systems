@@ -208,18 +208,18 @@ int integral(
     double tmax[] = {1.0, 1.0};
     int failure = 1;
     switch (integration_type) {
+        case NONE:
+            failure = 0;
+            result[0] = 1.0;
+            result[1] = 0.0;
+        break;
+
         case INTG_DOUBLE:
             failure = hcubature(
                 2, integrand_double, auxdata, 2, tmin, tmax, max_eval,
                 req_abs_error, req_rel_error, error_norm, result, error);
             result[0] = result[0] * receiver->length * sender->length;
             result[1] = result[1] * receiver->length * sender->length;
-        break;
-
-        case NONE:
-            failure = 0;
-            result[0] = 1.0;
-            result[1] = 0.0;
         break;
 
         case INTG_EXP_LOGNF:
@@ -350,6 +350,7 @@ int calculate_impedances(
     _Complex double one_4pik = 1.0/(FOUR_PI*kappa);
     _Complex double intg;
     size_t i, k, m;
+    int failure;
     // _self and _mutual impedances are not used to reduce the number of
     // operations, as some of them would be done twice or more unnecessarily
     for (i = 0; i < num_electrodes; i++)
@@ -376,9 +377,10 @@ int calculate_impedances(
                     cost += k1*k2;
                 }
                 cost = abs(cost/(ls*lr));
-                integral(&(electrodes[i]), &(electrodes[k]), gamma, max_eval,
-                         req_abs_error, req_rel_error, error_norm,
-                         integration_type, result, error);
+                failure = integral(&(electrodes[i]), &(electrodes[k]), gamma, max_eval,
+                                   req_abs_error, req_rel_error, error_norm,
+                                   integration_type, result, error);
+                if (failure) return failure;
                 intg = result[0] + I*result[1];
                 zl[i*num_electrodes + k] = iwu_4pi*intg*cost;
                 zt[i*num_electrodes + k] = one_4pik/(ls*lr)*intg;
@@ -402,6 +404,7 @@ int impedances_images(
     _Complex double iwu_4pi = s*mur*MU0/(FOUR_PI);
     _Complex double one_4pik = 1.0/(FOUR_PI*kappa);
     _Complex double intg;
+    int failure;
     // _mutual impedances are not used to reduce the number of
     // operations, as some of them would be done twice or more unnecessarily
     for (size_t i = 0; i < num_electrodes; i++)
@@ -418,9 +421,10 @@ int impedances_images(
                 cost += k1*k2;
             }
             cost = abs(cost/(ls*lr));
-            integral(&(electrodes[i]), &(images[k]), gamma, max_eval,
-                     req_abs_error, req_rel_error, error_norm,
-                     integration_type, result, error);
+            failure = integral(&(electrodes[i]), &(images[k]), gamma, max_eval,
+                               req_abs_error, req_rel_error, error_norm,
+                               integration_type, result, error);
+            if (failure) return failure;
             intg = result[0] + I*result[1];
             /*if (i != k)*/ zl[i*num_electrodes + k] += ref_l*iwu_4pi*intg*cost;
             zt[i*num_electrodes + k] += ref_t*one_4pik/(ls*lr)*intg;

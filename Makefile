@@ -55,7 +55,7 @@ test	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o testing.a testing.c $(OBJECTS) $(LINK)
 
 testDLL	:	libhem.so
-		$(CC) $(CFLAGS) $(INCLUDE) -o testingDLL.a testing.c '-Wl,-rpath,$$ORIGIN' $(LINK) libhem.so
+		$(CC) $(CFLAGS) $(INCLUDE) -o testingDLL.a testing.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem
 
 slatec	:
 		cd $(SLATECPATH) && $(MAKE) FC=$(FC) all
