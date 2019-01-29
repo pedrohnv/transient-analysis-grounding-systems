@@ -281,10 +281,11 @@ _Complex double transversal_mutual(
 Calculates the impedance matrices.
 @param electrodes array of electrodes
 @param num_electrodes number of electrodes
-@param zt transversal impedance matrix as a flat array of size
-`num_electrodes^2`
 @param zl longitudinal impedance matrix as a flat array of size
 `num_electrodes^2`
+@param zt transversal impedance matrix as a flat array of size
+`num_electrodes^2`
+@param gamma medium propagation constant
 @param s complex angular frequency `c + I*w` (rad/s)
 @param mur relative magnetic permeability of the medium
 @param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
@@ -311,10 +312,11 @@ Add the images effect to the impedance matrices.
 @param electrodes array of electrodes
 @param images array of electrodes
 @param num_electrodes number of electrodes
+@param zl longitudinal impedance matrix as a flat array of size
+`num_electrodes^2`s
 @param zt transversal impedance matrix as a flat array of size
 `num_electrodes^2`
-@param zl longitudinal impedance matrix as a flat array of size
-`num_electrodes^2`
+@param gamma medium propagation constant
 @param s complex angular frequency `c + I*w` (rad/s)
 @param mur relative magnetic permeability of the medium
 @param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
