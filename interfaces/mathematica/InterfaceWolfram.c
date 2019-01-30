@@ -162,8 +162,8 @@ DLLEXPORT int Mimpedances_images(
         populate_electrode(&(images[i]), start_point, end_point, radius, zi);
     }
     size_t ne2 = num_electrodes*num_electrodes;
-    _Complex double* zl = (_Complex double*) calloc(ne2, sizeof(_Complex double));
-    _Complex double* zt = (_Complex double*) calloc(ne2, sizeof(_Complex double));
+    _Complex double* zl = calloc(ne2, sizeof(_Complex double));
+    _Complex double* zt = calloc(ne2, sizeof(_Complex double));
     _Complex double gamma1 = gamma.ri[0] + I*gamma.ri[1];
     _Complex double kappa1 = kappa.ri[0] + I*kappa.ri[1];
     _Complex double ref_l1 = ref_l.ri[0] + I*ref_l.ri[1];

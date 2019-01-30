@@ -704,7 +704,7 @@ int harmonic_impedance1(
     _Complex double zinternal, ref_l, ref_t;
     _Complex double* zl = malloc(sizeof(_Complex double)*ne2);
     _Complex double* zt = malloc(sizeof(_Complex double)*ne2);
-    _Complex double* yn = (_Complex double*) calloc(nn2, sizeof(_Complex double));
+    _Complex double* yn = calloc(nn2, sizeof(_Complex double));
     _Complex double* ie = malloc(sizeof(_Complex double)*ss1);
     _Complex double* we = malloc(sizeof(_Complex double)*ss2);
     _Complex double* we_incidence = malloc(sizeof(_Complex double)*ss2);
@@ -767,7 +767,7 @@ int harmonic_impedance1_alt(
     _Complex double zinternal, ref_l, ref_t;
     _Complex double* zl = malloc(sizeof(_Complex double)*ne2);
     _Complex double* zt = malloc(sizeof(_Complex double)*ne2);
-    _Complex double* yn = (_Complex double*) calloc(nn2, sizeof(_Complex double));
+    _Complex double* yn = calloc(nn2, sizeof(_Complex double));
     _Complex double* ie = malloc(sizeof(_Complex double)*num_nodes);
     double* a = malloc(sizeof(double)*(num_electrodes*num_nodes));
     double* b = malloc(sizeof(double)*(num_electrodes*num_nodes));
