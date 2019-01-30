@@ -623,11 +623,11 @@ int ynodal_eq(
     // FIXME copy arrays a and b into complex arr, else the zgemm will give
     // wrong results.
     //Force a and b to be (_Complex double*) arguments instead of (double*)?
-    lapack_complex_double* arr = (lapack_complex_double*) malloc(
+    lapack_complex_double* arr = malloc(
         sizeof(lapack_complex_double)*(num_electrodes*num_nodes));
 
     // yn = aT*(zt^-1)*a + bT*(zl^-1)*b
-    lapack_int* ipiv = (MKL_INT*) malloc(sizeof(lapack_int)*num_electrodes);
+    lapack_int* ipiv = malloc(sizeof(lapack_int)*num_electrodes);
     // invert zl and zt taking advantage of its symmetry
     /* inv(ZT) is "exploding" (~10e280)
     LAPACKE_zsytrf(LAPACK_ROW_MAJOR, 'U', num_electrodes, zt, num_electrodes, ipiv);
@@ -644,7 +644,7 @@ int ynodal_eq(
     free(ipiv);
     const double alpha = 1.0;
     const double beta = 0.0;
-    lapack_complex_double* c = (lapack_complex_double*) malloc(
+    lapack_complex_double* c = malloc(
         sizeof(lapack_complex_double)*(num_electrodes*num_nodes));
     // c = yt*a
     for (size_t i = 0; i < num_electrodes*num_nodes; i++)
@@ -702,12 +702,12 @@ int harmonic_impedance1(
     size_t ss1 = (2*num_electrodes + num_nodes);
     size_t ss2 = ss1*ss1;
     _Complex double zinternal, ref_l, ref_t;
-    _Complex double* zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
+    _Complex double* zl = malloc(sizeof(_Complex double)*ne2);
+    _Complex double* zt = malloc(sizeof(_Complex double)*ne2);
     _Complex double* yn = (_Complex double*) calloc(nn2, sizeof(_Complex double));
-    _Complex double* ie = (_Complex double*) malloc(sizeof(_Complex double)*ss1);
-    _Complex double* we = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
-    _Complex double* we_incidence = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
+    _Complex double* ie = malloc(sizeof(_Complex double)*ss1);
+    _Complex double* we = malloc(sizeof(_Complex double)*ss2);
+    _Complex double* we_incidence = malloc(sizeof(_Complex double)*ss2);
     //yn[0] = 1.0/rsource;
     fill_incidence(we_incidence, electrodes, num_electrodes, nodes, num_nodes);
     // solve for each frequency: WE*VE = IE
@@ -765,12 +765,12 @@ int harmonic_impedance1_alt(
     size_t ne2 = num_electrodes*num_electrodes;
     size_t nn2 = num_nodes*num_nodes;
     _Complex double zinternal, ref_l, ref_t;
-    _Complex double* zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
+    _Complex double* zl = malloc(sizeof(_Complex double)*ne2);
+    _Complex double* zt = malloc(sizeof(_Complex double)*ne2);
     _Complex double* yn = (_Complex double*) calloc(nn2, sizeof(_Complex double));
-    _Complex double* ie = (_Complex double*) malloc(sizeof(_Complex double)*num_nodes);
-    double* a = (double*) malloc(sizeof(double)*(num_electrodes*num_nodes));
-    double* b = (double*) malloc(sizeof(double)*(num_electrodes*num_nodes));
+    _Complex double* ie = malloc(sizeof(_Complex double)*num_nodes);
+    double* a = malloc(sizeof(double)*(num_electrodes*num_nodes));
+    double* b = malloc(sizeof(double)*(num_electrodes*num_nodes));
     incidence_alt(a, b, electrodes, num_electrodes, nodes, num_nodes);
     //yn[0] = 1.0/rsource;
     // solve for each frequency: YN*VN = IN
