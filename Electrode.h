@@ -413,12 +413,15 @@ int ynodal_eq(
     _Complex double* zt, size_t num_electrodes, size_t num_nodes);
 
 /** harmonic_impedance1
-Calculates the harmonic impedance of a copper electrode system buried in a
-single layer soil.
-No segmentation on the electrodes is done.
+Calculates the harmonic impedance of a copper electrode system in a
+two layer medium. Electrodes are considered to be in medium 1.
+No segmentation of the electrodes is done.
 Injection node is considered the first.
-@param s array of complex frequencies `c + I*w`
 @param ns number of frequencies
+@param s array of complex frequencies `c + I*w`
+@param kappa1 medium 1 complex conductivity `(sigma + I*w*eps)` in S/m
+@param kappa2 medium 2 complex conductivity `(sigma + I*w*eps)` in S/m
+@param gamma1 medium 1 propagation constant
 @param electrodes array of electrodes
 @param num_electrodes number of electrodes
 @param nodes array of nodes
