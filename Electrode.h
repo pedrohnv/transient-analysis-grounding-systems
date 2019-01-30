@@ -431,9 +431,7 @@ limit)
 @param reqAbsError the absolute error requested (0 to ignore)
 @param reqRelError the relative error requested (0 to ignore)
 @param error_norm (enumeration defined in cubature.h) error checking scheme
-@param sigma medium conductivity
-@param er medium relative electric permittivity
-@param mur medium relative magnetic permeability
+@param rsource source internal resistence to consider.
 @param zh harmonic impedance array of size `ns`
 @return 0 on success
 */
