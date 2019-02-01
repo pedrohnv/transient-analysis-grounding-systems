@@ -65,7 +65,7 @@ Check if two points are the same.
 @param point_2 second point in \f$ R^3 \f$
 @return identity 0 if false, 1 if true
 */
-int equal_points(double point_1[3], double point_2[3]);
+int equal_points(const double point_1[3], const double point_2[3]);
 
 /** vector_norm
 Computes the Norm_2 (euclidian length) of the vector which starts at
@@ -74,7 +74,7 @@ start_point ends at end_point.
 @param end_point array `(x,y,z)` that defines the ending point
 @return length Norm_2
 */
-double vector_norm(double start_point[3], double end_point[3]);
+double vector_norm(const double start_point[3], const double end_point[3]);
 
 /** copy_array
 Copy `source` array into `target` array of complex numbers.
@@ -83,7 +83,7 @@ Copy `source` array into `target` array of complex numbers.
 @para size size of the array
 @return 0 on success
 */
-int copy_array(_Complex double* source, _Complex double* target,
+int copy_array(const _Complex double* source, _Complex double* target,
                size_t size);
 
 /** print_zmatrix_file
@@ -96,7 +96,7 @@ Prints a complex (double) matrix to a file.
 @return 0 on success
 */
 int print_zmatrix_file(size_t m, size_t n,
-                       _Complex double* a, int lda, FILE* fp);
+                       const _Complex double* a, int lda, FILE* fp);
 
 /** print_dmatrix_file
 Prints a real (double) matrix to a file.
@@ -108,7 +108,7 @@ Prints a real (double) matrix to a file.
 @return 0 on success
 */
 int print_dmatrix_file(size_t m, size_t n,
-                       double* a, int lda, FILE* fp);
+                       const double* a, int lda, FILE* fp);
 
 /** zbesi_
 FORTRAN subroutine to calculate I-Bessel function, i.e., modified Bessel

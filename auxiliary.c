@@ -45,7 +45,7 @@ double wave_length(double f, double sigma, double eps, double mur)
     return sqrt(2.)/(f*y);
 }
 
-int equal_points(double point_1[3], double point_2[3])
+int equal_points(const double point_1[3], const double point_2[3])
 {
 	for (size_t i = 0; i < 3; i++)
     {
@@ -57,7 +57,7 @@ int equal_points(double point_1[3], double point_2[3])
     return 1;
 }
 
-double vector_norm(double start_point[3], double end_point[3])
+double vector_norm(const double start_point[3], const double end_point[3])
 {
     if (equal_points(start_point, end_point))
     {
@@ -75,7 +75,7 @@ double vector_norm(double start_point[3], double end_point[3])
     }
 }
 
-int copy_array(_Complex double* source, _Complex double* target,
+int copy_array(const _Complex double* source, _Complex double* target,
 	           size_t size)
 {
     for (size_t i = 0; i < size; i++)
@@ -86,7 +86,7 @@ int copy_array(_Complex double* source, _Complex double* target,
 }
 
 int print_zmatrix_file(size_t m, size_t n,
-	                   _Complex double* a, int lda, FILE* fp)
+	                   const _Complex double* a, int lda, FILE* fp)
 {
     size_t i, j;
     for( i = 0; i < m; i++ )
@@ -102,7 +102,7 @@ int print_zmatrix_file(size_t m, size_t n,
 }
 
 int print_dmatrix_file(size_t m, size_t n,
-	                   double* a, int lda, FILE* fp)
+	                   const double* a, int lda, FILE* fp)
 {
     size_t i, j;
     for( i = 0; i < m; i++ )
