@@ -9,13 +9,50 @@ struct Electrode
     middle_point::NTuple{3,Cdouble}
     length::Float64
     radius::Float64
-    internal_impedance::Complex{Float64}
+    zi::Complex{Float64}
 end;
 
 function new_electrode(start_point, end_point, radius, internal_impedance)
-    return Electrode(NTuple{3,Cfloat}(start_point), NTuple{3,Cfloat}(end_point),
-                     NTuple{3,Cfloat}((start_point + end_point)/2.0),
+    return Electrode(NTuple{3,Cdouble}(start_point), NTuple{3,Cdouble}(end_point),
+                     NTuple{3,Cdouble}((start_point + end_point)/2.0),
                      norm(start_point - end_point), radius, internal_impedance)
+end;
+
+function segment_electrode(electrode::Electrode, num_segments::Int)
+    nn = num_segments + 1;
+    nodes = Array{Float64}(undef, nn, 3)
+    startp = Array{Float64,1}(undef, 3);
+    endp = Array{Float64,1}(undef, 3);
+    for k = 1:3
+        startp[k] = electrode.start_point[k];
+        endp[k] = electrode.end_point[k];
+    end
+    increment = (endp - startp)/num_segments;
+    for k = 0:num_segments
+        nodes[k+1,:] = startp + k*increment;
+    end
+    segments = Array{Electrode,1}(undef, num_segments);
+    for k = 1:num_segments
+        segments[k] = new_electrode(nodes[k,:], nodes[k+1,:], electrode.radius, electrode.zi);
+    end
+    return segments, nodes
+end;
+
+function calculate_impedances(electrodes, gamma, s, mur, kappa,
+                              max_eval, req_abs_error, req_rel_error,
+                              error_norm, intg_type)
+    ns = length(electrodes);
+    zl = zeros(Complex{Float64}, (ns,ns));
+    zt = zeros(Complex{Float64}, (ns,ns));
+    # path to the library must be a static symbol?
+    # see https://stackoverflow.com/questions/35831775/issue-with-julia-ccall-interface-and-symbols
+    ccall(("calculate_impedances", "/home/pedro/codigos/HP_HEM/libhem"), Int,
+          (Ref{Electrode}, Int, Ref{Complex{Float64}}, Ref{Complex{Float64}},
+          Complex{Float64}, Complex{Float64}, Float64, Complex{Float64},
+          Int, Float64, Float64, Int, Int),
+          electrodes, ns, zl, zt, gamma, s, mur, kappa,
+          max_eval, req_abs_error, req_rel_error, error_norm, intg_type);
+    return zl, zt
 end;
 
 r1 = 7e-3;
