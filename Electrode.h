@@ -407,6 +407,7 @@ int incidence_alt(
 
 /** ynodal_eq
 Finds the equivalent nodal admittance matrix of the electrode system.
+TODO put const qualifier to a, b and zl?
 */
 int ynodal_eq(
     _Complex double* yn, double* a, double *b, _Complex double* zl,
