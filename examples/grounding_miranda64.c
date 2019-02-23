@@ -9,19 +9,22 @@ Malha de aterramento em solo de duas camadas.
 #include <cubature.h>
 #include <Electrode.h>
 #include <auxiliary.h>
+#include <mkl_lapacke.h>
+#include <time.h>
 //#include <omp.h>
 
 int main()
 {
-    /*FILE* zl_file = fopen("examples/zl.dat", "w");
-    FILE* zt_file = fopen("examples/zt.dat", "w");
-    FILE* yl_file = fopen("examples/yl.dat", "w");
-    FILE* yt_file = fopen("examples/yt.dat", "w");
-    FILE* a_file = fopen("examples/a.dat", "w");
-    FILE* b_file = fopen("examples/b.dat", "w");
-    FILE* yn_file = fopen("examples/yn.dat", "w");*/
-    FILE* save_file = fopen("examples/miranda.dat", "w");
-
+    clock_t begin, end;
+    double time_spent;
+    begin = clock();
+    char file_name[] = "examples/miranda.dat";
+    FILE* save_file = fopen(file_name, "w");
+    if (save_file == NULL)
+    {
+        printf("Cannot open file %s\n",  file_name);
+        exit(1);
+    }
     // parameters
     double h; // image distance
     double mesh_depth = 1.0; //burial depth
@@ -38,31 +41,39 @@ int main()
     logspace(2, 7, nf, freq);
     // electrode definition and segmentation
     int num_electrodes = 118;
-    Electrode* electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode* electrodes = malloc(sizeof(Electrode)*num_electrodes);
     electrodes_file("examples/miranda64_electrodes.txt", electrodes, num_electrodes);
     int num_nodes = 116;
     double nodes[num_nodes][3];
     nodes_file("examples/miranda64_nodes.txt", nodes, num_nodes);
     //make images as copy of electrodes, change the points coordinates later
-    Electrode* images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode* images = malloc(sizeof(Electrode)*num_electrodes);
     electrodes_file("examples/miranda64_electrodes.txt", images, num_electrodes);
 
     int ne2 = num_electrodes*num_electrodes;
     int nn2 = num_nodes*num_nodes;
-    _Complex double* zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* yn = (_Complex double*) malloc(sizeof(_Complex double)*nn2);
-    _Complex double ref_l = 0.0; //reflection coefficient, longitudinal
-    _Complex double ref_t; //reflection coefficient, transversal
-    double* a = (double*) malloc(sizeof(double)*(num_electrodes*num_nodes));
-    double* b = (double*) malloc(sizeof(double)*(num_electrodes*num_nodes));
+    _Complex double* zl = malloc(sizeof(_Complex double)*ne2);
+    _Complex double* zt = malloc(sizeof(_Complex double)*ne2);
+    _Complex double* yn = malloc(sizeof(_Complex double)*nn2);
+    _Complex double* ie = malloc(sizeof(_Complex double)*num_nodes);
+    double* a = malloc(sizeof(double)*(num_electrodes*num_nodes));
+    double* b = malloc(sizeof(double)*(num_electrodes*num_nodes));
     incidence_alt(a, b, electrodes, num_electrodes, nodes, num_nodes);
     // for each frequency
-    _Complex double kappa1, kappa2, gamma, zinternal;
-    _Complex double s;
-    int i, k, m;
+    _Complex double kappa1, kappa2, gamma, zinternal, s;
+    _Complex double ref_l = 0.0; //reflection coefficient, longitudinal
+    _Complex double ref_t; //reflection coefficient, transversal
+    int i, k, m, info;
+    MKL_INT n = num_electrodes*2 + num_nodes;
+    MKL_INT ipiv[n]; //pivot indices
     for (i = 0; i < nf; i++)
     {
+        //reset IN
+        ie[0] = 1.0;
+        for (size_t k = 1; k < num_nodes; k++)
+        {
+            ie[k] = 0.0;
+        }
         printf("i = %i\n", i);
         s = I*TWO_PI*freq[i];
         kappa1 = (sigma1 + s*er1*EPS0); //soil complex conductivity
@@ -106,6 +117,7 @@ int main()
             ref_t = (kappa1 - kappa2)/(kappa1 + kappa2);
             // third group, Soil
             // this group has the same distance as the second one (in air)
+            //TODO avoid this calculation, as it is done twice unnecessarily
             impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
                 s, 1.0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
             // fourth group, Soil
@@ -118,16 +130,17 @@ int main()
             impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
                 s, 1.0, kappa1, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         }
-        /*print_dmatrix_file(num_electrodes, num_nodes, a, num_nodes, a_file);
-        print_dmatrix_file(num_electrodes, num_nodes, b, num_nodes, b_file);
-        print_zmatrix_file(num_electrodes, num_electrodes, zl, num_electrodes, zl_file);
-        print_zmatrix_file(num_electrodes, num_electrodes, zt, num_electrodes, zt_file);*/
         ynodal_eq(yn, a, b, zl, zt, num_electrodes, num_nodes);
-        print_zmatrix_file(num_nodes, num_nodes, yn, num_nodes, save_file);
-        fprintf(save_file, "f = %f\n", freq[i]);
-        /*print_zmatrix_file(num_nodes, num_nodes, yn, num_nodes, yn_file);
-        print_zmatrix_file(num_electrodes, num_electrodes, zl, num_electrodes, yl_file);
-        print_zmatrix_file(num_electrodes, num_electrodes, zt, num_electrodes, yt_file);*/
+        info = LAPACKE_zgesv(LAPACK_ROW_MAJOR, num_nodes, 1, yn, num_nodes, ipiv, ie, 1);
+        // Check for the exact singularity
+        if(info > 0)
+        {
+            printf("The diagonal element of the triangular factor of WE,\n");
+            printf("U(%i,%i) is zero, so that YN is singular;\n", info, info);
+            printf("the solution could not be computed.\n");
+            exit(info);
+        }
+        fprintf(save_file, "%f %f\n", creal(ie[0]), cimag(ie[0]));
     }
     free(electrodes);
     free(images);
@@ -136,10 +149,10 @@ int main()
     free(yn);
     free(a);
     free(b);
+    free(ie);
     fclose(save_file);
-    /*fclose(zl_file);
-    fclose(zt_file);
-    fclose(a_file);
-    fclose(b_file);*/
+    end = clock();
+    time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
+    printf("elapsed time: %f s\n", time_spent);
     return 0;
 }
