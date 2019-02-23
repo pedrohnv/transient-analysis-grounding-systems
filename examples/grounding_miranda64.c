@@ -6,19 +6,19 @@ Malha de aterramento em solo de duas camadas.
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #include <cubature.h>
 #include <Electrode.h>
 #include <auxiliary.h>
-#include <mkl_lapacke.h>
-#include <time.h>
 //#include <omp.h>
+#include <mkl_lapacke.h>
 
 int main()
 {
     clock_t begin, end;
     double time_spent;
     begin = clock();
-    char file_name[] = "examples/miranda.dat";
+    char file_name[] = "miranda.dat";
     FILE* save_file = fopen(file_name, "w");
     if (save_file == NULL)
     {
@@ -42,13 +42,13 @@ int main()
     // electrode definition and segmentation
     int num_electrodes = 118;
     Electrode* electrodes = malloc(sizeof(Electrode)*num_electrodes);
-    electrodes_file("examples/miranda64_electrodes.txt", electrodes, num_electrodes);
+    electrodes_file("miranda64_electrodes.txt", electrodes, num_electrodes);
     int num_nodes = 116;
     double nodes[num_nodes][3];
-    nodes_file("examples/miranda64_nodes.txt", nodes, num_nodes);
+    nodes_file("miranda64_nodes.txt", nodes, num_nodes);
     //make images as copy of electrodes, change the points coordinates later
     Electrode* images = malloc(sizeof(Electrode)*num_electrodes);
-    electrodes_file("examples/miranda64_electrodes.txt", images, num_electrodes);
+    electrodes_file("miranda64_electrodes.txt", images, num_electrodes);
 
     int ne2 = num_electrodes*num_electrodes;
     int nn2 = num_nodes*num_nodes;
@@ -135,7 +135,7 @@ int main()
         // Check for the exact singularity
         if(info > 0)
         {
-            printf("The diagonal element of the triangular factor of WE,\n");
+            printf("The diagonal element of the triangular factor of YN,\n");
             printf("U(%i,%i) is zero, so that YN is singular;\n", info, info);
             printf("the solution could not be computed.\n");
             exit(info);

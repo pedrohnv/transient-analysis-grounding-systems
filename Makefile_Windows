@@ -4,8 +4,10 @@
 #manual set:
 MKLROOT = "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\mkl"
 #make sure the intel MKL redist is in yout PATH. For command prompt path set:
-#SET PATH=%PATH%;"C:\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\redist\\intel64_win\\mkl"
+#SET PATH=%PATH%;"C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\redist\\intel64_win\\mkl"
+
 INTELLINK = "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\mkl\\lib\\intel64_win\\mkl_rt.lib"
+#INTELLINK = "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\mkl\\lib\\intel64_win\\mkl_intel_ilp64.lib" "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\mkl\\lib\\intel64_win\\mkl_intel_thread.lib" "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\mkl\\lib\\intel64_win\\mkl_core.lib" "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\compiler\\lib\\intel64_win\\libiomp5md.lib"
 INTELFLAGS = -DMKL_ILP64
 #The shared library slatec is assumed to be in your path.
 #If it is not, append its location to the INCLUDE variable or
@@ -29,10 +31,12 @@ FC = gfortran
 .PHONY	:	clean cleanout allclean slatec libhem.so dynamicLibrary wolfram
 
 clean	:
-		rm -f *.o *.obj *.dat examples\\*.o examples\\*.obj examples\\*.dat
+		rm -f *.o *.obj *.dat
+		cd examples && rm -f *.o *.obj *.dat
 
 cleanout	:
-		rm -f *.a *.exe *.dll examples\\*.a examples\\*.exe
+		rm -f *.a *.exe *.dll
+		cd examples && rm -f *.a *.exe *.dll
 
 allclean	:
 		make clean
@@ -59,7 +63,7 @@ test	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o testing.exe testing.c $(OBJECTS) $(LINK)
 
 testDLL	:	libhem.dll
-		$(CC) $(CFLAGS) $(INCLUDE) -o testingDLL.a testing.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem
+		$(CC) $(CFLAGS) $(INCLUDE) -o testingDLL.exe testing.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem
 
 slatec	:
 		cd $(SLATECPATH) && $(MAKE) FC=$(FC) all
@@ -70,20 +74,20 @@ wolfram	:
 timing	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o timing.exe examples\\timing.c $(OBJECTS) $(LINK)
 
-example20pwrd02grcev	:	$(OBJECTS)
+ex20pwrd02grcev	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o ex20pwrd02grcev.exe examples\\ex20pwrd02grcev.c $(OBJECTS) $(LINK)
 
-example51emc03grcev	:	$(OBJECTS)
+ex51emc03grcev	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o ex51emc03grcev.exe examples\\ex51emc03grcev.c $(OBJECTS) $(LINK)
 
-example12pwrd01grcev	:	$(OBJECTS)
+ex12pwrd01grcev	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o ex12pwrd01grcev.exe examples\\ex12pwrd01grcev\ex12pwrd01grcev.c $(OBJECTS) $(LINK)
 
-exampleAlipioSchroederRCA	:	$(OBJECTS)
+exAlipioSchroederRCA	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o AlipioSchroederRCA.exe examples\\AlipioSchroederRCA.c $(OBJECTS) $(LINK)
 
-miranda64	:	$(OBJECTS)
+exMiranda64	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o examples\\miranda64.exe examples\\grounding_miranda64.c $(OBJECTS) $(LINK)
 
-malha01	:	$(OBJECTS)
+exMalha01	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o examples\\malha01.exe examples\\malha01.c $(OBJECTS) $(LINK)
