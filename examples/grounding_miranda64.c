@@ -63,19 +63,19 @@ int main()
     _Complex double kappa1, kappa2, gamma, zinternal, s;
     _Complex double ref_l = 0.0; //reflection coefficient, longitudinal
     _Complex double ref_t; //reflection coefficient, transversal
-    int i, k, m, info;
+    int f, k, m, info;
     MKL_INT n = num_electrodes*2 + num_nodes;
     MKL_INT ipiv[n]; //pivot indices
-    for (i = 0; i < nf; i++)
+    for (f = 0; f < nf; f++)
     {
+		printf("i = %i\n", f+1);
         //reset IN
         ie[0] = 1.0;
-        for (size_t k = 1; k < num_nodes; k++)
+        for (k = 1; k < num_nodes; k++)
         {
             ie[k] = 0.0;
         }
-        printf("i = %i\n", i);
-        s = I*TWO_PI*freq[i];
+        s = I*TWO_PI*freq[f];
         kappa1 = (sigma1 + s*er1*EPS0); //soil complex conductivity
         kappa2 = (sigma2 + s*er2*EPS0);
         gamma = csqrt(s*MU0*kappa1); //soil 1 propagation constant
@@ -140,7 +140,7 @@ int main()
             printf("the solution could not be computed.\n");
             exit(info);
         }
-        fprintf(save_file, "%f %f\n", creal(ie[0]), cimag(ie[0]));
+        fprintf(save_file, "%f, %f\n", creal(ie[0]), cimag(ie[0]));
     }
     free(electrodes);
     free(images);
@@ -153,6 +153,6 @@ int main()
     fclose(save_file);
     end = clock();
     time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
-    printf("elapsed time: %f s\n", time_spent);
+    printf("elapsed time: %f min.\n", time_spent/60.0);
     return 0;
 }
