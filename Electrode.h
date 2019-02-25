@@ -410,8 +410,9 @@ Finds the equivalent nodal admittance matrix of the electrode system.
 TODO put const qualifier to a, b and zl?
 */
 int ynodal_eq(
-    _Complex double* yn, double* a, double *b, _Complex double* zl,
-    _Complex double* zt, size_t num_electrodes, size_t num_nodes);
+    _Complex double* yn, const double* a, const double* b,
+	_Complex double* zl, _Complex double* zt,
+	size_t num_electrodes, size_t num_nodes);
 
 /** harmonic_impedance1
 Calculates the harmonic impedance of a copper electrode system in a

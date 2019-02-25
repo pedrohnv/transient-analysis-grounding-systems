@@ -615,8 +615,9 @@ int incidence_alt(
 }
 
 int ynodal_eq(
-    _Complex double* yn, double* a, double* b, _Complex double* zl,
-    _Complex double* zt, size_t num_electrodes, size_t num_nodes)
+    _Complex double* yn, const double* a, const double* b,
+	_Complex double* zl, _Complex double* zt,
+	size_t num_electrodes, size_t num_nodes)
 {
     // TODO use COLUMN_MAJOR matrices, to avoid LAPACKE doing the matrix
     // copying when they are ROW_MAJOR
