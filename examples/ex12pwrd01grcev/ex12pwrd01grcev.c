@@ -2,6 +2,7 @@
 Test case 12pwrd01grcev-a
 
 Reproducing the results in [1] for a grounding grid.
+Execution time is expected to be up to 20 min.
 
 [1] L. D. Grcev and M. Heimbach, "Frequency dependent and transient
 characteristics of substation grounding systems," in IEEE Transactions on
@@ -15,20 +16,13 @@ doi: 10.1109/61.568238
 #include <cubature.h>
 #include <Electrode.h>
 #include <auxiliary.h>
+#include <time.h>
 //#include <omp.h>
 
-/*
-argv[0] = grid size
-argv[1] = num_electrodes
-argv[2] = num_nodes
-*/
-int main(int argc, char *argv[])
+int run_case(int gs, int num_electrodes, int num_nodes)
 {
-    int gs = strtol(argv[1], NULL, 10);;
-    int num_electrodes = strtol(argv[2], NULL, 10);;
-    int num_nodes = strtol(argv[3], NULL, 10);;
     char file_name[50];
-    sprintf(file_name, "examples/ex12pwrd01grcev/gs%d.dat", gs);
+    sprintf(file_name, "gs%d.dat", gs);
     FILE* save_file = fopen(file_name, "w");
     // parameters
     double sigma = 1.0/1000.0; // soil conductivity
@@ -41,7 +35,7 @@ int main(int argc, char *argv[])
 
     // electrode definition
     Electrode* electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
-    sprintf(file_name, "examples/ex12pwrd01grcev/elec_gs%d.csv", gs);
+    sprintf(file_name, "elec_gs%d.txt", gs);
     int read;
     read = electrodes_file(file_name, electrodes, num_electrodes);
     if (read > 0)
@@ -52,7 +46,7 @@ int main(int argc, char *argv[])
     electrodes_file(file_name, images, num_electrodes);
 
     double nodes[num_nodes][3];
-    sprintf(file_name, "examples/ex12pwrd01grcev/nodes_gs%d.csv", gs);
+    sprintf(file_name, "nodes_gs%d.txt", gs);
     nodes_file(file_name, nodes, num_nodes);
     for (int m = 0; m < num_electrodes; m++)
     {
@@ -115,5 +109,48 @@ int main(int argc, char *argv[])
     free(ie_cp);
     free(we);
     free(we_cp);
+    return 0;
+}
+
+int main()
+{
+    clock_t begin, end;
+    double time_spent;
+    // ===================================================
+    printf("computing GS10\n");
+    begin = clock();
+    run_case(10, 12, 12);
+    end = clock();
+    time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
+    printf("GS10: end; elapsed time: %f s\n", time_spent);
+    // ===================================================
+    printf("computing GS20\n");
+    begin = clock();
+    run_case(20, 36, 33);
+    end = clock();
+    time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
+    printf("GS20: end; elapsed time: %f s\n", time_spent);
+    // ===================================================
+    printf("computing GS30\n");
+    begin = clock();
+    run_case(30, 72, 64);
+    end = clock();
+    time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
+    printf("GS30: end; elapsed time: %f s\n", time_spent);
+    // ===================================================
+    printf("computing GS60\n");
+    begin = clock();
+    run_case(60, 252, 217);
+    end = clock();
+    time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
+    printf("GS60: end; elapsed time: %f s\n", time_spent);
+    // ===================================================
+    printf("computing GS120\n");
+    begin = clock();
+    run_case(120, 936, 793);
+    end = clock();
+    time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
+    printf("GS120: end; elapsed time: %f s\n", time_spent);
+    // ===================================================
     return 0;
 }

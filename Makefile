@@ -25,7 +25,7 @@ FC = gfortran
 .PHONY	:	clean cleanout allclean slatec libhem.so dynamicLibrary wolfram
 
 clean	:
-		rm -f *.o *.dat examples/*.o examples/*.dat
+		rm -f *.o *.dat examples/*.o examples/*.dat examples/ex12pwrd01grcev*.dat
 
 cleanout	:
 		rm -f *.a *.so examples/*.a interfaces/mathematica/*.so
@@ -73,7 +73,7 @@ ex51emc03grcev	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o ex51emc03grcev.a examples/ex51emc03grcev.c $(OBJECTS) $(LINK)
 
 ex12pwrd01grcev	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o ex12pwrd01grcev.a examples/ex12pwrd01grcev/ex12pwrd01grcev.c $(OBJECTS) $(LINK)
+		$(CC) $(CFLAGS) $(INCLUDE) -o examples/ex12pwrd01grcev/ex12pwrd01grcev.a examples/ex12pwrd01grcev/ex12pwrd01grcev.c $(OBJECTS) $(LINK)
 
 exAlipioSchroederRCA	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o AlipioSchroederRCA.a examples/AlipioSchroederRCA.c $(OBJECTS) $(LINK)
