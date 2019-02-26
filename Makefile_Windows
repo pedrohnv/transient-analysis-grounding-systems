@@ -3,11 +3,7 @@
 #"C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.1.144\windows\mkl\bin\mklvars.bat" intel64
 #manual set:
 MKLROOT = "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\mkl"
-#make sure the intel MKL redist is in yout PATH. For command prompt path set:
-#SET PATH=%PATH%;"C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\redist\\intel64_win\\mkl"
-
 INTELLINK = "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\mkl\\lib\\intel64_win\\mkl_rt.lib"
-#INTELLINK = "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\mkl\\lib\\intel64_win\\mkl_intel_ilp64.lib" "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\mkl\\lib\\intel64_win\\mkl_intel_thread.lib" "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\mkl\\lib\\intel64_win\\mkl_core.lib" "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\compiler\\lib\\intel64_win\\libiomp5md.lib"
 INTELFLAGS = -DMKL_ILP64
 #The shared library slatec is assumed to be in your path.
 #If it is not, append its location to the INCLUDE variable or
@@ -18,7 +14,7 @@ SLATECPATH = slatec
 WOLFRAMPATH = "C:\\Program Files\\Wolfram Research\\Mathematica\\11.3\\SystemFiles\\IncludeFiles\\C"
 INCLUDE = -I. -I$(CUBATUREPATH) -I$(MKLROOT)\\include -I$(SLATECPATH)\\lib -I$(MKLROOT)\\include
 LINK = -L. $(INTELLINK) $(SLATECPATH)\\lib\\libslatec.a -lgfortran
-CFLAGS = -Wall -fno-exceptions -std=c11 $(INTELFLAGS) -Werror -O3
+CFLAGS = -Wall -fno-exceptions -std=c11 $(INTELFLAGS) -Werror -g
 #CFLAGS = -Wall -std=c11 $(INTELFLAGS) -g
 OBJECTS = Electrode.o auxiliary.o hcubature.o
 
@@ -45,19 +41,19 @@ allclean	:
 		cd $(CUBATUREPATH) && $(MAKE) clean
 
 hcubature.o	:	$(CUBATUREPATH)\\hcubature.c
-		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c $(CUBATUREPATH)\\hcubature.c $(LINK)
+		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -c $(CUBATUREPATH)\\hcubature.c $(LINK)
 
 auxiliary.o	:	auxiliary.c
-		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c auxiliary.c $(LINK)
+		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -c auxiliary.c $(LINK)
 
 Electrode.o	:	Electrode.c auxiliary.o hcubature.o
-		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c Electrode.c $(LINK)
+		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -c Electrode.c $(LINK)
 
 libhem.dll	:
 		make dynamicLibrary
 
 dynamicLibrary	:
-		$(CC) -fPIC -shared $(CFLAGS) $(INCLUDE) -o libhem.dll Electrode.c auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
+		$(CC) $(CFLAGS) -fPIC -shared $(INCLUDE) -o libhem.dll Electrode.c auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
 
 test	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o testing.exe testing.c $(OBJECTS) $(LINK)
@@ -69,7 +65,7 @@ slatec	:
 		cd $(SLATECPATH) && $(MAKE) FC=$(FC) all
 
 wolfram	:
-		$(CC) -fPIC -shared -std=c11 $(INTELFLAGS) -Werror -O3 $(INCLUDE) -I$(WOLFRAMPATH) -o libhem_mma.dll InterfaceWolfram.c Electrode.c auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
+		$(CC) -O3 -fPIC -shared -std=c11 $(INTELFLAGS) -Werror $(INCLUDE) -I$(WOLFRAMPATH) -o libhem_mma.dll InterfaceWolfram.c Electrode.c auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
 
 timing	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o timing.exe examples\\timing.c $(OBJECTS) $(LINK)
