@@ -64,8 +64,8 @@ int run_case(int gs, int num_electrodes, int num_nodes)
     _Complex double kappa, gamma, zinternal;
     _Complex double* zl = malloc(sizeof(_Complex double)*ne2);
     _Complex double* zt = malloc(sizeof(_Complex double)*ne2);
-    _Complex double* yn = (_Complex double*) calloc(nn2, sizeof(_Complex double));
-    _Complex double* ie = (_Complex double*) calloc(ss1, sizeof(_Complex double));
+    _Complex double* yn = calloc(nn2, sizeof(_Complex double));
+    _Complex double* ie = calloc(ss1, sizeof(_Complex double));
     _Complex double* ie_cp = (_Complex double*) calloc(ss1, sizeof(_Complex double));
     _Complex double* we = malloc(sizeof(_Complex double)*ss2);
     _Complex double* we_cp = malloc(sizeof(_Complex double)*ss2);
