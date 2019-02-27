@@ -14,7 +14,7 @@ Reproducing the results in [1].
 //#include <omp.h>
 
 int run_case(double length, double rho, char file_name[],
-    _Complex double* ifonte, _Complex double* s, int nf)
+    _Complex double* isource, _Complex double* s, int nf)
 {
     // parameters
     double h = 0.6; //burial depth
@@ -63,13 +63,13 @@ int run_case(double length, double rho, char file_name[],
     int ss2 = ss1*ss1;
     //_Complex double s;
     _Complex double kappa, gamma, zinternal;
-    _Complex double* zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* yn = (_Complex double*) malloc(sizeof(_Complex double)*nn2);
-    _Complex double* ie = (_Complex double*) malloc(sizeof(_Complex double)*ss1);
-    _Complex double* ie_cp = (_Complex double*) malloc(sizeof(_Complex double)*ss1);
-    _Complex double* we = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
-    _Complex double* we_cp = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
+    _Complex double* zl = malloc(sizeof(_Complex double)*ne2);
+    _Complex double* zt = malloc(sizeof(_Complex double)*ne2);
+    _Complex double* yn = malloc(sizeof(_Complex double)*nn2);
+    _Complex double* ie = malloc(sizeof(_Complex double)*ss1);
+    _Complex double* ie_cp = malloc(sizeof(_Complex double)*ss1);
+    _Complex double* we = malloc(sizeof(_Complex double)*ss2);
+    _Complex double* we_cp = malloc(sizeof(_Complex double)*ss2);
     int i, k;
     for (i = 0; i < nn2; i++)
     {
@@ -83,7 +83,7 @@ int run_case(double length, double rho, char file_name[],
     // solve for each frequency: WE*VE = IE
     for (i = 0; i < nf; i++)
     {
-        ie[ss1 - num_nodes] = ifonte[i];
+        ie[ss1 - num_nodes] = isource[i];
         kappa = (sigma + s[i]*er*EPS0); //soil complex conductivity
         gamma = csqrt(s[i]*MU0*kappa); //soil propagation constant
         //TODO especialized impedance calculation taking advantage of symmetry
@@ -145,11 +145,11 @@ int main()
     {
         s[k] = (sigma - I*dw*k);
     }
-    _Complex double* ifonte = malloc(sizeof(_Complex double)*ns);
-    laplace_transform(inj, t, nt, s, ns, ifonte);
-    run_case(8.0, 65.0, "examples/AlipioSchroederRCA_1.dat", ifonte, s, ns);
-    //run_case(15.0, 70.0, "examples/AlipioSchroederRCA_2.dat", ifonte);
+    _Complex double* isource = malloc(sizeof(_Complex double)*ns);
+    laplace_transform(inj, t, nt, s, ns, isource);
+    run_case(8.0, 65.0, "examples/AlipioSchroederRCA_1.dat", isource, s, ns);
+    //run_case(15.0, 70.0, "examples/AlipioSchroederRCA_2.dat", isource);
     free(s);
-    free(ifonte);
+    free(isource);
     return 0;
 }
