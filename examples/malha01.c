@@ -46,13 +46,13 @@ int main()
     }
     int ne2 = num_electrodes*num_electrodes;
     int nn2 = num_nodes*num_nodes;
-    _Complex double* zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* yn = (_Complex double*) malloc(sizeof(_Complex double)*nn2);
+    _Complex double* zl = malloc(sizeof(_Complex double)*ne2);
+    _Complex double* zt = malloc(sizeof(_Complex double)*ne2);
+    _Complex double* yn = malloc(sizeof(_Complex double)*nn2);
     _Complex double ref_l = 0.0; //reflection coefficient, longitudinal
     _Complex double ref_t; //reflection coefficient, transversal
-    double* a = (double*) malloc(sizeof(double)*(num_electrodes*num_nodes));
-    double* b = (double*) malloc(sizeof(double)*(num_electrodes*num_nodes));
+    double* a = malloc(sizeof(double)*(num_electrodes*num_nodes));
+    double* b = malloc(sizeof(double)*(num_electrodes*num_nodes));
     incidence_alt(a, b, electrodes, num_electrodes, nodes, num_nodes);
     // for each frequency
     _Complex double kappa1, gamma, zinternal;
@@ -65,7 +65,7 @@ int main()
         kappa1 = (sigma1 + s*er1*EPS0); //soil complex conductivity
         gamma = csqrt(s*MU0*kappa1); //soil 1 propagation constant
         calculate_impedances(
-            electrodes, num_electrodes, zl, zt, gamma, w, 1.0, kappa1,
+            electrodes, num_electrodes, zl, zt, gamma, s, 1.0, kappa1,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         zinternal = internal_impedance(w, rho_c, radius, 1.0);
         for (k = 0; k < num_electrodes; k++)
