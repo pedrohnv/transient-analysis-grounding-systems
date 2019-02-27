@@ -20,7 +20,7 @@ int main()
     FILE* yn_file = fopen("examples/yn.dat", "w");*/
     FILE* save_file = fopen("examples/malha01.dat", "w");
     // parameters
-    double h = 1.0; // burial depth
+    //double h = 1.0; // burial depth
     double radius = 0.7e-3;//12.5e-3; // radius
     double sigma1 = 1e-3/5.0;//0.001; // soil conductivity
     double er1 = 30.0; //soil rel. permitivitty
@@ -32,11 +32,11 @@ int main()
     // electrode definition and segmentation
     int num_electrodes = 200;
     int num_nodes = 185;
-    Electrode* electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode* electrodes = malloc(sizeof(Electrode)*num_electrodes);
     electrodes_file("examples/malha01_electrodes.txt", electrodes, num_electrodes);
     double nodes[num_nodes][3];
     nodes_file("examples/malha01_nodes.txt", nodes, num_nodes);
-    Electrode* images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode* images = malloc(sizeof(Electrode)*num_electrodes);
     electrodes_file("examples/malha01_electrodes.txt", images, num_electrodes);
     for (int m = 0; m < num_electrodes; m++)
     {
@@ -67,7 +67,7 @@ int main()
         calculate_impedances(
             electrodes, num_electrodes, zl, zt, gamma, s, 1.0, kappa1,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
-        zinternal = internal_impedance(w, rho_c, radius, 1.0);
+        zinternal = internal_impedance(s, rho_c, radius, 1.0);
         for (k = 0; k < num_electrodes; k++)
         {
             zl[k*num_electrodes + k] += zinternal*electrodes[k].length;

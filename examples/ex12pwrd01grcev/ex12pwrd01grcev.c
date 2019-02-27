@@ -37,7 +37,7 @@ int run_case(int gs, int num_electrodes, int num_nodes)
     logspace(2, 6.4, nf, freq);
 
     // electrode definition
-    Electrode* electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode* electrodes = malloc(sizeof(Electrode)*num_electrodes);
     sprintf(file_name, "elec_gs%d.txt", gs);
     int read;
     read = electrodes_file(file_name, electrodes, num_electrodes);
@@ -45,7 +45,7 @@ int run_case(int gs, int num_electrodes, int num_nodes)
     {
         exit(read);
     }
-    Electrode* images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode* images = malloc(sizeof(Electrode)*num_electrodes);
     electrodes_file(file_name, images, num_electrodes);
 
     double nodes[num_nodes][3];

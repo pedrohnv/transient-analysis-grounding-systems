@@ -42,7 +42,7 @@ int run_case(double length, double rho, char file_name[],
     int num_electrodes = ceil( length/(lambda/6.0) ) ;
     int num_nodes = num_electrodes + 1;
     double nodes[num_nodes][3];
-    Electrode* electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode* electrodes = malloc(sizeof(Electrode)*num_electrodes);
     // the internal impedance is added "outside" later
     segment_electrode(
         electrodes, nodes, num_electrodes, start_point, end_point, r, 0.0);
@@ -52,7 +52,7 @@ int run_case(double length, double rho, char file_name[],
     end_point[2] = h;
     double nodes_images[num_nodes][3];
     //Electrode images[num_electrodes];
-    Electrode* images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode* images = malloc(sizeof(Electrode)*num_electrodes);
     segment_electrode(
         images, nodes_images, num_electrodes, start_point, end_point, r, 0.0);
 
