@@ -1,5 +1,6 @@
 /*
-Test case AlipioSchroederRCA
+Test case AlipioSchroederRCA.
+FIXME Unfinished example, please ignore it for now.
 
 Reproducing the results in [1].
 
@@ -143,7 +144,7 @@ int main()
     double sigma = log(0.001)/t[nt - 1];
     for (int k = 0; k < ns; k++)
     {
-        s[k] = (sigma - I*dw*k);
+        s[k] = (sigma - I*ds*k);
     }
     _Complex double* isource = malloc(sizeof(_Complex double)*ns);
     laplace_transform(inj, t, nt, s, ns, isource);

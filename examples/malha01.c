@@ -1,5 +1,6 @@
 /*
 400m^2 grounding mesh.
+FIXME Unfinished example, please ignore it for now.
 */
 #include <stdio.h>
 #include <string.h>
