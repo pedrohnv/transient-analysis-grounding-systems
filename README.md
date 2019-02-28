@@ -1,5 +1,5 @@
 # HP_HEM
-High performance Hybrid Electromagnetic Model implementation.
+High Performance Hybrid Electromagnetic Model, a computer implementation.
 
 This library is intended to be easy to use. Interfaces to use it from other programming languages are provided (work in progress) for Julia, Mathematica, Matlab, Octave, Python.
 
