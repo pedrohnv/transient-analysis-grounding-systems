@@ -10,9 +10,9 @@
 #include <mkl_lapacke.h>
 //#include <omp.h>
 
-int populate_electrode(
-    Electrode* electrode, const double start_point[3], const double end_point[3],
-    double radius, _Complex double internal_impedance)
+int populate_electrode(Electrode* electrode, const double start_point[3],
+                       const double end_point[3], double radius,
+                       _Complex double internal_impedance)
 {
     if (equal_points(start_point, end_point))
     {
@@ -37,7 +37,7 @@ int populate_electrode(
 }
 
 int electrodes_file(const char file_name[], Electrode* electrodes,
-    size_t num_electrodes)
+                    size_t num_electrodes)
 {
     FILE* stream = fopen(file_name, "r");
     if (stream == NULL) {
@@ -51,20 +51,20 @@ int electrodes_file(const char file_name[], Electrode* electrodes,
     for (size_t i = 0; i < num_electrodes; i++)
     {
         success = fscanf(stream, "%lf %lf %lf %lf %lf %lf %lf %lf %lf",
-            &start_point[0], &start_point[1], &start_point[2],
-            &end_point[0], &end_point[1], &end_point[2],
-            &radius, &rezi, &imzi);
+                         &start_point[0], &start_point[1], &start_point[2],
+                         &end_point[0], &end_point[1], &end_point[2],
+                         &radius, &rezi, &imzi);
         if (success != 9)
         {
             printf("error reading line %i of file %s\n", (int) (i+1), file_name);
             break;
         }
-        success = populate_electrode(&(electrodes[i]), start_point, end_point, radius,
-            rezi + I*imzi);
+        success = populate_electrode(&(electrodes[i]), start_point, end_point,
+                                     radius, rezi + I*imzi);
         if (success != 0)
         {
             printf("Bad input: could not create electrode %i from file %s\n",
-                (int) (i+1), file_name);
+                   (int) (i+1), file_name);
             pop_error = success;
             break;
         }
@@ -88,8 +88,8 @@ int nodes_file(const char file_name[], double nodes[][3], size_t num_nodes)
     int success = 3;
     for (size_t i = 0; i < num_nodes; i++)
     {
-        success = fscanf(stream, "%lf %lf %lf",
-            &nodes[i][0], &nodes[i][1], &nodes[i][2]);
+        success = fscanf(stream, "%lf %lf %lf", &nodes[i][0], &nodes[i][1],
+                         &nodes[i][2]);
         if (success != 3)
         {
             printf("error reading line %i of file %s\n", (int) (i+1), file_name);
@@ -100,10 +100,10 @@ int nodes_file(const char file_name[], double nodes[][3], size_t num_nodes)
     return (success - 3);
 }
 
-int segment_electrode(
-    Electrode* electrodes, double nodes[][3], size_t num_segments,
-    const double* start_point, const double* end_point, double radius,
-    _Complex double unit_zi)
+int segment_electrode(Electrode* electrodes, double nodes[][3],
+                      size_t num_segments, const double* start_point,
+                      const double* end_point, double radius,
+                      _Complex double unit_zi)
 {
     if (num_segments < 1)
     {
@@ -133,8 +133,8 @@ int segment_electrode(
     return 0;
 }
 
-int integrand_double(
-    unsigned ndim, const double *t, void *auxdata, unsigned fdim, double *fval)
+int integrand_double(unsigned ndim, const double *t, void *auxdata,
+                     unsigned fdim, double *fval)
 {
     Integration_data *p = (Integration_data*) auxdata;
     const Electrode* sender = p->sender;
@@ -158,8 +158,8 @@ int integrand_double(
     return 0;
 }
 
-int exp_logNf(
-    unsigned ndim, const double *t, void *auxdata, unsigned fdim, double *fval)
+int exp_logNf(unsigned ndim, const double *t, void *auxdata, unsigned fdim,
+              double *fval)
 {
     Integration_data *p = (Integration_data*) auxdata;
     const Electrode* sender = p->sender;
@@ -195,10 +195,10 @@ int exp_logNf(
     return 0;
 }
 
-int integral(
-    const Electrode* sender, const Electrode* receiver, _Complex double gamma,
-    size_t max_eval, double req_abs_error, double req_rel_error,
-    int error_norm, int integration_type, double result[2], double error[2])
+int integral(const Electrode* sender, const Electrode* receiver,
+             _Complex double gamma, size_t max_eval, double req_abs_error,
+             double req_rel_error, int error_norm, int integration_type,
+             double result[2], double error[2])
 {
     Integration_data* auxdata = malloc(sizeof(Integration_data));
     auxdata->sender = sender;
@@ -215,27 +215,27 @@ int integral(
         break;
 
         case INTG_DOUBLE:
-            failure = hcubature(
-                2, integrand_double, auxdata, 2, tmin, tmax, max_eval,
-                req_abs_error, req_rel_error, error_norm, result, error);
+            failure = hcubature(2, integrand_double, auxdata, 2, tmin, tmax,
+                                max_eval, req_abs_error, req_rel_error,
+                                error_norm, result, error);
             result[0] = result[0] * receiver->length * sender->length;
             result[1] = result[1] * receiver->length * sender->length;
         break;
 
         case INTG_EXP_LOGNF:
             auxdata->simplified = 0;
-            failure = hcubature(
-                2, exp_logNf, auxdata, 1, tmin, tmax, max_eval, req_abs_error,
-                req_rel_error, error_norm, result, error);
+            failure = hcubature(2, exp_logNf, auxdata, 1, tmin, tmax, max_eval,
+                                req_abs_error, req_rel_error, error_norm,
+                                result, error);
             result[0] = result[0] * receiver->length;
             result[1] = result[1] * receiver->length;
         break;
 
         case INTG_LOGNF:
             auxdata->simplified = 1;
-            failure = hcubature(
-                1, exp_logNf, auxdata, 1, tmin, tmax, max_eval, req_abs_error,
-                req_rel_error, error_norm, result, error);
+            failure = hcubature(1, exp_logNf, auxdata, 1, tmin, tmax, max_eval,
+                                req_abs_error, req_rel_error, error_norm,
+                                result, error);
             double rbar;
             rbar = vector_norm(sender->middle_point, receiver->middle_point);
             _Complex double exp_gr = cexp(-gamma*rbar)*result[0];
@@ -263,22 +263,25 @@ _Complex double internal_impedance(
     zbesi_(&zr, &zi, &fnu0, &kode, &n, &cyr0, &cyi0, &nz, &ierr);
     if (ierr != 0)
     {
-        printf("in function 'internal_impedance'\n");
-        printf("error in call to zbesi(fnu = 0)\nerror flag = %i\n", ierr);
+        printf("in function 'internal_impedance'\n
+                error in call to zbesi(fnu = 0)\n
+                error flag = %i\n", ierr);
         exit(ierr);
     }
     zbesi_(&zr, &zi, &fnu1, &kode, &n, &cyr1, &cyi1, &nz, &ierr);
     if (ierr != 0)
     {
-        printf("in function 'internal_impedance'\n");
-        printf("error in call to zbesi(fnu = 1)\nerror flag = %i\n", ierr);
+        printf("in function 'internal_impedance'\n
+                error in call to zbesi(fnu = 1)\n
+                error flag = %i\n", ierr);
         exit(ierr);
     }
     return (etapr*rho*(cyr0 + cyi0*I))/(TWO_PI*radius*(cyr1 + cyi1*I));
 }
 
 // Longitudinal impedance
-_Complex double longitudinal_self(const Electrode* electrode, _Complex double s, double mur)
+_Complex double longitudinal_self(const Electrode* electrode,
+                                  _Complex double s, double mur)
 {
     double ls = electrode->length;
     double k1 = electrode->radius/ls;
@@ -287,11 +290,13 @@ _Complex double longitudinal_self(const Electrode* electrode, _Complex double s,
     return s*mur*MU0*ls/(TWO_PI)*(log( (k2 + 1.)/k1 ) - k2 + k1) + zi;
 }
 
-_Complex double longitudinal_mutual(
-    const Electrode* sender, const Electrode* receiver, _Complex double s, double mur,
-    _Complex double gamma, size_t max_eval, double req_abs_error,
-    double req_rel_error, int error_norm, int integration_type,
-    double result[2], double error[2])
+_Complex double longitudinal_mutual(const Electrode* sender,
+                                    const Electrode* receiver,
+                                    _Complex double s, double mur,
+                                    _Complex double gamma, size_t max_eval,
+                                    double req_abs_error, double req_rel_error,
+                                    int error_norm, int integration_type,
+                                    double result[2], double error[2])
 {
     double cost = 0.0; //cosine between segments
     double k1, k2;
@@ -309,14 +314,15 @@ _Complex double longitudinal_mutual(
     else
     {
         integral(sender, receiver, gamma, max_eval, req_abs_error,
-            req_rel_error, error_norm, integration_type, result, error);
+                 req_rel_error, error_norm, integration_type, result, error);
         _Complex double intg = result[0] + I*result[1];
         return s*mur*MU0/(FOUR_PI)*intg*cost;
     }
 }
 
 // Transveral impedance
-_Complex double transversal_self(const Electrode* electrode, _Complex double kappa)
+_Complex double transversal_self(const Electrode* electrode,
+                                 _Complex double kappa)
 {
     double ls = electrode->length;
     double k1 = electrode->radius/ls;
@@ -324,26 +330,30 @@ _Complex double transversal_self(const Electrode* electrode, _Complex double kap
     return 1.0/(TWO_PI*kappa*ls)*(log( (k2 + 1.)/k1 ) - k2 + k1);
 }
 
-_Complex double transversal_mutual(
-    const Electrode* sender, const Electrode* receiver, _Complex double kappa,
-    _Complex double gamma, size_t max_eval, double req_abs_error,
-    double req_rel_error, int error_norm, int integration_type,
-    double result[2], double error[2])
+_Complex double transversal_mutual(const Electrode* sender,
+                                   const Electrode* receiver,
+                                   _Complex double kappa,
+                                   _Complex double gamma, size_t max_eval,
+                                   double req_abs_error, double req_rel_error,
+                                   int error_norm, int integration_type,
+                                   double result[2], double error[2])
 {
     double ls = sender->length;
     double lr = receiver->length;
     integral(sender, receiver, gamma, max_eval, req_abs_error,
-        req_rel_error, error_norm, integration_type, result, error);
+             req_rel_error, error_norm, integration_type, result, error);
     _Complex double intg = result[0] + I*result[1];
     return 1.0/(FOUR_PI*kappa*ls*lr)*intg;
 }
 
 // TODO store ZT and ZL as upper/lower triangular matrices, as they are symmetric
-int calculate_impedances(
-    const Electrode* electrodes, size_t num_electrodes, _Complex double* zl,
-    _Complex double* zt, _Complex double gamma, _Complex double s, double mur,
-    _Complex double kappa, size_t max_eval, double req_abs_error,
-    double req_rel_error, int error_norm, int integration_type)
+// TODO use COLUMN_MAJOR ordering to avoid having transpose the matrices for LAPACK
+int calculate_impedances(const Electrode* electrodes, size_t num_electrodes,
+                         _Complex double* zl, _Complex double* zt,
+                         _Complex double gamma, _Complex double s, double mur,
+                         _Complex double kappa, size_t max_eval,
+                         double req_abs_error, double req_rel_error,
+                         int error_norm, int integration_type)
 {
     double result[2], error[2], ls, lr, k1, k2, cost;
     _Complex double iwu_4pi = s*mur*MU0/(FOUR_PI);
@@ -377,9 +387,9 @@ int calculate_impedances(
                     cost += k1*k2;
                 }
                 cost = abs(cost/(ls*lr));
-                failure = integral(&(electrodes[i]), &(electrodes[k]), gamma, max_eval,
-                                   req_abs_error, req_rel_error, error_norm,
-                                   integration_type, result, error);
+                failure = integral(&(electrodes[i]), &(electrodes[k]), gamma,
+                                   max_eval, req_abs_error, req_rel_error,
+                                   error_norm, integration_type, result, error);
                 if (failure) return failure;
                 intg = result[0] + I*result[1];
                 zl[i*num_electrodes + k] = iwu_4pi*intg*cost;
@@ -393,12 +403,13 @@ int calculate_impedances(
     return 0;
 }
 
-int impedances_images(
-    const Electrode* electrodes, const Electrode* images, size_t num_electrodes,
-    _Complex double* zl, _Complex double* zt, _Complex double gamma, _Complex double s,
-    double mur, _Complex double kappa, _Complex double ref_l,
-    _Complex double ref_t, size_t max_eval, double req_abs_error,
-    double req_rel_error, int error_norm, int integration_type)
+int impedances_images(const Electrode* electrodes, const Electrode* images,
+                      size_t num_electrodes, _Complex double* zl,
+                      _Complex double* zt, _Complex double gamma,
+                      _Complex double s, double mur, _Complex double kappa,
+                      _Complex double ref_l, _Complex double ref_t,
+                      size_t max_eval, double req_abs_error,
+                      double req_rel_error, int error_norm, int integration_type)
 {
     double result[2], error[2], ls, lr, k1, k2, cost;
     _Complex double iwu_4pi = s*mur*MU0/(FOUR_PI);
@@ -436,9 +447,9 @@ int impedances_images(
     return 0;
 }
 
-int fill_incidence(
-    _Complex double* we, const Electrode* electrodes, size_t num_electrodes,
-    const double nodes[][3], size_t num_nodes)
+int fill_incidence(_Complex double* we, const Electrode* electrodes,
+                   size_t num_electrodes, const double nodes[][3],
+                   size_t num_nodes)
 {
     int e, n, condition, node_is_start, node_is_end, a, b, c, d, no_incidence;
     size_t ld = (2*num_electrodes + num_nodes)*num_electrodes;
@@ -507,10 +518,10 @@ int fill_incidence(
     return 0;
 }
 
-int fill_impedance(
-    _Complex double* we, const Electrode* electrodes, size_t num_electrodes,
-    size_t num_nodes, const _Complex double* zl, const _Complex double* zt,
-    const _Complex double* yn)
+int fill_impedance(_Complex double* we, const Electrode* electrodes,
+                   size_t num_electrodes, size_t num_nodes,
+                   const _Complex double* zl, const _Complex double* zt,
+                   const _Complex double* yn)
 {
     size_t i, k;
     size_t row_size = num_electrodes*2 + num_nodes;
@@ -536,8 +547,8 @@ int fill_impedance(
     return 0;
 }
 
-int solve_electrodes(
-    _Complex double* we, _Complex double* ie, size_t num_electrodes, size_t num_nodes)
+int solve_electrodes(_Complex double* we, _Complex double* ie,
+                     size_t num_electrodes, size_t num_nodes)
 {
     MKL_INT n = num_electrodes*2 + num_nodes;
     MKL_INT ipiv[n]; //pivot indices
@@ -545,18 +556,18 @@ int solve_electrodes(
     /* Check for the exact singularity */
     if(info > 0)
     {
-        printf("The diagonal element of the triangular factor of WE,\n");
-        printf("U(%i,%i) is zero, so that WE is singular;\n", info, info);
-        printf("the solution could not be computed.\n");
+        printf("The diagonal element of the triangular factor of WE,\n
+                U(%i,%i) is zero, so that WE is singular;\n
+                the solution could not be computed.\n", info, info);
         exit(info);
     }
     return info;
 }
 
 // Alternative approach using equivalent Ynodal
-int incidence_alt(
-    double* a, double* b, const Electrode* electrodes, size_t num_electrodes,
-    const double nodes[][3], size_t num_nodes)
+int incidence_alt(double* a, double* b, const Electrode* electrodes,
+                  size_t num_electrodes, const double nodes[][3],
+                  size_t num_nodes)
 {
     int e, n, condition, node_is_start, node_is_end, no_incidence, pos;
     //TODO use a more efficient search or fill-up method if possible
@@ -614,10 +625,9 @@ int incidence_alt(
     return 0;
 }
 
-int ynodal_eq(
-    _Complex double* yn, const double* a, const double* b,
-	_Complex double* zl, _Complex double* zt,
-	size_t num_electrodes, size_t num_nodes)
+int ynodal_eq(_Complex double* yn, const double* a, const double* b,
+	          _Complex double* zl, _Complex double* zt, size_t num_electrodes,
+              size_t num_nodes)
 {
     // TODO use COLUMN_MAJOR matrices, to avoid LAPACKE doing the matrix
     // copying when they are ROW_MAJOR
@@ -625,7 +635,7 @@ int ynodal_eq(
     // wrong results.
     //Force a and b to be (_Complex double*) arguments instead of (double*)?
     lapack_complex_double* arr = malloc(
-        sizeof(lapack_complex_double)*(num_electrodes*num_nodes));
+                   sizeof(lapack_complex_double)*(num_electrodes*num_nodes));
 
     // yn = aT*(zt^-1)*a + bT*(zl^-1)*b
     lapack_int* ipiv = malloc(sizeof(lapack_int)*num_electrodes);
@@ -637,16 +647,16 @@ int ynodal_eq(
     LAPACKE_zsytri(LAPACK_ROW_MAJOR, 'U', num_electrodes, zl, num_electrodes, ipiv);*/
     // invert zl and zt by general matrix LU factorization
     LAPACKE_zgetrf(LAPACK_ROW_MAJOR, num_electrodes, num_electrodes,
-        zt, num_electrodes, ipiv);
+                   zt, num_electrodes, ipiv);
     LAPACKE_zgetri(LAPACK_ROW_MAJOR, num_electrodes, zt, num_electrodes, ipiv);
     LAPACKE_zgetrf(LAPACK_ROW_MAJOR, num_electrodes, num_electrodes,
-        zl, num_electrodes, ipiv);
+                   zl, num_electrodes, ipiv);
     LAPACKE_zgetri(LAPACK_ROW_MAJOR, num_electrodes, zl, num_electrodes, ipiv);
     free(ipiv);
     const double alpha = 1.0;
     const double beta = 0.0;
     lapack_complex_double* c = malloc(
-        sizeof(lapack_complex_double)*(num_electrodes*num_nodes));
+                   sizeof(lapack_complex_double)*(num_electrodes*num_nodes));
     // c = yt*a
     for (size_t i = 0; i < num_electrodes*num_nodes; i++)
     {
@@ -688,16 +698,19 @@ int ynodal_eq(
     return 0;
 }
 
-int harmonic_impedance1(
-    size_t ns, const _Complex double* s, const _Complex double* kappa1, const _Complex double* kappa2,
-    const _Complex double* gamma1, const Electrode* electrodes, const Electrode* images, size_t num_electrodes,
-    const double nodes[][3], size_t num_nodes, size_t max_eval, double req_abs_error,
-    double req_rel_error, int error_norm, double rsource, _Complex double* zh)
+int harmonic_impedance1(size_t ns, const _Complex double* s,
+                        const _Complex double* kappa1,
+                        const _Complex double* kappa2,
+                        const _Complex double* gamma1,
+                        const Electrode* electrodes, const Electrode* images,
+                        size_t num_electrodes, const double nodes[][3],
+                        size_t num_nodes, size_t max_eval, double req_abs_error,
+                        double req_rel_error, int error_norm, double rsource,
+                        _Complex double* zh)
 {
-    //TODO extract nodes from electrodes instead of receiving it as an argument?
+    //TODO extract nodes from electrodes instead of receiving them as an argument?
     //build system to be solved
-    //TODO take mur1 as argument
-    double mur1 = 1.0;
+    double mur1 = 1.0; //TODO take mur1 an argument
     size_t ne2 = num_electrodes*num_electrodes;
     size_t nn2 = num_nodes*num_nodes;
     size_t ss1 = (2*num_electrodes + num_nodes);
@@ -709,7 +722,7 @@ int harmonic_impedance1(
     _Complex double* ie = malloc(sizeof(_Complex double)*ss1);
     _Complex double* we = malloc(sizeof(_Complex double)*ss2);
     _Complex double* we_incidence = malloc(sizeof(_Complex double)*ss2);
-    //yn[0] = 1.0/rsource;
+    //yn[0] = 1.0/rsource; FIXME why did I comment this line?
     fill_incidence(we_incidence, electrodes, num_electrodes, nodes, num_nodes);
     // solve for each frequency: WE*VE = IE
     for (size_t i = 0; i < ns; i++)
@@ -723,19 +736,20 @@ int harmonic_impedance1(
         ref_l = (kappa1[i] - kappa2[i])/(kappa1[i] + kappa2[i]);
         ref_t = ref_l;
         //TODO specialized impedance calculation taking advantage of symmetry
-        calculate_impedances(
-            electrodes, num_electrodes, zl, zt, gamma1[i], s[i], mur1, kappa1[i],
-            max_eval, req_abs_error, req_rel_error, error_norm, INTG_DOUBLE);
+        calculate_impedances(electrodes, num_electrodes, zl, zt, gamma1[i],
+                             s[i], mur1, kappa1[i], max_eval, req_abs_error,
+                             req_rel_error, error_norm, INTG_DOUBLE);
         for (size_t k = 0; k < num_electrodes; k++)
         {
             //FIXME crashing when interfaced with Mathematica because it does not see zbesi_
-            zinternal = internal_impedance(s[i], RHO_CU, electrodes[k].radius, 1.0)*electrodes[k].length;
+            zinternal = internal_impedance(s[i], RHO_CU, electrodes[k].radius, 1.0)
+                        *electrodes[k].length;
             //zinternal = 0.0;
             zl[k*num_electrodes + k] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma1[i],
-            s[i], mur1, kappa1[i], ref_l, ref_t, max_eval, req_abs_error, req_rel_error,
-            error_norm, INTG_DOUBLE);
+                          s[i], mur1, kappa1[i], ref_l, ref_t, max_eval,
+                          req_abs_error, req_rel_error, error_norm, INTG_DOUBLE);
         //The matrices are pivoted in-place. To avoid overwriting them, copy.
         //That way the filling of the incidence, which is costly, needs to be
         //done only once
@@ -753,16 +767,20 @@ int harmonic_impedance1(
     return 0;
 }
 
-int harmonic_impedance1_alt(
-    size_t ns, const _Complex double* s, const _Complex double* kappa1, const _Complex double* kappa2,
-    const _Complex double* gamma1, const Electrode* electrodes, const Electrode* images, size_t num_electrodes,
-    const double nodes[][3], size_t num_nodes, size_t max_eval, double req_abs_error,
-    double req_rel_error, int error_norm, double rsource, _Complex double* zh)
+int harmonic_impedance1_alt(size_t ns, const _Complex double* s,
+                            const _Complex double* kappa1,
+                            const _Complex double* kappa2,
+                            const _Complex double* gamma1,
+                            const Electrode* electrodes,
+                            const Electrode* images, size_t num_electrodes,
+                            const double nodes[][3], size_t num_nodes,
+                            size_t max_eval, double req_abs_error,
+                            double req_rel_error, int error_norm,
+                            double rsource, _Complex double* zh)
 {
     //TODO extract nodes from electrodes instead of receiving it as an argument?
     //build system to be solved
-    //TODO take mur1 as argument
-    double mur1 = 1.0;
+    double mur1 = 1.0; //TODO take mur1 as argument
     size_t ne2 = num_electrodes*num_electrodes;
     size_t nn2 = num_nodes*num_nodes;
     _Complex double zinternal, ref_l, ref_t;
@@ -773,7 +791,7 @@ int harmonic_impedance1_alt(
     double* a = malloc(sizeof(double)*(num_electrodes*num_nodes));
     double* b = malloc(sizeof(double)*(num_electrodes*num_nodes));
     incidence_alt(a, b, electrodes, num_electrodes, nodes, num_nodes);
-    //yn[0] = 1.0/rsource;
+    //yn[0] = 1.0/rsource; FIXME why did I comment this line?
     // solve for each frequency: YN*VN = IN
     MKL_INT n = num_electrodes*2 + num_nodes;
     MKL_INT ipiv[n]; //pivot indices
@@ -789,27 +807,27 @@ int harmonic_impedance1_alt(
         ref_l = (kappa1[i] - kappa2[i])/(kappa1[i] + kappa2[i]);
         ref_t = ref_l;
         //TODO specialized impedance calculation taking advantage of symmetry
-        calculate_impedances(
-            electrodes, num_electrodes, zl, zt, gamma1[i], s[i], mur1, kappa1[i],
-            max_eval, req_abs_error, req_rel_error, error_norm, INTG_DOUBLE);
+        calculate_impedances(electrodes, num_electrodes, zl, zt, gamma1[i],
+                             s[i], mur1, kappa1[i], max_eval, req_abs_error,
+                             req_rel_error, error_norm, INTG_DOUBLE);
         for (size_t k = 0; k < num_electrodes; k++)
         {
-            //FIXME crashing on internal_impedance evaluation. The value of RHO_CU seems to be the source
-            zinternal = internal_impedance(s[i], RHO_CU, electrodes[k].radius, 1.0)*electrodes[k].length;
+            zinternal = internal_impedance(s[i], RHO_CU, electrodes[k].radius, 1.0)
+                        *electrodes[k].length;
             //zinternal = 0.0;
             zl[k*num_electrodes + k] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma1[i],
-            s[i], mur1, kappa1[i], ref_l, ref_t, max_eval, req_abs_error, req_rel_error,
-            error_norm, INTG_DOUBLE);
+                          s[i], mur1, kappa1[i], ref_l, ref_t, max_eval,
+                          req_abs_error, req_rel_error, error_norm, INTG_DOUBLE);
         ynodal_eq(yn, a, b, zl, zt, num_electrodes, num_nodes);
         info = LAPACKE_zgesv(LAPACK_ROW_MAJOR, num_nodes, 1, yn, num_nodes, ipiv, ie, 1);
         // Check for the exact singularity
         if(info > 0)
         {
-            printf("The diagonal element of the triangular factor of WE,\n");
-            printf("U(%i,%i) is zero, so that YN is singular;\n", info, info);
-            printf("the solution could not be computed.\n");
+            printf("The diagonal element of the triangular factor of WE,\n
+                    U(%i,%i) is zero, so that YN is singular;\n
+                    the solution could not be computed.\n", info, info);
             exit(info);
         }
         zh[i] = ie[0];
