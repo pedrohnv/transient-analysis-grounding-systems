@@ -263,17 +263,17 @@ _Complex double internal_impedance(
     zbesi_(&zr, &zi, &fnu0, &kode, &n, &cyr0, &cyi0, &nz, &ierr);
     if (ierr != 0)
     {
-        printf("in function 'internal_impedance'\n
-                error in call to zbesi(fnu = 0)\n
-                error flag = %i\n", ierr);
+        printf("in function 'internal_impedance'\n");
+        printf("error in call to zbesi(fnu = 0)\n");
+        printf("error flag = %i\n", ierr);
         exit(ierr);
     }
     zbesi_(&zr, &zi, &fnu1, &kode, &n, &cyr1, &cyi1, &nz, &ierr);
     if (ierr != 0)
     {
-        printf("in function 'internal_impedance'\n
-                error in call to zbesi(fnu = 1)\n
-                error flag = %i\n", ierr);
+        printf("in function 'internal_impedance'\n");
+        printf("error in call to zbesi(fnu = 1)\n");
+        printf("error flag = %i\n", ierr);
         exit(ierr);
     }
     return (etapr*rho*(cyr0 + cyi0*I))/(TWO_PI*radius*(cyr1 + cyi1*I));
@@ -556,9 +556,9 @@ int solve_electrodes(_Complex double* we, _Complex double* ie,
     /* Check for the exact singularity */
     if(info > 0)
     {
-        printf("The diagonal element of the triangular factor of WE,\n
-                U(%i,%i) is zero, so that WE is singular;\n
-                the solution could not be computed.\n", info, info);
+        printf("The diagonal element of the triangular factor of WE,\n");
+        printf("U(%i,%i) is zero, so that WE is singular;\n", info, info);
+        printf("the solution could not be computed.\n");
         exit(info);
     }
     return info;
@@ -825,9 +825,9 @@ int harmonic_impedance1_alt(size_t ns, const _Complex double* s,
         // Check for the exact singularity
         if(info > 0)
         {
-            printf("The diagonal element of the triangular factor of WE,\n
-                    U(%i,%i) is zero, so that YN is singular;\n
-                    the solution could not be computed.\n", info, info);
+            printf("The diagonal element of the triangular factor of YN,\n");
+            printf("U(%i,%i) is zero, so that YN is singular;\n", info, info);
+            printf("the solution could not be computed.\n");
             exit(info);
         }
         zh[i] = ie[0];
