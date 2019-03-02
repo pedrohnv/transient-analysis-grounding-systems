@@ -194,13 +194,13 @@ vout = zeros(Complex{Float64}, (nf,nn));
 
 ## Source input
 path = "/home/pedro/codigos/HP_HEM/interfaces/julia/";
-input = string(path, "source.csv");
+input = string(path, "source.txt");
 source = CSV.read(input, header=["t", "V"]);
 source[:,1] = source[:,1]*1e-9;
 
-input = string(path, "voltageArt.csv");
+input = string(path, "voltageArt.txt");
 vout_art = CSV.read(input, header=["t", "V"]);
-input = string(path, "currentArt.csv");
+input = string(path, "currentArt.txt");
 iout_art = CSV.read(input, header=["t", "I"]);
 
 ent_freq = laplace_transform(Vector{ComplexF64}(source.V), Vector{Float64}(source.t), -1.0im*sk);
