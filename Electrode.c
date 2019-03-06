@@ -414,9 +414,9 @@ int impedances_images(const Electrode* electrodes, const Electrode* images,
     // operations, as some of them would be done twice or more unnecessarily
     for (size_t i = 0; i < num_electrodes; i++)
     {
+        ls = electrodes[i].length;
         for (size_t k = i; k < num_electrodes; k++)
         {
-            ls = electrodes[i].length;
             lr = images[k].length;
             cost = 0.0;
             for (size_t m = 0; m < 3; m++)
@@ -640,12 +640,14 @@ int ynodal_eq(_Complex double* yn, const double* a, const double* b,
     LAPACKE_zsytrf(LAPACK_ROW_MAJOR, 'U', num_electrodes, zl, num_electrodes, ipiv);
     LAPACKE_zsytri(LAPACK_ROW_MAJOR, 'U', num_electrodes, zl, num_electrodes, ipiv);*/
     // invert zl and zt by general matrix LU factorization
-    LAPACKE_zgetrf(LAPACK_ROW_MAJOR, num_electrodes, num_electrodes,
+    // as both zl and zt are symmetric, it does not matter if COL or ROW MAJOR.
+    // Use COL Major so LAPACKE does not transpose them.
+    LAPACKE_zgetrf(LAPACK_COL_MAJOR, num_electrodes, num_electrodes,
                    zt, num_electrodes, ipiv);
-    LAPACKE_zgetri(LAPACK_ROW_MAJOR, num_electrodes, zt, num_electrodes, ipiv);
-    LAPACKE_zgetrf(LAPACK_ROW_MAJOR, num_electrodes, num_electrodes,
+    LAPACKE_zgetri(LAPACK_COL_MAJOR, num_electrodes, zt, num_electrodes, ipiv);
+    LAPACKE_zgetrf(LAPACK_COL_MAJOR, num_electrodes, num_electrodes,
                    zl, num_electrodes, ipiv);
-    LAPACKE_zgetri(LAPACK_ROW_MAJOR, num_electrodes, zl, num_electrodes, ipiv);
+    LAPACKE_zgetri(LAPACK_COL_MAJOR, num_electrodes, zl, num_electrodes, ipiv);
     free(ipiv);
     const double alpha = 1.0;
     const double beta = 0.0;
