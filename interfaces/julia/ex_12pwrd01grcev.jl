@@ -1,3 +1,14 @@
+#=
+Test case 12pwrd01grcev-a
+
+Reproducing the results in [1] for a grounding grid.
+Execution time is expected to be up to 20 min.
+
+[1] L. D. Grcev and M. Heimbach, "Frequency dependent and transient
+characteristics of substation grounding systems," in IEEE Transactions on
+Power Delivery, vol. 12, no. 1, pp. 172-178, Jan. 1997.
+doi: 10.1109/61.568238
+=#
 using Plots
 
 include("hp_hem.jl");

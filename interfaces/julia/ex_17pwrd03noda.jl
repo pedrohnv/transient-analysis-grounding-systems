@@ -1,3 +1,11 @@
+#=
+Test case 17pwrd03noda
+
+Reproducing the results in [1] of a time domain surge response.
+
+[1] Noda, Taku, and Shigeru Yokoyama. "Thin wire representation in finite difference time domain
+surge simulation." IEEE Transactions on Power Delivery 17.3 (2002): 840-847.
+=#
 using LinearAlgebra
 using DataFrames, CSV
 using FFTW

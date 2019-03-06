@@ -1,5 +1,5 @@
 #=
-Test: using the Julia interface
+Julia interface to the High Performance Hybrid Electromagnetic Model program.
 =#
 using LinearAlgebra;
 
