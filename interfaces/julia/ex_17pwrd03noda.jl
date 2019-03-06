@@ -127,7 +127,6 @@ function simulate()
 	ent_freq = laplace_transform(Vector{ComplexF64}(source.V), Vector{Float64}(source.t), -1.0im*sk);
 
 	## Freq. loop
-	println("starting loop")
 	for i = 1:nf
 		jw = 1.0im*sk[i];
 	    kappa = jw*eps0;
@@ -146,7 +145,6 @@ function simulate()
 	    exci[1] = ent_freq[i]*gf;
 	    vout[i,:] = yn\exci;
 	end;
-	println("loop end")
 
 	## Time response
 	outlow = map(i -> vout[:,1][Int(i+1)]*sigma(i), kk);
@@ -172,7 +170,7 @@ function simulate()
 	return outv, outi, source, vout_art, iout_art, t
 end;
 
-outv, outi, source, vout_art, iout_art, t = simulate();
+outv, outi, source, vout_art, iout_art, t = @time simulate();
 plotly()
 #pyplot()
 display(plot([t*1e9, source.t*1e9, vout_art.t], [outv, source.V, vout_art.V],
