@@ -4,6 +4,7 @@ Test: using the Julia interface
 using LinearAlgebra;
 
 struct Electrode
+	#had to use tuple to successfully pass to C as a pointer
     start_point::NTuple{3,Cdouble}
     end_point::NTuple{3,Cdouble}
     middle_point::NTuple{3,Cdouble}
@@ -33,14 +34,77 @@ function segment_electrode(electrode::Electrode, num_segments::Int)
     end
     segments = Array{Electrode,1}(undef, num_segments);
     for k = 1:num_segments
-        segments[k] = new_electrode(nodes[k,:], nodes[k+1,:], electrode.radius, electrode.zi);
+        segments[k] = new_electrode(nodes[k,:], nodes[k+1,:], electrode.radius,
+                                    electrode.zi);
     end
     return segments, nodes
 end;
 
-function calculate_impedances(electrodes, gamma, s, mur, kappa,
-                              max_eval, req_abs_error, req_rel_error,
-                              error_norm, intg_type)
+function matchrow(a, B, atol=1e-9, rtol=0)
+	#= Returns the row in B that matches a. If there is no match, nothing is returned.
+	taken and modified from from https://stackoverflow.com/a/32740306/6152534 =#
+	findfirst(i -> all(j -> isapprox(a[j], B[i,j], atol=atol, rtol=rtol), 1:size(B,2)), 1:size(B,1))
+end
+
+function seg_electrode_list(electrodes, frac)
+	num_elec = 0; #after segmentation
+	for i=1:length(electrodes)
+		#TODO store in array to avoid repeated calculations
+		num_elec += Int(ceil(electrodes[i].length/frac));
+	end
+	elecs = Array{Electrode}(undef, num_elec);
+	nodes = zeros(Float64, (2*num_elec, 3));
+	e = 1;
+	nodes = [];
+	for i=1:length(electrodes)
+		ns = Int(ceil(electrodes[i].length/frac));
+		new_elecs, new_nodes = segment_electrode(electrodes[i], ns);
+		for k=1:ns
+			elecs[e] = new_elecs[k];
+			e += 1;
+		end
+		if (nodes == [])
+			nodes = new_nodes;
+		else
+			for k=1:size(new_nodes)[1]
+				if (matchrow(new_nodes[k:k,:], nodes) == nothing)
+					nodes = cat(nodes, new_nodes[k:k,:], dims=1);
+				end
+			end
+		end
+	end
+	return elecs, nodes
+end;
+
+function electrode_grid(a, n::Int, b, m::Int, h, r, zi=0.0im)
+	#=
+	Creates an electrode grid `h` coordinate below ground with each conductor
+	having radius `r` and internal impedance `zi`.
+	The grid has dimensions `a*b` with `n` and `m` divisions respectively.
+	=#
+	xx = 0:a/n:a;
+	yy = 0:b/m:b;
+	num_elec = n*(m + 1) + m*(n + 1);
+	electrodes = Array{Electrode}(undef, num_elec);
+	e = 1;
+	for k=1:(m+1)
+		for i=1:n
+			electrodes[e] = new_electrode([xx[i], yy[k], h], [xx[i+1], yy[k], h], r, zi);
+			e += 1;
+		end
+	end
+	for k=1:(n+1)
+		for i=1:m
+			electrodes[e] = new_electrode([xx[k], yy[i], h], [xx[k], yy[i+1], h], r, zi);
+			e += 1;
+		end
+	end
+	# TODO return nodes as well?
+	return electrodes
+end;
+
+function calculate_impedances(electrodes, gamma, s, mur, kappa, max_eval,
+                              req_abs_error, req_rel_error, error_norm, intg_type)
     ns = length(electrodes);
     zl = zeros(Complex{Float64}, (ns,ns));
     zt = zeros(Complex{Float64}, (ns,ns));
@@ -55,55 +119,38 @@ function calculate_impedances(electrodes, gamma, s, mur, kappa,
     return zl, zt
 end;
 
-r1 = 7e-3;
-zi = 0.0;
-electrodes = [
-    new_electrode([0, 0, 0], [1, 0, 0], r1, zi),
-    new_electrode([0, 0, 0], [0, 1, 0], r1, zi),
-    new_electrode([0, 0, 0], [0, 0, 1], r1, zi)
-];
+function impedances_images(electrodes, images, zl, zt, gamma, s, mur, kappa,
+						   ref_l, ref_t, max_eval, req_abs_error,
+						   req_rel_error, error_norm, intg_type)
+    ns = length(electrodes);
+    # path to the library must be a static symbol?
+    # see https://stackoverflow.com/questions/35831775/issue-with-julia-ccall-interface-and-symbols
+    ccall(("impedances_images", "/home/pedro/codigos/HP_HEM/libhem"), Int,
+          (Ref{Electrode}, Ref{Electrode}, Int, Ref{Complex{Float64}},
+		  Ref{Complex{Float64}}, Complex{Float64}, Complex{Float64}, Float64,
+		  Complex{Float64}, Complex{Float64}, Complex{Float64}, Int, Float64,
+		  Float64, Int, Int),
+          electrodes, images, ns, zl, zt, gamma, s, mur, kappa, ref_l, ref_t,
+          max_eval, req_abs_error, req_rel_error, error_norm, intg_type);
+    return zl, zt
+end;
 
-zl = zeros(Complex{Float64}, (3,3));
-zt = zeros(Complex{Float64}, (3,3));
-
-ccall(("calculate_impedances", "/home/pedro/codigos/HP_HEM/libhem"), Int,
-      (Ref{Electrode}, Int, Ref{Complex{Float64}}, Ref{Complex{Float64}},
-      Complex{Float64}, Complex{Float64}, Float64, Complex{Float64},
-      Int, Float64, Float64, Int, Int),
-      electrodes, 3, zl, zt, 1.0, 1.0, 1.0, 1.0, 200, 1e-3, 1e-4, 2, 1);
-
-println("zl =");
-for i = 1:3
-    for k = 1:3
-        print(zl[i,k], "   ");
+function incidence(electrodes::Vector{Electrode}, nodes::Matrix{Float64})
+	# build incidence matrices for calculating 'YN = AT*inv(zt)*A + BT*inv(zl)*B'
+    ns = length(electrodes);
+    nn = size(nodes)[1];
+    a = zeros(Float64, (ns,nn));
+    b = zeros(Float64, (ns,nn));
+    for i = 1:ns
+        for k = 1:nn
+            if isapprox(collect(electrodes[i].start_point), nodes[k,:])
+                a[i,k] = 0.5;
+                b[i,k] = 1.0;
+            elseif isapprox(collect(electrodes[i].end_point), nodes[k,:])
+                a[i,k] = 0.5;
+                b[i,k] = -1.0;
+            end
+        end
     end
-    println();
-end
-
-println("zt =");
-for i = 1:3
-    for k = 1:3
-        print(zt[i,k], "   ");
-    end
-    println();
-end
-#############
-#zl =
-#   9.3240e-07   0.0000e+00   0.0000e+00
-#   0.0000e+00   9.3240e-07   0.0000e+00
-#   0.0000e+00   0.0000e+00   9.3240e-07
-#
-#zt =
-#   0.741977   0.085033   0.085033
-#   0.085033   0.741977   0.085033
-#   0.085033   0.085033   0.741977
-
-#############
-w = 2*pi*60;
-e0 = 8.854187817620e-12;
-mu0 = 1.256637061435917e-6;
-mur = 1.0;
-sigma = 1.0/600;
-epsr = 15.0;
-kappa = sigma + 1im*w*epsr*e0;
-gamma = sqrt(1im*w*mur*mu0*kappa);
+    return a, b
+end;
