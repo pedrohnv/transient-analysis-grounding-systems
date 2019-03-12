@@ -110,7 +110,7 @@ function calculate_impedances(electrodes, gamma, s, mur, kappa, max_eval,
     zt = zeros(Complex{Float64}, (ns,ns));
     # path to the library must be a static symbol?
     # see https://stackoverflow.com/questions/35831775/issue-with-julia-ccall-interface-and-symbols
-    ccall(("calculate_impedances", "/home/pedro/codigos/HP_HEM/libhem"), Int,
+    ccall(("calculate_impedances", "/home/pedro/codigos/HP_HEM/libhem.so"), Int,
           (Ref{Electrode}, Int, Ref{Complex{Float64}}, Ref{Complex{Float64}},
           Complex{Float64}, Complex{Float64}, Float64, Complex{Float64},
           Int, Float64, Float64, Int, Int),
@@ -125,7 +125,7 @@ function impedances_images(electrodes, images, zl, zt, gamma, s, mur, kappa,
     ns = length(electrodes);
     # path to the library must be a static symbol?
     # see https://stackoverflow.com/questions/35831775/issue-with-julia-ccall-interface-and-symbols
-    ccall(("impedances_images", "/home/pedro/codigos/HP_HEM/libhem"), Int,
+    ccall(("impedances_images", "/home/pedro/codigos/HP_HEM/libhem.so"), Int,
           (Ref{Electrode}, Ref{Electrode}, Int, Ref{Complex{Float64}},
 		  Ref{Complex{Float64}}, Complex{Float64}, Complex{Float64}, Float64,
 		  Complex{Float64}, Complex{Float64}, Complex{Float64}, Int, Float64,

@@ -13,7 +13,7 @@ using Plots
 
 include("hp_hem.jl");
 
-function simulate(gs::Int, nf::Int)
+function simulate(gs::Int, nf::Int, intg_type::Int)
 	## Parameters
 	# Soil
 	mu0 = pi*4e-7;
@@ -27,7 +27,6 @@ function simulate(gs::Int, nf::Int)
 	req_abs_error = 1e-3;
 	req_rel_error = 1e-4;
 	error_norm = 1; #paired
-	intg_type = 1; #double integral
 
 	# Frequencies
 	freq = exp10.(range(2, stop=6.4, length=nf)); #logspace
@@ -90,19 +89,22 @@ function simulate(gs::Int, nf::Int)
 	return zh
 end;
 
+#1: #double integral
+#0: closed form solution
+intg_type = 1;
 nf = 150;
 freq = exp10.(range(2, stop=6.4, length=nf)); #logspace
 zh = zeros(ComplexF64, (nf, 5)); #Julia is Column Major.
 i = 1;
 tot_time = @timed for gs in [10, 20, 30, 60, 120]
 	println("gs = ", gs)
-	global zh[:,i] = @time simulate(gs, nf);
+	global zh[:,i] = @time simulate(gs, nf, intg_type);
 	global i += 1;
 end;
 println("total elapsed time: ", tot_time[2]/60, " min")
 
-plotly()
-#pyplot()
+#plotly()
+pyplot()
 display(plot(freq, [map(i -> abs(i), zh[:,k]) for k=1:5],
              xaxis=:log, xlabel="f (Hz)", ylabel="|Zin| (Ohms)",
 			 title="Harmonic Impedance",
