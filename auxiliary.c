@@ -59,20 +59,13 @@ int equal_points(const double point_1[3], const double point_2[3])
 
 double vector_norm(const double start_point[3], const double end_point[3])
 {
-    if (equal_points(start_point, end_point))
-    {
-        return 0.0;
-    }
-    else
-    {
-        double length = 0.0;
-        for (int i = 0; i < 3; i++)
-        {
-            length += pow(start_point[i] - end_point[i], 2.0);
-        }
-        length = sqrt(length);
-        return length;
-    }
+	double length = 0.0;
+	for (int i = 0; i < 3; i++)
+	{
+		length += pow(start_point[i] - end_point[i], 2.0);
+	}
+	length = sqrt(length);
+	return length;
 }
 
 int copy_array(const _Complex double* source, _Complex double* target,
