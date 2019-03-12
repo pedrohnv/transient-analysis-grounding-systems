@@ -209,9 +209,12 @@ int integral(const Electrode* sender, const Electrode* receiver,
     int failure = 1;
     switch (integration_type) {
         case NONE:
+            double lslr = sender->length * receiver->length;
+            double rbar = vector_norm(sender->middle_point, receiver->middle_point);
+            _Complex double exp_gr = cexp(-gamma*rbar)*lslr;
+            result[0] = creal(exp_gr);
+            result[1] = cimag(exp_gr);
             failure = 0;
-            result[0] = 1.0;
-            result[1] = 0.0;
         break;
 
         case INTG_DOUBLE:

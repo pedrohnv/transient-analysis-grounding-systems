@@ -20,7 +20,7 @@ TODO insert condition to check if sender == receiver?
 //default integration options ===============================================
 /** Integration_type
 Type of integration and simplification thereof to be done.
-@param NONE integration is not done
+@param NONE integration has closed form solution \f e^{-\gamma \bar r}}{\bar r} L_s L_r \f
 @param INTG_DOUBLE \f$ \int_0^{L_s} \int_0^{L_r} \frac{e^{-\gamma r}}{r} dl_r dl_s \f$
 @param INTG_EXP_LOGNF \f$ \int_0^{L_r} e^{-\gamma \bar r} Log(N_f) dl_r \f$
 @param INTG_LOGNF \f$ e^{-\gamma \bar r} \int_0^{L_r} Log(N_f) dl_r \f$
@@ -188,8 +188,7 @@ limit)
 @param reqAbsError the absolute error requested (0 to ignore)
 @param reqRelError the relative error requested (0 to ignore)
 @param error_norm (enumeration defined in cubature.h) error checking scheme
-@param integration_type type of integration to be done. If NONE, the value
-`result[0] + result[1]*I` will be unaltered and no integration is done.
+@param integration_type type of integration to be done.
 @param result array[2] where to store the integral result (real and imaginary
 parts)
 @param error array[2] where to store the integral error (real and imaginary
@@ -246,8 +245,7 @@ limit)
 @param reqAbsError the absolute error requested (0 to ignore)
 @param reqRelError the relative error requested (0 to ignore)
 @param error_norm (enumeration defined in cubature.h) error checking scheme
-@param integration_type type of integration to be done. If NONE, the value
-`result[0] + result[1]*I` will be used and no integration is done.
+@param integration_type type of integration to be done.
 @param result array[2] where to store the integral result (real and imaginary
 parts)
 @param error array[2] where to store the integral error (real and imaginary
@@ -291,8 +289,7 @@ limit)
 @param reqAbsError the absolute error requested (0 to ignore)
 @param reqRelError the relative error requested (0 to ignore)
 @param error_norm (enumeration defined in cubature.h) error checking scheme
-@param integration_type type of integration to be done. If NONE, the value
-`result[0] + result[1]*I` will be used and no integration is done.
+@param integration_type type of integration to be done.
 @param result array[2] where to store the integral result (real and imaginary
 parts)
 @param error array[2] where to store the integral error (real and imaginary
@@ -333,8 +330,7 @@ limit)
 @param reqAbsError the absolute error requested (0 to ignore)
 @param reqRelError the relative error requested (0 to ignore)
 @param error_norm (enumeration defined in cubature.h) error checking scheme
-@param integration_type type of integration to be done. If NONE, the value
-`result[0] + result[1]*I` will be used and no integration is done.
+@param integration_type type of integration to be done.
 @return 0 on sucess
 @see integral
 @see Integration_type
@@ -374,8 +370,7 @@ limit)
 @param reqAbsError the absolute error requested (0 to ignore)
 @param reqRelError the relative error requested (0 to ignore)
 @param error_norm (enumeration defined in cubature.h) error checking scheme
-@param integration_type type of integration to be done. If NONE, the value
-`result[0] + result[1]*I` will be used and no integration is done.
+@param integration_type type of integration to be done.
 @return 0 on sucess
 @see integral
 @see Integration_type
