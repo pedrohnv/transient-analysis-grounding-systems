@@ -207,11 +207,13 @@ int integral(const Electrode* sender, const Electrode* receiver,
     double tmin[] = {0.0, 0.0};
     double tmax[] = {1.0, 1.0};
     int failure = 1;
+    double rbar, lslr;
+    _Complex double exp_gr;
     switch (integration_type) {
-        case NONE:
-            double lslr = sender->length * receiver->length;
-            double rbar = vector_norm(sender->middle_point, receiver->middle_point);
-            _Complex double exp_gr = cexp(-gamma*rbar)*lslr;
+        case INTG_NONE:
+            lslr = (sender->length)*(receiver->length);
+            rbar = vector_norm(sender->middle_point, receiver->middle_point);
+            exp_gr = cexp(-gamma*rbar)/rbar*lslr;
             result[0] = creal(exp_gr);
             result[1] = cimag(exp_gr);
             failure = 0;
@@ -239,9 +241,8 @@ int integral(const Electrode* sender, const Electrode* receiver,
             failure = hcubature(1, exp_logNf, auxdata, 1, tmin, tmax, max_eval,
                                 req_abs_error, req_rel_error, error_norm,
                                 result, error);
-            double rbar;
             rbar = vector_norm(sender->middle_point, receiver->middle_point);
-            _Complex double exp_gr = cexp(-gamma*rbar)*result[0];
+            exp_gr = cexp(-gamma*rbar);
             result[0] = creal(exp_gr) * receiver->length;
             result[1] = cimag(exp_gr) * receiver->length;
         break;

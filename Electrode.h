@@ -27,7 +27,7 @@ Type of integration and simplification thereof to be done.
 */
 enum Integration_type
 {
-    NONE = 0,
+    INTG_NONE = 0,
     INTG_DOUBLE,
     INTG_EXP_LOGNF,
     INTG_LOGNF
