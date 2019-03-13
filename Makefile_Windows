@@ -77,7 +77,7 @@ ex51emc03grcev	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o ex51emc03grcev.exe examples\\ex51emc03grcev.c $(OBJECTS) $(LINK)
 
 ex12pwrd01grcev	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o ex12pwrd01grcev.exe examples\\ex12pwrd01grcev\ex12pwrd01grcev.c $(OBJECTS) $(LINK)
+		$(CC) $(CFLAGS) $(INCLUDE) -o ex12pwrd01grcev.exe examples\\ex12pwrd01grcev\\ex12pwrd01grcev.c $(OBJECTS) $(LINK)
 
 exAlipioSchroederRCA	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o AlipioSchroederRCA.exe examples\\AlipioSchroederRCA.c $(OBJECTS) $(LINK)
