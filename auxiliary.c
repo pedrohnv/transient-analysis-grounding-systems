@@ -44,13 +44,7 @@ double wave_length(double f, double sigma, double eps, double mur) {
 
 int equal_points(const double point_1[3], const double point_2[3]) {
     for (size_t i = 0; i < 3; i++) {
-<<<<<<< HEAD
         if (fabs(point_1[i] - point_2[i]) > FLT_EPSILON) return 0;
-=======
-        if (fabs(point_1[i] - point_2[i]) > FLT_EPSILON) {
-            return 0;
-        }
->>>>>>> 311cd38595027c60fa5ab5a4fde01cc826c942cc
     }
     return 1;
 }
