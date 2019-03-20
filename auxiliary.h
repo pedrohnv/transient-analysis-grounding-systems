@@ -128,4 +128,11 @@ function of the first kind, with complex argument.
 extern int zbesi_(double* zr, double* zi, double* fnu, int* kode, int* n,
     double* cyr, double* cyi, int* nz, int* ierr);
 
+/* TODO bug related to Mathematica on Windows could be related to FORTRAN
+name mangling, Do something like the following to solve...
+#if defined(_WIN32)
+#define zbesi_ zbesi
+#endif
+*/
+
 #endif /* AUXILIARY_H_ */
