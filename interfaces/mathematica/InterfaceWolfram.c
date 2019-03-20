@@ -29,8 +29,7 @@ limit)
 @param Args[9] integration_type type of integration to be done.
 */
 DLLEXPORT int Mcalculate_impedances(
-    WolframLibraryData libData, mint Argc, MArgument *Args, MArgument Res)
-{
+    WolframLibraryData libData, mint Argc, MArgument *Args, MArgument Res) {
     int err; // error code
     MTensor elec_tensor = MArgument_getMTensor(Args[0]);
     mcomplex gamma = MArgument_getComplex(Args[1]);
@@ -51,8 +50,7 @@ DLLEXPORT int Mcalculate_impedances(
     double start_point[3], end_point[3];
     double radius;
     _Complex double zi;
-    for (size_t i = 0; i < num_electrodes; i++)
-    {
+    for (size_t i = 0; i < num_electrodes; i++) {
         start_point[0] = elec_data[9*i + 0];
         start_point[1] = elec_data[9*i + 1];
         start_point[2] = elec_data[9*i + 2];
@@ -77,13 +75,11 @@ DLLEXPORT int Mcalculate_impedances(
     mint out_dim[] = {2*ne2};
     err = libData->MTensor_new(MType_Complex, 1, out_dim, &zlzt);
     data = libData->MTensor_getComplexData(zlzt);
-    for (size_t i = 0; i < ne2; i++)
-    {
+    for (size_t i = 0; i < ne2; i++) {
         data[i].ri[0] = creal(zl[i]);
         data[i].ri[1] = cimag(zl[i]);
     }
-    for (size_t i = 0; i < ne2; i++)
-    {
+    for (size_t i = 0; i < ne2; i++) {
         data[i + ne2].ri[0] = creal(zt[i]);
         data[i + ne2].ri[1] = cimag(zt[i]);
     }
@@ -115,8 +111,7 @@ describing the image of an electrode as
 "{x0, y0, z0, x1, y1, z1, radius, Re(zi), Im(zi)}".
 */
 DLLEXPORT int Mimpedances_images(
-    WolframLibraryData libData, mint Argc, MArgument *Args, MArgument Res)
-{
+    WolframLibraryData libData, mint Argc, MArgument *Args, MArgument Res) {
     int err; // error code
     MTensor elec_tensor = MArgument_getMTensor(Args[0]);
     mcomplex gamma = MArgument_getComplex(Args[1]);
@@ -142,8 +137,7 @@ DLLEXPORT int Mimpedances_images(
     double start_point[3], end_point[3];
     double radius;
     _Complex double zi;
-    for (size_t i = 0; i < num_electrodes; i++)
-    {
+    for (size_t i = 0; i < num_electrodes; i++) {
         start_point[0] = elec_data[9*i + 0];
         start_point[1] = elec_data[9*i + 1];
         start_point[2] = elec_data[9*i + 2];
@@ -171,22 +165,19 @@ DLLEXPORT int Mimpedances_images(
     _Complex double ref_l1 = ref_l.ri[0] + I*ref_l.ri[1];
     _Complex double ref_t1 = ref_t.ri[0] + I*ref_t.ri[1];
     _Complex double s1 = s.ri[0] + I*s.ri[1];
-    impedances_images(
-            electrodes, images, num_electrodes, zl, zt, gamma1, s1, mur, kappa1,
-            ref_l1, ref_t1, max_eval, req_abs_error, req_rel_error, error_norm,
-            integration_type);
+    impedances_images(electrodes, images, num_electrodes, zl, zt, gamma1, s1,
+                      mur, kappa1, ref_l1, ref_t1, max_eval, req_abs_error,
+                      req_rel_error, error_norm, integration_type);
     MTensor zlzt;
     mcomplex *data;
     mint out_dim[] = {2*ne2};
     err = libData->MTensor_new(MType_Complex, 1, out_dim, &zlzt);
     data = libData->MTensor_getComplexData(zlzt);
-    for (size_t i = 0; i < ne2; i++)
-    {
+    for (size_t i = 0; i < ne2; i++) {
         data[i].ri[0] = creal(zl[i]);
         data[i].ri[1] = cimag(zl[i]);
     }
-    for (size_t i = 0; i < ne2; i++)
-    {
+    for (size_t i = 0; i < ne2; i++) {
         data[i + ne2].ri[0] = creal(zt[i]);
         data[i + ne2].ri[1] = cimag(zt[i]);
     }
@@ -202,8 +193,7 @@ DLLEXPORT int Mimpedances_images(
 
 */
 DLLEXPORT int Mharmonic_impedance1(
-    WolframLibraryData libData, mint Argc, MArgument *Args, MArgument Res)
-{
+    WolframLibraryData libData, mint Argc, MArgument *Args, MArgument Res) {
     int err; // error code
     MTensor elec_tensor = MArgument_getMTensor(Args[0]);
     MTensor imag_tensor = MArgument_getMTensor(Args[1]);
@@ -229,8 +219,7 @@ DLLEXPORT int Mharmonic_impedance1(
     Electrode* images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     double start_point[3], end_point[3];
     double radius;
-    for (size_t i = 0; i < num_electrodes; i++)
-    {
+    for (size_t i = 0; i < num_electrodes; i++) {
         start_point[0] = elec_data[9*i + 0];
         start_point[1] = elec_data[9*i + 1];
         start_point[2] = elec_data[9*i + 2];
@@ -254,8 +243,7 @@ DLLEXPORT int Mharmonic_impedance1(
     size_t num_nodes = dims[0];
     //double* nodes = (double*) malloc(sizeof(double)*num_nodes);
     double nodes[num_nodes][3];
-    for (size_t i = 0; i < num_nodes; i++)
-    {
+    for (size_t i = 0; i < num_nodes; i++) {
         nodes[i][0] = nodes_data[3*i + 0];
         nodes[i][1] = nodes_data[3*i + 1];
         nodes[i][2] = nodes_data[3*i + 2];
@@ -269,8 +257,7 @@ DLLEXPORT int Mharmonic_impedance1(
     kappa2_data = libData->MTensor_getComplexData(mkappa2);
     gamma1_data = libData->MTensor_getComplexData(mgamma1);
     s_data = libData->MTensor_getComplexData(s_array);
-    for (size_t i = 0; i < ns; i++)
-    {
+    for (size_t i = 0; i < ns; i++) {
         kappa1[i] = kappa1_data[i].ri[0] + I*kappa1_data[i].ri[1];
         kappa2[i] = kappa2_data[i].ri[0] + I*kappa2_data[i].ri[1];
         gamma1[i] = gamma1_data[i].ri[0] + I*gamma1_data[i].ri[1];
@@ -286,8 +273,7 @@ DLLEXPORT int Mharmonic_impedance1(
     mint out_dim[] = {ns};
     err = libData->MTensor_new(MType_Complex, 1, out_dim, &mzh);
     zh_data = libData->MTensor_getComplexData(mzh);
-    for (size_t i = 0; i < ns; i++)
-    {
+    for (size_t i = 0; i < ns; i++) {
         zh_data[i].ri[0] = creal(zh[i]);
         zh_data[i].ri[1] = cimag(zh[i]);
     }

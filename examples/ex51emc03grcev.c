@@ -15,8 +15,7 @@ Electrodes”. In: IEEE Transactions on Electromagnetic Compatibility 51.3
 #include <auxiliary.h>
 //#include <omp.h>
 
-int run_case(double length, double rho, char file_name[])
-{
+int run_case(double length, double rho, char file_name[]) {
     // parameters
     double h = 0.8; //burial depth
     double r = 7e-3; //radius
@@ -29,16 +28,13 @@ int run_case(double length, double rho, char file_name[])
     double freq[nf];
     double start_point[3] = {0., 0., -h};
     double end_point[3] = {length, 0., -h};
-
     remove(file_name);
     FILE* save_file = fopen(file_name, "w");
-    if (save_file == NULL)
-    {
+    if (save_file == NULL) {
         printf("Cannot open file %s\n",  file_name);
         exit(1);
     }
     logspace(2, 7, nf, freq);
-
     // electrode definition and segmentation
     double lambda = wave_length(freq[nf - 1], sigma, er*EPS0, 1.0); //smallest
     int num_electrodes = ceil( length/(lambda/6.0) ) ;
@@ -48,7 +44,6 @@ int run_case(double length, double rho, char file_name[])
     // the internal impedance is added "outside" later
     segment_electrode(
         electrodes, nodes, num_electrodes, start_point, end_point, r, 0.0);
-
     // create images
     start_point[2] = h;
     end_point[2] = h;
@@ -57,7 +52,6 @@ int run_case(double length, double rho, char file_name[])
     Electrode* images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     segment_electrode(
         images, nodes_images, num_electrodes, start_point, end_point, r, 0.0);
-
     //build system to be solved
     int ne2 = num_electrodes*num_electrodes;
     int nn2 = num_nodes*num_nodes;
@@ -65,41 +59,31 @@ int run_case(double length, double rho, char file_name[])
     int ss2 = ss1*ss1;
     _Complex double s;
     _Complex double kappa, gamma, zinternal;
-    _Complex double* zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* yn = (_Complex double*) malloc(sizeof(_Complex double)*nn2);
-    _Complex double* ie = (_Complex double*) malloc(sizeof(_Complex double)*ss1);
-    _Complex double* ie_cp = (_Complex double*) malloc(sizeof(_Complex double)*ss1);
-    _Complex double* we = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
-    _Complex double* we_cp = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
+    _Complex double* zl = malloc(sizeof(_Complex double)*ne2);
+    _Complex double* zt = malloc(sizeof(_Complex double)*ne2);
+    _Complex double* yn = calloc(nn2, sizeof(_Complex double));
+    _Complex double* ie = calloc(ss1, sizeof(_Complex double));
+    _Complex double* ie_cp = malloc(sizeof(_Complex double)*ss1);
+    _Complex double* we = malloc(sizeof(_Complex double)*ss2);
+    _Complex double* we_cp = malloc(sizeof(_Complex double)*ss2);
     int i, k;
-    for (i = 0; i < nn2; i++)
-    {
-        yn[i] = 0.0; //external nodal admittance
-    }
-    for (i = 0; i < ss1; i++)
-    {
-        ie[i] = 0.0;
-    }
     ie[ss1 - num_nodes] = 1.0;
     fill_incidence(we, electrodes, num_electrodes, nodes, num_nodes);
     // solve for each frequency: WE*VE = IE
-    for (i = 0; i < nf; i++)
-    {
+    for (i = 0; i < nf; i++) {
         s = I*TWO_PI*freq[i];
         kappa = (sigma + s*er*EPS0); //soil complex conductivity
         gamma = csqrt(s*MU0*kappa); //soil propagation constant
         //TODO especialized impedance calculation taking advantage of symmetry
-        calculate_impedances(
-            electrodes, num_electrodes, zl, zt, gamma, s, 1.0, kappa,
-            200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+        calculate_impedances(electrodes, num_electrodes, zl, zt, gamma, s, 1.0,
+                             kappa, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         zinternal = internal_impedance(s, rho_c, r, 1.0)*electrodes[0].length;
-        for (k = 0; k < num_electrodes; k++)
-        {
+        for (k = 0; k < num_electrodes; k++) {
             zl[k*num_electrodes + k] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-            s, 1.0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+                          s, 1.0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED,
+                          INTG_DOUBLE);
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         //The matrices are pivoted in-place. To recover them, copy
         copy_array(we, we_cp, ss2);
@@ -121,8 +105,7 @@ int run_case(double length, double rho, char file_name[])
     return 0;
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     printf("test case 51emc03grcev\n=== START ===\n");
     run_case(10.0, 10.0, "examples/51emc03grcev_L10rho10.dat");
     run_case(10.0, 100.0, "examples/51emc03grcev_L10rho100.dat");

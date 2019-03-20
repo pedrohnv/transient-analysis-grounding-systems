@@ -10,8 +10,7 @@ FIXME Unfinished example, please ignore it for now.
 #include <auxiliary.h>
 //#include <omp.h>
 
-int main()
-{
+int main() {
     /*FILE* zl_file = fopen("examples/zl.dat", "w");
     FILE* zt_file = fopen("examples/zt.dat", "w");
     FILE* yl_file = fopen("examples/yl.dat", "w");
@@ -39,8 +38,7 @@ int main()
     nodes_file("examples/malha01_nodes.txt", nodes, num_nodes);
     Electrode* images = malloc(sizeof(Electrode)*num_electrodes);
     electrodes_file("examples/malha01_electrodes.txt", images, num_electrodes);
-    for (int m = 0; m < num_electrodes; m++)
-    {
+    for (int m = 0; m < num_electrodes; m++) {
         images[m].start_point[2] = -images[m].start_point[2];
         images[m].end_point[2] = -images[m].end_point[2];
         images[m].middle_point[2] = -images[m].middle_point[2];
@@ -59,8 +57,7 @@ int main()
     _Complex double kappa1, gamma, zinternal;
     _Complex double s;
     int i, k;
-    for (i = 0; i < nf; i++)
-    {
+    for (i = 0; i < nf; i++) {
         printf("i = %i\n", i);
         s = I*TWO_PI*freq[i];
         kappa1 = (sigma1 + s*er1*EPS0); //soil complex conductivity
@@ -69,8 +66,7 @@ int main()
             electrodes, num_electrodes, zl, zt, gamma, s, 1.0, kappa1,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         zinternal = internal_impedance(s, rho_c, radius, 1.0);
-        for (k = 0; k < num_electrodes; k++)
-        {
+        for (k = 0; k < num_electrodes; k++) {
             zl[k*num_electrodes + k] += zinternal*electrodes[k].length;
         }
         ref_t = (kappa1 - s*EPS0)/(kappa1 + s*EPS0);

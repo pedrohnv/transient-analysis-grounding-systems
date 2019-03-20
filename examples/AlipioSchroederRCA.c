@@ -15,8 +15,7 @@ Reproducing the results in [1].
 //#include <omp.h>
 
 int run_case(double length, double rho, char file_name[],
-    _Complex double* isource, _Complex double* s, int nf)
-{
+    _Complex double* isource, _Complex double* s, int nf) {
     // parameters
     double h = 0.6; //burial depth
     double r = 0.00607651; //radius
@@ -28,16 +27,13 @@ int run_case(double length, double rho, char file_name[],
     //double freq[nf];
     double start_point[3] = {0., 0., -h};
     double end_point[3] = {length, 0., -h};
-
     remove(file_name);
     FILE* save_file = fopen(file_name, "w");
-    if (save_file == NULL)
-    {
+    if (save_file == NULL) {
         printf("Cannot open file %s\n",  file_name);
         exit(1);
     }
     //logspace(2, 7, nf, freq);
-
     // electrode definition and segmentation
     double lambda = wave_length(-cimag(w[nf - 1])/TWO_PI, sigma, er*EPS0, 1.0); //smallest
     int num_electrodes = ceil( length/(lambda/6.0) ) ;
@@ -47,7 +43,6 @@ int run_case(double length, double rho, char file_name[],
     // the internal impedance is added "outside" later
     segment_electrode(
         electrodes, nodes, num_electrodes, start_point, end_point, r, 0.0);
-
     // create images
     start_point[2] = h;
     end_point[2] = h;
@@ -56,7 +51,6 @@ int run_case(double length, double rho, char file_name[],
     Electrode* images = malloc(sizeof(Electrode)*num_electrodes);
     segment_electrode(
         images, nodes_images, num_electrodes, start_point, end_point, r, 0.0);
-
     //build system to be solved
     int ne2 = num_electrodes*num_electrodes;
     int nn2 = num_nodes*num_nodes;
@@ -66,38 +60,28 @@ int run_case(double length, double rho, char file_name[],
     _Complex double kappa, gamma, zinternal;
     _Complex double* zl = malloc(sizeof(_Complex double)*ne2);
     _Complex double* zt = malloc(sizeof(_Complex double)*ne2);
-    _Complex double* yn = malloc(sizeof(_Complex double)*nn2);
-    _Complex double* ie = malloc(sizeof(_Complex double)*ss1);
+    _Complex double* yn = calloc(nn2, sizeof(_Complex double)); //external yn
+    _Complex double* ie = calloc(ss1, sizeof(_Complex double));
     _Complex double* ie_cp = malloc(sizeof(_Complex double)*ss1);
     _Complex double* we = malloc(sizeof(_Complex double)*ss2);
     _Complex double* we_cp = malloc(sizeof(_Complex double)*ss2);
     int i, k;
-    for (i = 0; i < nn2; i++)
-    {
-        yn[i] = 0.0; //external nodal admittance
-    }
-    for (i = 0; i < ss1; i++)
-    {
-        ie[i] = 0.0;
-    }
     fill_incidence(we, electrodes, num_electrodes, nodes, num_nodes);
     // solve for each frequency: WE*VE = IE
-    for (i = 0; i < nf; i++)
-    {
+    for (i = 0; i < nf; i++) {
         ie[ss1 - num_nodes] = isource[i];
         kappa = (sigma + s[i]*er*EPS0); //soil complex conductivity
         gamma = csqrt(s[i]*MU0*kappa); //soil propagation constant
         //TODO especialized impedance calculation taking advantage of symmetry
-        calculate_impedances(
-            electrodes, num_electrodes, zl, zt, gamma, w[i], 1.0, kappa,
-            200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+        calculate_impedances(electrodes, num_electrodes, zl, zt, gamma, w[i],
+                             1.0, kappa, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         zinternal = internal_impedance(w[i], rho_c, r, 1.0)*electrodes[0].length;
-        for (k = 0; k < num_electrodes; k++)
-        {
+        for (k = 0; k < num_electrodes; k++) {
             zl[k*num_electrodes + k] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-            w[i], 1.0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
+                          w[i], 1.0, kappa, 0.0, 1.0, 200, 1e-3, 1e-4,
+                          ERROR_PAIRED, INTG_DOUBLE);
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         //The matrices are pivoted in-place. To recover them, copy
         copy_array(we, we_cp, ss2);
@@ -119,8 +103,7 @@ int run_case(double length, double rho, char file_name[],
     return 0;
 }
 
-int main()
-{
+int main() {
     double t[] = {9.22133e-10, 2.80886e-8, 4.45412e-8, 5.37883e-8,
             6.85252e-8, 7.96766e-8, 9.26036e-8, 1.01911e-7,
             1.13054e-7, 1.33255e-7, 1.51577e-7, 1.69994e-7,
@@ -142,10 +125,7 @@ int main()
     double dt = t[nt - 1]/(2*ns);
     double ds = I*TWO_PI/(2*ns*dt);
     double sigma = log(0.001)/t[nt - 1];
-    for (int k = 0; k < ns; k++)
-    {
-        s[k] = (sigma - I*ds*k);
-    }
+    for (int k = 0; k < ns; k++) s[k] = (sigma - I*ds*k);
     _Complex double* isource = malloc(sizeof(_Complex double)*ns);
     laplace_transform(inj, t, nt, s, ns, isource);
     run_case(8.0, 65.0, "examples/AlipioSchroederRCA_1.dat", isource, s, ns);

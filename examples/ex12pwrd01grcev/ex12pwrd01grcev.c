@@ -19,8 +19,7 @@ doi: 10.1109/61.568238
 #include <time.h>
 //#include <omp.h>
 
-int run_case(int gs, int num_electrodes, int num_nodes)
-{
+int run_case(int gs, int num_electrodes, int num_nodes) {
     size_t max_eval = 200;
     double req_abs_error = 1e-3;
     double req_rel_error = 1e-4;
@@ -35,24 +34,18 @@ int run_case(int gs, int num_electrodes, int num_nodes)
     int nf = 150;
     double freq[nf];
     logspace(2, 6.4, nf, freq);
-
     // electrode definition
     Electrode* electrodes = malloc(sizeof(Electrode)*num_electrodes);
     sprintf(file_name, "elec_gs%d.txt", gs);
     int read;
     read = electrodes_file(file_name, electrodes, num_electrodes);
-    if (read > 0)
-    {
-        exit(read);
-    }
+    if (read > 0) exit(read);
     Electrode* images = malloc(sizeof(Electrode)*num_electrodes);
     electrodes_file(file_name, images, num_electrodes);
-
     double nodes[num_nodes][3];
     sprintf(file_name, "nodes_gs%d.txt", gs);
     nodes_file(file_name, nodes, num_nodes);
-    for (int m = 0; m < num_electrodes; m++)
-    {
+    for (int m = 0; m < num_electrodes; m++) {
         images[m].start_point[2] = -images[m].start_point[2];
         images[m].end_point[2] = -images[m].end_point[2];
         images[m].middle_point[2] = -images[m].middle_point[2];
@@ -75,8 +68,7 @@ int run_case(int gs, int num_electrodes, int num_nodes)
     // solve for each frequency: WE*VE = IE
     _Complex double s;
     _Complex double ref_l, ref_t;
-    for (i = 0; i < nf; i++)
-    {
+    for (i = 0; i < nf; i++) {
         s = I*TWO_PI*freq[i];
         kappa = (sigma + s*er*EPS0); //soil complex conductivity
         gamma = csqrt(s*MU0*kappa); //soil propagation constant
@@ -84,17 +76,17 @@ int run_case(int gs, int num_electrodes, int num_nodes)
         //ref_l = (1 - ref_t);
         ref_l = ref_t;
         //TODO especialized impedance calculation taking advantage of symmetry
-        calculate_impedances(
-            electrodes, num_electrodes, zl, zt, gamma, s, 1.0, kappa,
-            max_eval, req_abs_error, req_rel_error, ERROR_PAIRED, INTG_DOUBLE);
+        calculate_impedances(electrodes, num_electrodes, zl, zt, gamma, s, 1.0,
+                             kappa, max_eval, req_abs_error, req_rel_error,
+                             ERROR_PAIRED, INTG_DOUBLE);
         zinternal = internal_impedance(s, rho_c,
             electrodes[0].radius, 1.0)*electrodes[0].length;
-        for (k = 0; k < num_electrodes; k++)
-        {
+        for (k = 0; k < num_electrodes; k++) {
             zl[k*num_electrodes + k] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-            s, 1.0, kappa, ref_l, ref_t, max_eval, req_abs_error, req_rel_error, ERROR_PAIRED, INTG_DOUBLE);
+                          s, 1.0, kappa, ref_l, ref_t, max_eval, req_abs_error,
+                          req_rel_error, ERROR_PAIRED, INTG_DOUBLE);
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         //The matrices are pivoted in-place. To recover them, copy
         copy_array(we, we_cp, ss2);
@@ -116,8 +108,7 @@ int run_case(int gs, int num_electrodes, int num_nodes)
     return 0;
 }
 
-int main()
-{
+int main() {
     clock_t begin, end;
     double time_spent;
     // ===================================================
