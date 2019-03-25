@@ -320,7 +320,7 @@ int calculate_impedances(const Electrode* electrodes, size_t num_electrodes,
                          _Complex double kappa, size_t max_eval,
                          double req_abs_error, double req_rel_error,
                          int error_norm, int integration_type) {
-    double result[2], error[2], ls, lr, k1, k2, cost;
+    double result[2], error[2], ls, lr, k1[3], k2, cost;
     _Complex double iwu_4pi = s*mur*MU0/(FOUR_PI);
     _Complex double one_4pik = 1.0/(FOUR_PI*kappa);
     _Complex double intg;
@@ -330,18 +330,20 @@ int calculate_impedances(const Electrode* electrodes, size_t num_electrodes,
     // operations, as some of them would be done twice or more unnecessarily
     for (i = 0; i < num_electrodes; i++) {
         ls = electrodes[i].length;
-        k1 = electrodes[i].radius/ls;
-        k2 = sqrt(1.0 + k1*k1);
-        cost = 2.0*(log( (k2 + 1.)/k1 ) - k2 + k1);
+        k1[0] = electrodes[i].radius/ls;
+        k2 = sqrt(1.0 + k1[0]*k1[0]);
+        cost = 2.0*(log( (k2 + 1.)/k1[0] ) - k2 + k1[0]);
         zl[i*num_electrodes + i] = iwu_4pi*ls*cost + electrodes[i].zi;
         zt[i*num_electrodes + i] = one_4pik/ls*cost;
+        for (m = 0; m < 3; m++) {
+            k1[m] = (electrodes[i].end_point[m] - electrodes[i].start_point[m]);
+        }
         for (k = i+1; k < num_electrodes; k++) {
             lr = electrodes[k].length;
             cost = 0.0;
             for (m = 0; m < 3; m++) {
-                k1 = (electrodes[i].end_point[m] - electrodes[i].start_point[m]);
                 k2 = (electrodes[k].end_point[m] - electrodes[k].start_point[m]);
-                cost += k1*k2;
+                cost += k1[m]*k2;
             }
             cost = abs(cost/(ls*lr));
             failure = integral(&(electrodes[i]), &(electrodes[k]), gamma,
@@ -366,7 +368,7 @@ int impedances_images(const Electrode* electrodes, const Electrode* images,
                       _Complex double ref_l, _Complex double ref_t,
                       size_t max_eval, double req_abs_error,
                       double req_rel_error, int error_norm, int integration_type) {
-    double result[2], error[2], ls, lr, k1, k2, cost;
+    double result[2], error[2], ls, lr, k1[3], k2, cost;
     _Complex double iwu_4pi = s*mur*MU0/(FOUR_PI);
     _Complex double one_4pik = 1.0/(FOUR_PI*kappa);
     _Complex double intg;
@@ -375,13 +377,15 @@ int impedances_images(const Electrode* electrodes, const Electrode* images,
     // operations, as some of them would be done twice or more unnecessarily
     for (size_t i = 0; i < num_electrodes; i++) {
         ls = electrodes[i].length;
+        for (size_t m = 0; m < 3; m++) {
+            k1[m] = (electrodes[i].end_point[m] - electrodes[i].start_point[m]);
+        }
         for (size_t k = i; k < num_electrodes; k++) {
             lr = images[k].length;
             cost = 0.0;
             for (size_t m = 0; m < 3; m++) {
-                k1 = (electrodes[i].end_point[m] - electrodes[i].start_point[m]);
                 k2 = (images[k].end_point[m] - images[k].start_point[m]);
-                cost += k1*k2;
+                cost += k1[m]*k2;
             }
             cost = abs(cost/(ls*lr));
             failure = integral(&(electrodes[i]), &(images[k]), gamma, max_eval,
