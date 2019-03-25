@@ -1,7 +1,7 @@
 #MKLROOT is defined by a bash script that is shipped together with intel's MKL
 #source mklvars.sh intel64
-#"C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.1.144\windows\mkl\bin\mklvars.bat" intel64
 #manual set:
+#"C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019.1.144\windows\mkl\bin\mklvars.bat" intel64
 MKLROOT = "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\mkl"
 INTELLINK = "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2019.1.144\\windows\\mkl\\lib\\intel64_win\\mkl_rt.lib"
 INTELFLAGS = -DMKL_ILP64
