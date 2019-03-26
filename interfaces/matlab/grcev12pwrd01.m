@@ -7,7 +7,7 @@
 % characteristics of substation grounding systems," in IEEE Transactions on
 % Power Delivery, vol. 12, no. 1, pp. 172-178, Jan. 1997.
 % doi: 10.1109/61.568238
-usemat = false; % use the pure MATLAB routines?
+usemat = true; % use the pure MATLAB routines?
 if ~usemat
     if ispc % windows?
         mex calculate_impedances.c interface_matlab.c ..\\..\\src\\electrode.c ..\\..\\cubature\\hcubature.c ..\\..\\src\\auxiliary.c -I. -I..\\..\\src -I..\\..\\cubature
@@ -18,7 +18,7 @@ if ~usemat
     end
 end
 %% Parameters
-gs = 60 % grid size in meters
+gs = 20 % grid size in meters
 % Soil
 mu0 = pi*4e-7;
 mur = 1.0;
@@ -31,7 +31,7 @@ max_eval = 200;
 req_abs_error = 1e-3;
 req_rel_error = 1e-4;
 error_norm = 1; %paired, only used in C routines
-intg_type = 2; % 0 -> none; 1 -> double; 2 -> single
+intg_type = Integration_type.INTG_NONE;
 
 % Frequencies
 nf = 150;

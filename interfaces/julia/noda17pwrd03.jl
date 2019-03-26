@@ -181,9 +181,7 @@ function simulate(intg_type::Int)
 	return outv, outi, source, vout_art, iout_art, t
 end;
 
-#1: #double integral
-#0: closed form solution
-outv, outi, source, vout_art, iout_art, t = @time simulate(0);
+outv, outi, source, vout_art, iout_art, t = @time simulate(INTG_DOUBLE);
 #plotly()
 pyplot()
 display(plot([t*1e9, source.t*1e9, vout_art.t], [outv, source.V, vout_art.V],

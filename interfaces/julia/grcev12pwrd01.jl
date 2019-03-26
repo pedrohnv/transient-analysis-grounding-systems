@@ -89,9 +89,7 @@ function simulate(gs::Int, nf::Int, intg_type::Int)
 	return zh
 end;
 
-#1: #double integral
-#0: closed form solution
-intg_type = 1;
+intg_type = INTG_DOUBLE;
 nf = 150;
 freq = exp10.(range(2, stop=6.4, length=nf)); #logspace
 zh = zeros(ComplexF64, (nf, 5)); #Julia is Column Major.

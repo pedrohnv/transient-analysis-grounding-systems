@@ -21,7 +21,7 @@ function [zl, zt] = Mimpedances_images(electrodes, images, zl, zt, gamma, ...
                 cost = cost + k1(m)*k2;
             end
             cost = abs(cost/(ls*lr));
-            intg = integralHEM(electrodes(i), images(k), gamma, req_abs_error, req_rel_error, intg_type);
+            intg = integral_hem(electrodes(i), images(k), gamma, req_abs_error, req_rel_error, intg_type);
             zl(k,i) = zl(k,i) + ref_l*iwu_4pi*intg*cost;
             zt(k,i) = zt(k,i) + ref_t*one_4pik/(ls*lr)*intg;
             zl(i,k) = zl(k,i);

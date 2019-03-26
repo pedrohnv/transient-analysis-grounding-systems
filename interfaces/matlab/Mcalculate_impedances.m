@@ -27,7 +27,7 @@ function [zl, zt] = Mcalculate_impedances(electrodes, gamma, s, mur, kappa, ...
                 cost = cost + k1(m)*k2;
             end
             cost = abs(cost/(ls*lr));
-            intg = integralHEM(electrodes(i), electrodes(k), gamma, req_abs_error, req_rel_error, intg_type);
+            intg = integral_hem(electrodes(i), electrodes(k), gamma, req_abs_error, req_rel_error, intg_type);
             zl(k,i) = iwu_4pi*intg*cost;
             zt(k,i) = one_4pik/(ls*lr)*intg;
             zl(i,k) = zl(k,i);

@@ -13,6 +13,13 @@ struct Electrode
     zi::Complex{Float64}
 end;
 
+@enum Integration_type begin
+	INTG_NONE = 1
+	INTG_DOUBLE = 2
+	INTG_EXP_LOGNF = 3
+	INTG_LOGNF = 4
+end
+
 function new_electrode(start_point, end_point, radius, internal_impedance)
     return Electrode(NTuple{3,Cdouble}(start_point), NTuple{3,Cdouble}(end_point),
                      NTuple{3,Cdouble}((start_point + end_point)/2.0),
