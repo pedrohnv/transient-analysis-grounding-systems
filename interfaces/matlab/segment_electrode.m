@@ -11,7 +11,7 @@ function [segments, nodes] = segment_electrode(electrode, num_segments)
     for k = 0:num_segments
         nodes(k+1,:) = startp + k*increment;
     end
-    segments = repmat(new_electrode(), num_segments); %pre-allocate
+    segments = repmat(new_electrode(), num_segments, 1); %pre-allocate
     for k = 1:num_segments
         segments(k) = new_electrode(nodes(k,:), nodes(k+1,:), electrode.radius, electrode.zi);
     end
