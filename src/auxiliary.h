@@ -86,7 +86,7 @@ Copy `source` array into `target` array of complex numbers.
 int copy_array(const _Complex double* source, _Complex double* target,
                size_t size);
 
-/** print_zmatrix_file
+/** complex_matrix_file
 Prints a complex (double) matrix to a file.
 @param m number of rows
 @param n number of columns
@@ -95,10 +95,10 @@ Prints a complex (double) matrix to a file.
 @param fp pointer to file stream
 @return 0 on success
 */
-int print_zmatrix_file(size_t m, size_t n,
-                       const _Complex double* a, int lda, FILE* fp);
+int
+complex_matrix_file (size_t m, size_t n, const _Complex double *a, int lda, FILE *fp);
 
-/** print_dmatrix_file
+/** double_matrix_file
 Prints a real (double) matrix to a file.
 @param m number of rows
 @param n number of columns
@@ -107,8 +107,8 @@ Prints a real (double) matrix to a file.
 @param fp pointer to file stream
 @return 0 on success
 */
-int print_dmatrix_file(size_t m, size_t n,
-                       const double* a, int lda, FILE* fp);
+int
+double_matrix_file (size_t m, size_t n, const double *a, int lda, FILE *fp);
 
 /** zbesi_
 FORTRAN subroutine to calculate I-Bessel function, i.e., modified Bessel
@@ -125,8 +125,9 @@ function of the first kind, with complex argument.
 @param ierr error flag
 @see http://netlib.org/amos/zbesi.f
 */
-extern int zbesi_(double* zr, double* zi, double* fnu, int* kode, int* n,
-    double* cyr, double* cyi, int* nz, int* ierr);
+extern int
+zbesi_ (double *zr, double *zi, double *fnu, int *kode, int *n, double *cyr,
+        double *cyi, int *nz, int *ierr);
 
 /* TODO bug related to Mathematica on Windows could be related to FORTRAN
 name mangling, Do something like the following to solve...

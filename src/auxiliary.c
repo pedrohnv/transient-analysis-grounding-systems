@@ -64,11 +64,11 @@ int copy_array(const _Complex double* source, _Complex double* target,
     return 0;
 }
 
-int print_zmatrix_file(size_t m, size_t n, const _Complex double* a, int lda,
-	                     FILE* fp) {
-    size_t i, j;
-    for( i = 0; i < m; i++ ) {
-        for( j = 0; j < n; j++ ) {
+int
+complex_matrix_file(size_t m, size_t n, const _Complex double *a, int lda, FILE *fp)
+{
+    for (size_t i = 0; i < m; i++) {
+        for (size_t j = 0; j < n; j++) {
             fprintf(fp, "(%.6f%+.6fj)", creal(a[i*lda+j]), cimag(a[i*lda+j]) );
             if (j < n - 1) fprintf(fp, ",");
         }
@@ -77,10 +77,11 @@ int print_zmatrix_file(size_t m, size_t n, const _Complex double* a, int lda,
     return 0;
 }
 
-int print_dmatrix_file(size_t m, size_t n, const double* a, int lda, FILE* fp) {
-    size_t i, j;
-    for( i = 0; i < m; i++ ) {
-        for( j = 0; j < n; j++ ) {
+int
+double_matrix_file(size_t m, size_t n, const double *a, int lda, FILE *fp)
+{
+    for (size_t i = 0; i < m; i++) {
+        for (size_t j = 0; j < n; j++) {
             fprintf(fp, "%.6f", a[i*lda+j]);
             if (j < n - 1) fprintf(fp, ",");
         }
