@@ -18,7 +18,7 @@ if ~usemat
     end
 end
 %% Parameters
-gs = 10 % grid size in meters
+gs = 60 % grid size in meters
 % Soil
 mu0 = pi*4e-7;
 mur = 1.0;
@@ -63,7 +63,7 @@ for i=1:ns
     images(i).middle_point(3) = -images(i).middle_point(3);
     images(i).end_point(3) = -images(i).end_point(3);
 end
-
+tic
 [mA, mB] = incidence(electrodes, nodes);
 mAT = transpose(mA);
 mBT = transpose(mB);
@@ -100,6 +100,7 @@ for i = 1:nf
     vn = yn\exci;
     zh(i) = vn(inj_node);
 end
+toc
 %% PLOT
 figure()
 semilogx(freq, abs(zh))

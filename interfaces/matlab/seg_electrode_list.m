@@ -4,7 +4,7 @@ function [elecs, nodes] = seg_electrode_list(electrodes, frac)
 		%TODO store in array to avoid repeated calculations
 		num_elec = num_elec + ceil(electrodes(i).length/frac);
     end
-    elecs = repmat(new_electrode(), num_elec); %pre-allocate
+    elecs = repmat(new_electrode(), num_elec, 1); %pre-allocate
 	e = 1;
 	for i=1:length(electrodes)
 		ns = ceil(electrodes(i).length/frac);

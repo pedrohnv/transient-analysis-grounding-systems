@@ -12,7 +12,7 @@ mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
     //TODO check inputs and print useful error messages
     //mxGetNumberOfElements = N_array_elements + N_struct_fields
-    size_t num_electrodes = mxGetNumberOfElements(prhs[0])/12;
+    size_t num_electrodes = mxGetNumberOfElements(prhs[0]);
     Electrode *electrodes = malloc(sizeof(Electrode)*num_electrodes);
     for (size_t i = 0; i < num_electrodes; i++) {
         cast_electrode(prhs[0], i, &(electrodes[i]));
