@@ -1,13 +1,23 @@
-/**
-Funtions to interface the C code to MATLAB.
-
+/** Funtions to interface the C code to MATLAB.
 Uses Matlab's "C Matrix API" to run on Matlab R2017b and
 earlier.
 */
-#include <mex.h>
-//#include <Electrode.h>
-#include <complex.h>
+#ifndef INTERFACE_MATLAB_H_
+#define INTERFACE_MATLAB_H_
 
+#include "mex.h"
+#include "electrode.h"
+//#include <complex.h>
+
+/** cast_electrode
+Cast the matlab Electrode structure to the C struct.
+@param matlab_elect pointer to Matlab structure that holds the electrode structure
+@param electrode pointer that will be used as the C struct
+*/
+int
+cast_electrode (const mxArray *matlab_elect, mwIndex index, Electrode *electrode);
+
+/*
 //auxiliary.h
 #define PI 3.1415926535897932384626433832795029L
 #define TWO_PI 6.283185307179586
@@ -57,24 +67,19 @@ int integral(const Electrode* sender, const Electrode* receiver,
              double result[2], double error[2]);
 
 int calculate_impedances(const Electrode* electrodes, size_t num_electrodes,
-                         _Complex double* zl, _Complex double* zt,
+                         _Complex double *zl, _Complex double *zt,
                          _Complex double gamma, _Complex double s, double mur,
                          _Complex double kappa, size_t max_eval,
                          double req_abs_error, double req_rel_error,
                          int error_norm, int integration_type);
 
 int impedances_images(const Electrode* electrodes, const Electrode* images,
-                      size_t num_electrodes, _Complex double* zl,
-                      _Complex double* zt, _Complex double gamma,
+                      size_t num_electrodes, _Complex double *zl,
+                      _Complex double *zt, _Complex double gamma,
                       _Complex double s, double mur, _Complex double kappa,
                       _Complex double ref_l, _Complex double ref_t,
                       size_t max_eval, double req_abs_error,
                       double req_rel_error, int error_norm, int integration_type);
-
-// THIS
-/**
-Cast the matlab Electrode structure to the C struct.
-@param matlab_elect pointer to Matlab structure that holds the electrode structure
-@param electrode pointer that will be used as the C struct
 */
-int cast_electrode(const mxArray *matlab_elect, mwIndex index, Electrode* electrode);
+
+#endif /* INTERFACE_MATLAB_H_ */

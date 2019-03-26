@@ -7,12 +7,11 @@ Reproducing the results in [1] for a vertical electrode buriend in ground.
 ground rod”. In: IEEE Transactions on Power Delivery 20.2 (2005), pp. 1598–
 1603. ISSN : 0885-8977. DOI : 10.1109/TPWRD.2004.838460.
 */
+#include "auxiliary.h"
+#include "electrode.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <cubature.h>
-#include <Electrode.h>
-#include <auxiliary.h>
 //#include <omp.h>
 
 int
@@ -31,7 +30,7 @@ run_case (double length, double rho, char file_name[])
     double start_point[3] = {0., 0., -h};
     double end_point[3] = {0., 0., -h - length};
     remove(file_name);
-    FILE* save_file = fopen(file_name, "w");
+    FILE *save_file = fopen(file_name, "w");
     if (save_file == NULL) {
         printf("Cannot open file %s\n",  file_name);
         exit(1);
@@ -42,7 +41,7 @@ run_case (double length, double rho, char file_name[])
     size_t num_electrodes = ceil( length/(lambda/6.0) ) ;
     size_t num_nodes = num_electrodes + 1;
     double nodes[num_nodes][3];
-    Electrode* electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode *electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     // the internal impedance is added "outside" later
     segment_electrode(
         electrodes, nodes, num_electrodes, start_point, end_point, r, 0.0);
@@ -51,7 +50,7 @@ run_case (double length, double rho, char file_name[])
     end_point[2] = h + length;
     double nodes_images[num_nodes][3];
     //Electrode images[num_electrodes];
-    Electrode* images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode *images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     segment_electrode(
         images, nodes_images, num_electrodes, start_point, end_point, r, 0.0);
     //build system to be solved
@@ -61,13 +60,13 @@ run_case (double length, double rho, char file_name[])
     size_t ss2 = ss1*ss1;
     _Complex double s, ref_l, ref_t;
     _Complex double kappa, gamma, zinternal, kappa_air;
-    _Complex double* zl = malloc(sizeof(_Complex double)*ne2);
-    _Complex double* zt = malloc(sizeof(_Complex double)*ne2);
-    _Complex double* yn = calloc(nn2, sizeof(_Complex double)*nn2);
-    _Complex double* ie = calloc(ss1, sizeof(_Complex double)*ss1);
-    _Complex double* ie_cp = malloc(sizeof(_Complex double)*ss1);
-    _Complex double* we = malloc(sizeof(_Complex double)*ss2);
-    _Complex double* we_cp = malloc(sizeof(_Complex double)*ss2);
+    _Complex double *zl = malloc(sizeof(_Complex double)*ne2);
+    _Complex double *zt = malloc(sizeof(_Complex double)*ne2);
+    _Complex double *yn = calloc(nn2, sizeof(_Complex double)*nn2);
+    _Complex double *ie = calloc(ss1, sizeof(_Complex double)*ss1);
+    _Complex double *ie_cp = malloc(sizeof(_Complex double)*ss1);
+    _Complex double *we = malloc(sizeof(_Complex double)*ss2);
+    _Complex double *we_cp = malloc(sizeof(_Complex double)*ss2);
     ie[ss1 - num_nodes] = 1.0;
     fill_incidence(we, electrodes, num_electrodes, nodes, num_nodes);
     // solve for each frequency: WE*VE = IE
@@ -129,7 +128,7 @@ run_case2 (double length, double rho, char file_name[])
     double end_point[3] = {0., 0., -h - length};
 
     remove(file_name);
-    FILE* save_file = fopen(file_name, "w");
+    FILE *save_file = fopen(file_name, "w");
     if (save_file == NULL) {
         printf("Cannot open file %s\n",  file_name);
         exit(1);
@@ -140,7 +139,7 @@ run_case2 (double length, double rho, char file_name[])
     size_t num_electrodes = ceil( length/(lambda/6.0) ) ;
     size_t num_nodes = num_electrodes + 1;
     double nodes[num_nodes][3];
-    Electrode* electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode *electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     // the internal impedance is added "outside" later
     segment_electrode(
         electrodes, nodes, num_electrodes, start_point, end_point, r, 0.0);
@@ -149,7 +148,7 @@ run_case2 (double length, double rho, char file_name[])
     end_point[2] = h + length;
     double nodes_images[num_nodes][3];
     //Electrode images[num_electrodes];
-    Electrode* images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode *images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     segment_electrode(
         images, nodes_images, num_electrodes, start_point, end_point, r, 0.0);
     _Complex double *s = malloc(sizeof(_Complex double)*nf);
@@ -162,7 +161,7 @@ run_case2 (double length, double rho, char file_name[])
         gamma1[i] = csqrt(s[i]*MU0*kappa1[i]);
         kappa2[i] = s[i]*EPS0;
     }
-    _Complex double* zh = malloc(sizeof(_Complex double)*nf);
+    _Complex double *zh = malloc(sizeof(_Complex double)*nf);
     double rsource = 0.0;
     harmonic_impedance1(
     //harmonic_impedance1_alt(

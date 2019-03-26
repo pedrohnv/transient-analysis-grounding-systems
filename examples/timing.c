@@ -1,19 +1,17 @@
 /* check timing for both grcev20pwrd02 and grcev51emc03
 for each integration type */
-
+#include "auxiliary.h"
+#include "electrode.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <cubature.h>
-#include <Electrode.h>
-#include <auxiliary.h>
 //#include <omp.h>
 #include <time.h>
 
 int
-impedances_single (Electrode* electrodes, int num_electrodes, _Complex double* zl,
-                   _Complex double* zt, _Complex double gamma, _Complex double s,
-                   double mur, _Complex double kappa, _Complex double* mpot)
+impedances_single (Electrode *electrodes, int num_electrodes, _Complex double *zl,
+                   _Complex double *zt, _Complex double gamma, _Complex double s,
+                   double mur, _Complex double kappa, _Complex double *mpot)
 {
     double ls, lr, k1, k2, cost, rbar;
     _Complex double iwu_4pi = s*mur*MU0/(FOUR_PI);
@@ -71,7 +69,7 @@ run_grcev20pwrd02 (double length, double rho, char file_name[], int intg_type)
     double end_point[3] = {0., 0., -h - length};
 
     remove(file_name);
-    FILE* save_file = fopen(file_name, "w");
+    FILE *save_file = fopen(file_name, "w");
     if (save_file == NULL) {
         printf("Cannot open file %s\n",  file_name);
         exit(1);
@@ -82,7 +80,7 @@ run_grcev20pwrd02 (double length, double rho, char file_name[], int intg_type)
     size_t num_electrodes = ceil( length/(lambda/6.0) ) ;
     size_t num_nodes = num_electrodes + 1;
     double nodes[num_nodes][3];
-    Electrode* electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode *electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     // the internal impedance is added "outside" later
     segment_electrode(
         electrodes, nodes, num_electrodes, start_point, end_point, r, 0.0);
@@ -92,7 +90,7 @@ run_grcev20pwrd02 (double length, double rho, char file_name[], int intg_type)
     end_point[2] = h + length;
     double nodes_images[num_nodes][3];
     //Electrode images[num_electrodes];
-    Electrode* images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode *images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     segment_electrode(
         images, nodes_images, num_electrodes, start_point, end_point, r, 0.0);
 
@@ -103,14 +101,14 @@ run_grcev20pwrd02 (double length, double rho, char file_name[], int intg_type)
     size_t ss2 = ss1*ss1;
     _Complex double s;
     _Complex double kappa, gamma, zinternal;
-    _Complex double* mpot = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* yn = (_Complex double*) malloc(sizeof(_Complex double)*nn2);
-    _Complex double* ie = (_Complex double*) malloc(sizeof(_Complex double)*ss1);
-    _Complex double* ie_cp = (_Complex double*) malloc(sizeof(_Complex double)*ss1);
-    _Complex double* we = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
-    _Complex double* we_cp = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
+    _Complex double *mpot = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
+    _Complex double *zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
+    _Complex double *zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
+    _Complex double *yn = (_Complex double*) malloc(sizeof(_Complex double)*nn2);
+    _Complex double *ie = (_Complex double*) malloc(sizeof(_Complex double)*ss1);
+    _Complex double *ie_cp = (_Complex double*) malloc(sizeof(_Complex double)*ss1);
+    _Complex double *we = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
+    _Complex double *we_cp = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
     for (size_t i = 0; i < nn2; i++) {
         yn[i] = 0.0; //external nodal admittance
     }
@@ -186,7 +184,7 @@ run_grcev51emc03 (double length, double rho, char file_name[], int intg_type)
     double end_point[3] = {length, 0., -h};
 
     remove(file_name);
-    FILE* save_file = fopen(file_name, "w");
+    FILE *save_file = fopen(file_name, "w");
     if (save_file == NULL) {
         printf("Cannot open file %s\n",  file_name);
         exit(1);
@@ -198,7 +196,7 @@ run_grcev51emc03 (double length, double rho, char file_name[], int intg_type)
     size_t num_electrodes = ceil( length/(lambda/6.0) ) ;
     size_t num_nodes = num_electrodes + 1;
     double nodes[num_nodes][3];
-    Electrode* electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode *electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     // the internal impedance is added "outside" later
     segment_electrode(
         electrodes, nodes, num_electrodes, start_point, end_point, r, 0.0);
@@ -208,7 +206,7 @@ run_grcev51emc03 (double length, double rho, char file_name[], int intg_type)
     end_point[2] = h;
     double nodes_images[num_nodes][3];
     //Electrode images[num_electrodes];
-    Electrode* images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
+    Electrode *images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     segment_electrode(
         images, nodes_images, num_electrodes, start_point, end_point, r, 0.0);
 
@@ -219,14 +217,14 @@ run_grcev51emc03 (double length, double rho, char file_name[], int intg_type)
     size_t ss2 = ss1*ss1;
     _Complex double s;
     _Complex double kappa, gamma, zinternal;
-    _Complex double* mpot = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
-    _Complex double* yn = (_Complex double*) malloc(sizeof(_Complex double)*nn2);
-    _Complex double* ie = (_Complex double*) malloc(sizeof(_Complex double)*ss1);
-    _Complex double* ie_cp = (_Complex double*) malloc(sizeof(_Complex double)*ss1);
-    _Complex double* we = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
-    _Complex double* we_cp = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
+    _Complex double *mpot = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
+    _Complex double *zl = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
+    _Complex double *zt = (_Complex double*) malloc(sizeof(_Complex double)*ne2);
+    _Complex double *yn = (_Complex double*) malloc(sizeof(_Complex double)*nn2);
+    _Complex double *ie = (_Complex double*) malloc(sizeof(_Complex double)*ss1);
+    _Complex double *ie_cp = (_Complex double*) malloc(sizeof(_Complex double)*ss1);
+    _Complex double *we = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
+    _Complex double *we_cp = (_Complex double*) malloc(sizeof(_Complex double)*ss2);
     for (size_t i = 0; i < nn2; i++) {
         yn[i] = 0.0; //external nodal admittance
     }
@@ -289,7 +287,7 @@ int
 run_timing (int intg_type, char *file_name, unsigned int loops)
 {
     remove(file_name);
-    FILE* save_file = fopen(file_name, "w");
+    FILE *save_file = fopen(file_name, "w");
     if (save_file == NULL) {
         printf("Cannot open file %s\n",  file_name);
         exit(1);

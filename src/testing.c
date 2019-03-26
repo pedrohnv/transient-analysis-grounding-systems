@@ -1,18 +1,19 @@
 /*
 Functions for testing the code
 */
+
+#include "cubature.h"
+#include "electrode.h"
+#include "auxiliary.h"
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
-#include <cubature.h>
-#include <Electrode.h>
-#include <auxiliary.h>
-//#include <omp.h>
 #include <assert.h>
+//#include <omp.h>
 
 /* Auxiliary routine: printing a matrix */
 void
-print_matrix (char* desc, MKL_INT m, MKL_INT n, _Complex double* a, MKL_INT lda)
+print_matrix (char *desc, MKL_INT m, MKL_INT n, _Complex double *a, MKL_INT lda)
 {
     MKL_INT i, j;
     printf( "\n %s\n", desc );
@@ -173,7 +174,7 @@ test_case (double rho, double length, double frac)
     double rho_c = 1.9e-6;
     // execute
     remove("test_case.dat");
-    FILE* ftest_case = fopen("test_case.dat", "w");
+    FILE *ftest_case = fopen("test_case.dat", "w");
     if (ftest_case == NULL) {
         printf("Cannot open file %s\n", "test_case.dat");
         exit(1);
@@ -280,19 +281,19 @@ integration ()
     logspace(2, 7, nf, freq);
     char file_name[] = "integration_test.dat";
     remove(file_name);
-    FILE* save_file = fopen(file_name, "w");
+    FILE *save_file = fopen(file_name, "w");
     if (save_file == NULL) {
         printf("Cannot open file %s\n",  file_name);
         exit(1);
     }
     double start_point[3] = {0., 0., h};
     double end_point[3] = {len, 0., h};
-    Electrode* sender = (Electrode*) malloc(sizeof(Electrode));
+    Electrode *sender = (Electrode*) malloc(sizeof(Electrode));
     populate_electrode(sender, start_point, end_point, r1, 0.0);
     start_point[1] = len;
     start_point[2] = -h;
     end_point[2] = -h;
-    Electrode* receiver = (Electrode*) malloc(sizeof(Electrode));
+    Electrode *receiver = (Electrode*) malloc(sizeof(Electrode));
     populate_electrode(receiver, start_point, end_point, r1, 0.0);
     double result[2], error[2];
     _Complex double s;

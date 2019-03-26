@@ -1,4 +1,5 @@
-#include "InterfaceMatlab.h"
+#include "interface_matlab.h"
+#include "electrode.h"
 #include "mex.h"
 //mex calculate_impedances.c InterfaceMatlab.c ..\\..\\cubature\\hcubature.c -I. -I..\\..\\cubature
 
@@ -6,11 +7,13 @@
 Calculate the impedance matrices of the electrode system.
 TODO describe args
 */
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+void
+mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+{
     //TODO check inputs and print useful error messages
     //mxGetNumberOfElements = N_array_elements + N_struct_fields
     size_t num_electrodes = mxGetNumberOfElements(prhs[0])/12;
-    Electrode* electrodes = malloc(sizeof(Electrode)*num_electrodes);
+    Electrode *electrodes = malloc(sizeof(Electrode)*num_electrodes);
     for (size_t i = 0; i < num_electrodes; i++) {
         cast_electrode(prhs[0], i, &(electrodes[i]));
     }

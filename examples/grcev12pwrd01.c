@@ -9,13 +9,12 @@ characteristics of substation grounding systems," in IEEE Transactions on
 Power Delivery, vol. 12, no. 1, pp. 172-178, Jan. 1997.
 doi: 10.1109/61.568238
 */
+#include "auxiliary.h"
+#include "electrode.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include <cubature.h>
-#include <Electrode.h>
-#include <auxiliary.h>
 #include <time.h>
 //#include <omp.h>
 
@@ -27,7 +26,7 @@ run_case (int gs, int num_electrodes, int num_nodes)
     double req_rel_error = 1e-4;
     char file_name[50];
     sprintf(file_name, "gs%d.dat", gs);
-    FILE* save_file = fopen(file_name, "w");
+    FILE *save_file = fopen(file_name, "w");
     // parameters
     double sigma = 1.0/1000.0; // soil conductivity
     double er = 10.0; // soil rel. permitivitty
@@ -37,12 +36,12 @@ run_case (int gs, int num_electrodes, int num_nodes)
     double freq[nf];
     logspace(2, 6.4, nf, freq);
     // electrode definition
-    Electrode* electrodes = malloc(sizeof(Electrode)*num_electrodes);
+    Electrode *electrodes = malloc(sizeof(Electrode)*num_electrodes);
     sprintf(file_name, "elec_gs%d.txt", gs);
     int read;
     read = electrodes_file(file_name, electrodes, num_electrodes);
     if (read > 0) exit(read);
-    Electrode* images = malloc(sizeof(Electrode)*num_electrodes);
+    Electrode *images = malloc(sizeof(Electrode)*num_electrodes);
     electrodes_file(file_name, images, num_electrodes);
     double nodes[num_nodes][3];
     sprintf(file_name, "nodes_gs%d.txt", gs);
@@ -57,13 +56,13 @@ run_case (int gs, int num_electrodes, int num_nodes)
     size_t ss1 = (2*num_electrodes + num_nodes);
     size_t ss2 = ss1*ss1;
     _Complex double kappa, gamma, zinternal;
-    _Complex double* zl = malloc(sizeof(_Complex double)*ne2);
-    _Complex double* zt = malloc(sizeof(_Complex double)*ne2);
-    _Complex double* yn = calloc(nn2, sizeof(_Complex double));
-    _Complex double* ie = calloc(ss1, sizeof(_Complex double));
-    _Complex double* ie_cp = (_Complex double*) calloc(ss1, sizeof(_Complex double));
-    _Complex double* we = malloc(sizeof(_Complex double)*ss2);
-    _Complex double* we_cp = malloc(sizeof(_Complex double)*ss2);
+    _Complex double *zl = malloc(sizeof(_Complex double)*ne2);
+    _Complex double *zt = malloc(sizeof(_Complex double)*ne2);
+    _Complex double *yn = calloc(nn2, sizeof(_Complex double));
+    _Complex double *ie = calloc(ss1, sizeof(_Complex double));
+    _Complex double *ie_cp = (_Complex double*) calloc(ss1, sizeof(_Complex double));
+    _Complex double *we = malloc(sizeof(_Complex double)*ss2);
+    _Complex double *we_cp = malloc(sizeof(_Complex double)*ss2);
     ie[ss1 - num_nodes] = 1.0;
     fill_incidence(we, electrodes, num_electrodes, nodes, num_nodes);
     // solve for each frequency: WE*VE = IE

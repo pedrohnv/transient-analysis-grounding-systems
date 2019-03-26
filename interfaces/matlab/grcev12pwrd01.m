@@ -7,13 +7,18 @@
 % characteristics of substation grounding systems," in IEEE Transactions on
 % Power Delivery, vol. 12, no. 1, pp. 172-178, Jan. 1997.
 % doi: 10.1109/61.568238
-
 usemat = false; % use the pure MATLAB routines?
 if ~usemat
-    mex calculate_impedances.c InterfaceMatlab.c ..\\..\\cubature\\hcubature.c -I. -I..\\..\\cubature
-    mex impedances_images.c InterfaceMatlab.c ..\\..\\cubature\\hcubature.c -I. -I..\\..\\cubature
+    if ispc % windows?
+        mex calculate_impedances.c interface_matlab.c ..\\..\\src\\electrode.c ..\\..\\cubature\\hcubature.c ..\\..\\src\\auxiliary.c -I. -I..\\..\\src -I..\\..\\cubature
+        mex impedances_images.c interface_matlab.c ..\\..\\src\\electrode.c ..\\..\\cubature\\hcubature.c ..\\..\\src\\auxiliary.c -I. -I..\\..\\src -I..\\..\\cubature
+    else
+        mex calculate_impedances.c interface_matlab.c ../../src/electrode.c ../../cubature/hcubature.c ../../src/auxiliary.c -I. -I../../src -I../../cubature
+        mex impedances_images.c interface_matlab.c ../../src/electrode.c ../../cubature/hcubature.c ../../src/auxiliary.c -I. -I../../src -I../../cubature
+    end
 end
 %% Parameters
+gs = 10 % grid size in meters
 % Soil
 mu0 = pi*4e-7;
 mur = 1.0;
@@ -39,7 +44,6 @@ frac = lambda/10; %for segmentation
 r = 7e-3;
 h = -0.5;
 l = 10;
-gs = 10;
 n = gs/10;
 elecs = electrode_grid(l, n, l, n, h, r);
 [electrodes, nodes] =  seg_electrode_list(elecs, frac);

@@ -4,11 +4,15 @@
 %
 % [1] Noda, Taku, and Shigeru Yokoyama. "Thin wire representation in finite difference time domain
 % surge simulation." IEEE Transactions on Power Delivery 17.3 (2002): 840-847.
-
 usemat = false; % use the pure MATLAB routines?
 if ~usemat
-    mex calculate_impedances.c InterfaceMatlab.c ..\\..\\cubature\\hcubature.c -I. -I..\\..\\cubature
-    mex impedances_images.c InterfaceMatlab.c ..\\..\\cubature\\hcubature.c -I. -I..\\..\\cubature
+    if ispc % windows?
+        mex calculate_impedances.c interface_matlab.c ..\\..\\src\\electrode.c ..\\..\\cubature\\hcubature.c ..\\..\\src\\auxiliary.c -I. -I..\\..\\src -I..\\..\\cubature
+        mex impedances_images.c interface_matlab.c ..\\..\\src\\electrode.c ..\\..\\cubature\\hcubature.c ..\\..\\src\\auxiliary.c -I. -I..\\..\\src -I..\\..\\cubature
+    else
+        mex calculate_impedances.c interface_matlab.c ../../src/electrode.c ../../cubature/hcubature.c ../../src/auxiliary.c -I. -I../../src -I../../cubature
+        mex impedances_images.c interface_matlab.c ../../src/electrode.c ../../cubature/hcubature.c ../../src/auxiliary.c -I. -I../../src -I../../cubature
+    end
 end
 
 %% Parameters

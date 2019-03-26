@@ -10,11 +10,11 @@ INTELFLAGS = -DMKL_ILP64 -m64
 CUBATUREPATH = cubature/
 SLATECPATH = slatec/
 WOLFRAMPATH = /usr/local/Wolfram/Mathematica/11.3/SystemFiles/IncludeFiles/C/
-INCLUDE = -I. -I$(CUBATUREPATH)
+INCLUDE = -Isrc -I$(CUBATUREPATH)
 LINK = -L. $(INTELLINK) -lslatec -lgfortran
 CFLAGS = -Wall -fno-exceptions -std=c11 $(INTELFLAGS) -Werror -O3
 #CFLAGS = -Wall -std=c11 $(INTELFLAGS) -g
-OBJECTS = Electrode.o auxiliary.o hcubature.o
+OBJECTS = electrode.o auxiliary.o hcubature.o
 
 #Compilers
 CC = gcc
@@ -39,26 +39,26 @@ cleanall	:
 hcubature.o	:	$(CUBATUREPATH)hcubature.c
 		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c $(CUBATUREPATH)hcubature.c $(LINK)
 
-auxiliary.o	:	src/auxiliary.c
-		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c src/auxiliary.c $(LINK)
+auxiliary.o	:	auxiliary.c
+		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c auxiliary.c $(LINK)
 
-Electrode.o	:	src/Electrode.c auxiliary.o hcubature.o
-		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c src/Electrode.c $(LINK)
+electrode.o	:	electrode.c auxiliary.o hcubature.o
+		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c electrode.c $(LINK)
 
 dynamicLibrary	:
-		$(CC) -fPIC -shared $(CFLAGS) $(INCLUDE) -o libhem.so src/Electrode.c src/auxiliary.c $(CUBATUREPATH)hcubature.c $(LINK)
+		$(CC) -fPIC -shared $(CFLAGS) $(INCLUDE) -o libhem.so electrode.c auxiliary.c $(CUBATUREPATH)hcubature.c $(LINK)
 
 test	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o testing.a src/testing.c $(OBJECTS) $(LINK)
+		$(CC) $(CFLAGS) $(INCLUDE) -o testing.a testing.c $(OBJECTS) $(LINK)
 
 testDLL	:	libhem.so
-		$(CC) $(CFLAGS) $(INCLUDE) -o testingDLL.a src/testing.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem
+		$(CC) $(CFLAGS) $(INCLUDE) -o testingDLL.a testing.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem
 
 slatec	:
 		cd $(SLATECPATH) && $(MAKE) FC=$(FC) all
 
 wolfram	:
-		$(CC) -fPIC -shared -std=c11 $(INTELFLAGS) -Werror -O3 $(INCLUDE) -I$(WOLFRAMPATH) -o interfaces/mathematica/libhem_mma.so InterfaceWolfram.c src/Electrode.c src/auxiliary.c $(CUBATUREPATH)hcubature.c $(LINK)
+		$(CC) -fPIC -shared -std=c11 $(INTELFLAGS) -Werror -O3 $(INCLUDE) -I$(WOLFRAMPATH) -o interfaces/mathematica/libhem_mma.so interface_wolfram.c electrode.c auxiliary.c $(CUBATUREPATH)hcubature.c $(LINK)
 
 timing	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o timing.a examples/timing.c $(OBJECTS) $(LINK)

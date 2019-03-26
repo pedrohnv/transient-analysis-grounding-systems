@@ -1,11 +1,13 @@
-#include "InterfaceMatlab.h"
-#include "cubature.h"
-#include <math.h>
+#include "interface_matlab.h"
+#include "mex.h"
+#include "electrode.h"
+//#include <math.h>
 #include <complex.h>
 #include <string.h>
-#include <float.h>
 
-int cast_electrode(const mxArray *matlab_elect, mwIndex index, Electrode* electrode) {
+int
+cast_electrode (const mxArray *matlab_elect, mwIndex index, Electrode* electrode)
+{
     int number_of_fields, field_index;
     const char *field_name;
     const mxArray *field_array_ptr;
@@ -77,7 +79,7 @@ int cast_electrode(const mxArray *matlab_elect, mwIndex index, Electrode* electr
     mexPrintf("zi: %f + I*%f\n\n", creal(electrode->zi), cimag(electrode->zi));*/
     return 0;
 }
-
+/* FIXME
 //auxiliary.c
 int equal_points(const double point_1[3], const double point_2[3]) {
     for (size_t i = 0; i < 3; i++) {
@@ -202,7 +204,7 @@ int integral(const Electrode* sender, const Electrode* receiver,
 }
 
 int calculate_impedances(const Electrode* electrodes, size_t num_electrodes,
-                         _Complex double* zl, _Complex double* zt,
+                         _Complex double *zl, _Complex double *zt,
                          _Complex double gamma, _Complex double s, double mur,
                          _Complex double kappa, size_t max_eval,
                          double req_abs_error, double req_rel_error,
@@ -249,8 +251,8 @@ int calculate_impedances(const Electrode* electrodes, size_t num_electrodes,
 }
 
 int impedances_images(const Electrode* electrodes, const Electrode* images,
-                      size_t num_electrodes, _Complex double* zl,
-                      _Complex double* zt, _Complex double gamma,
+                      size_t num_electrodes, _Complex double *zl,
+                      _Complex double *zt, _Complex double gamma,
                       _Complex double s, double mur, _Complex double kappa,
                       _Complex double ref_l, _Complex double ref_t,
                       size_t max_eval, double req_abs_error,
@@ -280,7 +282,7 @@ int impedances_images(const Electrode* electrodes, const Electrode* images,
                                integration_type, result, error);
             if (failure) return failure;
             intg = result[0] + I*result[1];
-            /*if (i != k)*/ zl[i*num_electrodes + k] += ref_l*iwu_4pi*intg*cost;
+            zl[i*num_electrodes + k] += ref_l*iwu_4pi*intg*cost;
             zt[i*num_electrodes + k] += ref_t*one_4pik/(ls*lr)*intg;
 
             zl[k*num_electrodes + i] = zl[i*num_electrodes + k];
@@ -289,3 +291,4 @@ int impedances_images(const Electrode* electrodes, const Electrode* images,
     }
     return 0;
 }
+*/

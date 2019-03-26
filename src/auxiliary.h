@@ -1,7 +1,8 @@
-/**
-High Performance Hybrid Electromagnetic Model calculations in C.
-Constants, auxiliary functions and routines.
+/** High Performance Hybrid Electromagnetic Model calculations in C.
+
 All parameters' units are in the SI base units if omitted.
+
+Constants, auxiliary functions and routines.
 */
 #ifndef AUXILIARY_H_
 #define AUXILIARY_H_
@@ -114,10 +115,10 @@ function of the first kind, with complex argument.
 @param nz number of components set to zero due to underflow
 @param ierr error flag
 @see http://netlib.org/amos/zbesi.f
-*/
+FIXME leave out for now...
 extern int
 zbesi_ (double *zr, double *zi, double *fnu, int *kode, int *n, double *cyr,
-        double *cyi, int *nz, int *ierr);
+        double *cyi, int *nz, int *ierr);*/
 
 /* TODO bug related to Mathematica on Windows could be related to FORTRAN
 name mangling, Do something like the following to solve...
