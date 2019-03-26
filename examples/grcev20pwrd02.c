@@ -89,8 +89,12 @@ int run_case(double length, double rho, char file_name[]) {
             s, 1.0, kappa, ref_l, ref_t, 200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         //The matrices are pivoted in-place. To recover them, copy
-        copy_array(we, we_cp, ss2);
-        copy_array(ie, ie_cp, ss1);
+        for (size_t i = 0; i < ss2; i++) {
+            we_cp[i] = we[i];
+        }
+        for (size_t i = 0; i < ss1; i++) {
+            ie_cp[i] = ie[i];
+        }
         solve_electrodes(we_cp, ie_cp, num_electrodes, num_nodes);
         fprintf(save_file, "%f %f\n",
                 creal(ie_cp[ss1 - num_nodes]), cimag(ie_cp[ss1 - num_nodes]));

@@ -659,7 +659,9 @@ int harmonic_impedance1(size_t ns, const _Complex double* s,
         //The matrices are pivoted in-place. To avoid overwriting them, copy.
         //That way the filling of the incidence, which is costly, needs to be
         //done only once
-        copy_array(we_incidence, we, ss2);
+        for (size_t i = 0; i < ss2; i++) {
+            we[i] = we_incidence[i];
+        }
         fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
         solve_electrodes(we, ie, num_electrodes, num_nodes);
         zh[i] = ie[ss1 - num_nodes];
