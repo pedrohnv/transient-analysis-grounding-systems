@@ -25,12 +25,12 @@ FC = gfortran
 .PHONY	:	clean cleanout allclean slatec libhem.so dynamicLibrary wolfram
 
 clean	:
-		rm -f *.o *.dat examples/*.o examples/*.dat examples/ex12pwrd01grcev*.dat
+		rm -f *.o *.dat examples/*.o examples/*.dat examples/grcev12pwrd01*.dat
 
 cleanout	:
 		rm -f *.a *.so examples/*.a interfaces/mathematica/*.so
 
-allclean	:
+cleanall	:
 		make clean
 		make cleanout
 		cd $(SLATECPATH) && $(MAKE) clean
@@ -39,47 +39,35 @@ allclean	:
 hcubature.o	:	$(CUBATUREPATH)hcubature.c
 		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c $(CUBATUREPATH)hcubature.c $(LINK)
 
-auxiliary.o	:	auxiliary.c
-		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c auxiliary.c $(LINK)
+auxiliary.o	:	src/auxiliary.c
+		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c src/auxiliary.c $(LINK)
 
-Electrode.o	:	Electrode.c auxiliary.o hcubature.o
-		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c Electrode.c $(LINK)
-
-libhem.so	:
-		make dynamicLibrary
+Electrode.o	:	src/Electrode.c auxiliary.o hcubature.o
+		$(CC) -fPIC $(CFLAGS) $(INCLUDE) -c src/Electrode.c $(LINK)
 
 dynamicLibrary	:
-		$(CC) -fPIC -shared $(CFLAGS) $(INCLUDE) -o libhem.so Electrode.c auxiliary.c $(CUBATUREPATH)hcubature.c $(LINK)
+		$(CC) -fPIC -shared $(CFLAGS) $(INCLUDE) -o libhem.so src/Electrode.c src/auxiliary.c $(CUBATUREPATH)hcubature.c $(LINK)
 
 test	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o testing.a testing.c $(OBJECTS) $(LINK)
+		$(CC) $(CFLAGS) $(INCLUDE) -o testing.a src/testing.c $(OBJECTS) $(LINK)
 
 testDLL	:	libhem.so
-		$(CC) $(CFLAGS) $(INCLUDE) -o testingDLL.a testing.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem
+		$(CC) $(CFLAGS) $(INCLUDE) -o testingDLL.a src/testing.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem
 
 slatec	:
 		cd $(SLATECPATH) && $(MAKE) FC=$(FC) all
 
 wolfram	:
-		$(CC) -fPIC -shared -std=c11 $(INTELFLAGS) -Werror -O3 $(INCLUDE) -I$(WOLFRAMPATH) -Iinterfaces/mathematica -o interfaces/mathematica/libhem_mma.so interfaces/mathematica/InterfaceWolfram.c Electrode.c auxiliary.c $(CUBATUREPATH)hcubature.c $(LINK)
+		$(CC) -fPIC -shared -std=c11 $(INTELFLAGS) -Werror -O3 $(INCLUDE) -I$(WOLFRAMPATH) -o interfaces/mathematica/libhem_mma.so InterfaceWolfram.c src/Electrode.c src/auxiliary.c $(CUBATUREPATH)hcubature.c $(LINK)
 
 timing	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o timing.a examples/timing.c $(OBJECTS) $(LINK)
+# examples are named based on publication: author_volume_journal_issue
+grcev20pwrd02	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o grcev20pwrd02.a examples/grcev20pwrd02.c $(OBJECTS) $(LINK)
 
-ex20pwrd02grcev	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o ex20pwrd02grcev.a examples/ex20pwrd02grcev.c $(OBJECTS) $(LINK)
+grcev51emc03	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o grcev51emc03.a examples/grcev51emc03.c $(OBJECTS) $(LINK)
 
-ex51emc03grcev	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o ex51emc03grcev.a examples/ex51emc03grcev.c $(OBJECTS) $(LINK)
-
-ex12pwrd01grcev	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o examples/ex12pwrd01grcev/ex12pwrd01grcev.a examples/ex12pwrd01grcev/ex12pwrd01grcev.c $(OBJECTS) $(LINK)
-
-exAlipioSchroederRCA	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o AlipioSchroederRCA.a examples/AlipioSchroederRCA.c $(OBJECTS) $(LINK)
-
-exMiranda64	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o examples/miranda64.a examples/grounding_miranda64.c $(OBJECTS) $(LINK)
-
-exMalha01	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o examples/malha01.a examples/malha01.c $(OBJECTS) $(LINK)
+grcev12pwrd01	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o examples/grcev12pwrd01/grcev12pwrd01.a examples/grcev12pwrd01/grcev12pwrd01.c $(OBJECTS) $(LINK)

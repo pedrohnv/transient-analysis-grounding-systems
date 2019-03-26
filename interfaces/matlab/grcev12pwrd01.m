@@ -26,7 +26,7 @@ max_eval = 200;
 req_abs_error = 1e-3;
 req_rel_error = 1e-4;
 error_norm = 1; %paired, only used in C routines
-intg_type = 1; % 0 -> none; 1 -> double; 2 -> single
+intg_type = 2; % 0 -> none; 1 -> double; 2 -> single
 
 % Frequencies
 nf = 150;

@@ -21,7 +21,7 @@ end;
 
 function segment_electrode(electrode::Electrode, num_segments::Int)
     nn = num_segments + 1;
-    nodes = Array{Float64}(undef, nn, 3)
+    nodes = Array{Float64}(undef, nn, 3);
     startp = Array{Float64,1}(undef, 3);
     endp = Array{Float64,1}(undef, 3);
     for k = 1:3
@@ -53,7 +53,7 @@ function seg_electrode_list(electrodes, frac)
 		num_elec += Int(ceil(electrodes[i].length/frac));
 	end
 	elecs = Array{Electrode}(undef, num_elec);
-	nodes = zeros(Float64, (2*num_elec, 3));
+	#nodes = zeros(Float64, (2*num_elec, 3));
 	e = 1;
 	nodes = [];
 	for i=1:length(electrodes)
@@ -110,7 +110,7 @@ function calculate_impedances(electrodes, gamma, s, mur, kappa, max_eval,
     zt = zeros(Complex{Float64}, (ns,ns));
     # path to the library must be a static symbol?
     # see https://stackoverflow.com/questions/35831775/issue-with-julia-ccall-interface-and-symbols
-    ccall(("calculate_impedances", "/home/pedro/codigos/HP_HEM/libhem.so"), Int,
+    ccall(("calculate_impedances", "C:\\Users\\pedro\\Documents\\codigos\\HP_HEM\\libhem.dll"), Int,
           (Ref{Electrode}, Int, Ref{Complex{Float64}}, Ref{Complex{Float64}},
           Complex{Float64}, Complex{Float64}, Float64, Complex{Float64},
           Int, Float64, Float64, Int, Int),
@@ -125,7 +125,7 @@ function impedances_images(electrodes, images, zl, zt, gamma, s, mur, kappa,
     ns = length(electrodes);
     # path to the library must be a static symbol?
     # see https://stackoverflow.com/questions/35831775/issue-with-julia-ccall-interface-and-symbols
-    ccall(("impedances_images", "/home/pedro/codigos/HP_HEM/libhem.so"), Int,
+    ccall(("impedances_images", "C:\\Users\\pedro\\Documents\\codigos\\HP_HEM\\libhem.dll"), Int,
           (Ref{Electrode}, Ref{Electrode}, Int, Ref{Complex{Float64}},
 		  Ref{Complex{Float64}}, Complex{Float64}, Complex{Float64}, Float64,
 		  Complex{Float64}, Complex{Float64}, Complex{Float64}, Int, Float64,

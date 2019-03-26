@@ -34,7 +34,7 @@ cleanout	:
 		rm -f *.a *.exe *.dll
 		cd examples && rm -f *.a *.exe *.dll
 
-allclean	:
+cleanall	:
 		make clean
 		make cleanout
 		cd $(SLATECPATH) && $(MAKE) clean
@@ -43,47 +43,35 @@ allclean	:
 hcubature.o	:	$(CUBATUREPATH)\\hcubature.c
 		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -c $(CUBATUREPATH)\\hcubature.c $(LINK)
 
-auxiliary.o	:	auxiliary.c
+auxiliary.o	:	src\\auxiliary.c
 		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -c auxiliary.c $(LINK)
 
-Electrode.o	:	Electrode.c auxiliary.o hcubature.o
-		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -c Electrode.c $(LINK)
-
-libhem.dll	:
-		make dynamicLibrary
+Electrode.o	:	src\\Electrode.c auxiliary.o hcubature.o
+		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -c src\\Electrode.c $(LINK)
 
 dynamicLibrary	:
-		$(CC) $(CFLAGS) -fPIC -shared $(INCLUDE) -o libhem.dll Electrode.c auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
+		$(CC) $(CFLAGS) -fPIC -shared $(INCLUDE) -o libhem.dll src\\Electrode.c src\\auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
 
 test	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o testing.exe testing.c $(OBJECTS) $(LINK)
+		$(CC) $(CFLAGS) $(INCLUDE) -o testing.exe src\\testing.c $(OBJECTS) $(LINK)
 
 testDLL	:	libhem.dll
-		$(CC) $(CFLAGS) $(INCLUDE) -o testingDLL.exe testing.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem
+		$(CC) $(CFLAGS) $(INCLUDE) -o testingDLL.exe src\\testing.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem
 
 slatec	:
 		cd $(SLATECPATH) && $(MAKE) FC=$(FC) all
 
 wolfram	:
-		$(CC) -O3 -fPIC -shared -std=c11 $(INTELFLAGS) -Werror $(INCLUDE) -I$(WOLFRAMPATH) -o libhem_mma.dll InterfaceWolfram.c Electrode.c auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
+		$(CC) -O3 -fPIC -shared -std=c11 $(INTELFLAGS) -Werror $(INCLUDE) -I$(WOLFRAMPATH) -o interfaces\\mathematica\\libhem_mma.dll InterfaceWolfram.c src\\Electrode.c src\\auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
 
 timing	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o timing.exe examples\\timing.c $(OBJECTS) $(LINK)
+# examples are named based on publication: author_volume_journal_issue
+grcev20pwrd0	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o ex20pwrd02grcev.exe examples\\grcev20pwrd02.c $(OBJECTS) $(LINK)
 
-ex20pwrd02grcev	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o ex20pwrd02grcev.exe examples\\ex20pwrd02grcev.c $(OBJECTS) $(LINK)
+grcev51emc03	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o ex51emc03grcev.exe examples\\grcev51emc03.c $(OBJECTS) $(LINK)
 
-ex51emc03grcev	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o ex51emc03grcev.exe examples\\ex51emc03grcev.c $(OBJECTS) $(LINK)
-
-ex12pwrd01grcev	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o ex12pwrd01grcev.exe examples\\ex12pwrd01grcev\\ex12pwrd01grcev.c $(OBJECTS) $(LINK)
-
-exAlipioSchroederRCA	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o AlipioSchroederRCA.exe examples\\AlipioSchroederRCA.c $(OBJECTS) $(LINK)
-
-exMiranda64	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o examples\\miranda64.exe examples\\grounding_miranda64.c $(OBJECTS) $(LINK)
-
-exMalha01	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o examples\\malha01.exe examples\\malha01.c $(OBJECTS) $(LINK)
+grcev12pwrd01	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o ex12pwrd01grcev.exe examples\\grcev12pwrd01.c $(OBJECTS) $(LINK)

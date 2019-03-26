@@ -17,7 +17,7 @@ function simulate(gs::Int, nf::Int, intg_type::Int)
 	## Parameters
 	# Soil
 	mu0 = pi*4e-7;
-	mur= 1.0;
+	mur = 1.0;
 	eps0 = 8.854e-12;
 	epsr = 10;
 	sigma1 = 1.0/1000.0;
@@ -81,7 +81,7 @@ function simulate(gs::Int, nf::Int, intg_type::Int)
 		ref_l = ref_t;
 		zl, zt = impedances_images(electrodes, images, zl, zt, k1, jw, mur, kappa,
 								   ref_l, ref_t, max_eval, req_abs_error,
-								   req_rel_error, error_norm, intg_type)
+								   req_rel_error, error_norm, intg_type);
 	    yn = mAT*inv(zt)*mA + mBT*inv(zl)*mB;
 		vn = yn\exci;
 	    zh[i] = vn[inj_node];
@@ -103,8 +103,8 @@ tot_time = @timed for gs in [10, 20, 30, 60, 120]
 end;
 println("total elapsed time: ", tot_time[2]/60, " min")
 
-#plotly()
-pyplot()
+plotly()
+#pyplot()
 display(plot(freq, [map(i -> abs(i), zh[:,k]) for k=1:5],
              xaxis=:log, xlabel="f (Hz)", ylabel="|Zin| (Ohms)",
 			 title="Harmonic Impedance",

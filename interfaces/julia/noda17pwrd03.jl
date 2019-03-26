@@ -121,14 +121,18 @@ function simulate(intg_type::Int)
 	## Source input
 	#loading the files using CSV seems to be the slower part of the code
 	#TODO search alternative
-	path = "/home/pedro/codigos/HP_HEM/interfaces/julia/";
+	if Sys.iswindows()
+    	path = "..\\..\\examples\\noda17pwrd03_auxfiles\\";
+	else
+		path = "../../examples/noda17pwrd03_auxfiles/";
+	end
 	input = string(path, "source.txt");
 	source = CSV.read(input, header=["t", "V"]);
 	source[:,1] = source[:,1]*1e-9;
 
-	input = string(path, "voltageArt.txt");
+	input = string(path, "voltage.txt");
 	vout_art = CSV.read(input, header=["t", "V"]);
-	input = string(path, "currentArt.txt");
+	input = string(path, "current.txt");
 	iout_art = CSV.read(input, header=["t", "I"]);
 
 	ent_freq = laplace_transform(Vector{ComplexF64}(source.V), Vector{Float64}(source.t), -1.0im*sk);

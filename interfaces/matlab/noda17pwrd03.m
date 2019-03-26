@@ -1,11 +1,11 @@
 % Test case 17pwrd03noda
-% 
+%
 % Reproducing the results in [1] of a time domain surge response.
-% 
+%
 % [1] Noda, Taku, and Shigeru Yokoyama. "Thin wire representation in finite difference time domain
 % surge simulation." IEEE Transactions on Power Delivery 17.3 (2002): 840-847.
 
-usemat = true; % use the pure MATLAB routines?
+usemat = false; % use the pure MATLAB routines?
 if ~usemat
     mex calculate_impedances.c InterfaceMatlab.c ..\\..\\cubature\\hcubature.c -I. -I..\\..\\cubature
     mex impedances_images.c InterfaceMatlab.c ..\\..\\cubature\\hcubature.c -I. -I..\\..\\cubature
@@ -13,10 +13,10 @@ end
 
 %% Parameters
 mu0 = pi*4e-7;
-mur = 1;
+mur = 1.0;
 eps0 = 8.854e-12;
-epsr = 1;
-sigma1 = 0;
+epsr = 1.0;
+sigma1 = 0.0 + 0.0j;
 %rhoc = 1.9 10^-6;
 rhoc = 1.68e-8;
 sigma_cu = 1/rhoc;
@@ -88,16 +88,22 @@ zt = zl;
 vout = zeros(nf, nn, 'like', zh);
 
 %% Source input
-fileID = fopen('source.txt','r');
+if ispc % windows?
+    path = '..\\..\\examples\\noda17pwrd03_auxfiles\\';
+else
+    path = '../../examples/noda17pwrd03_auxfiles/';
+end
+
+fileID = fopen([path, 'source.txt'],'r');
 A = fscanf(fileID,'%f,%f');
 source = transpose(reshape(A, 2,12));
 source(:,1) = source(:,1)*1e-9;
 
-fileID = fopen('voltageArt.txt','r');
+fileID = fopen([path, 'voltage.txt'],'r');
 A = fscanf(fileID,'%f,%f');
 vout_art = transpose(reshape(A, 2,37));
 
-fileID = fopen('currentArt.txt','r');
+fileID = fopen([path, 'current.txt'],'r');
 A = fscanf(fileID,'%f,%f');
 iout_art = transpose(reshape(A, 2,39));
 
@@ -105,12 +111,13 @@ ent_freq = laplace_transform(source(:,2), source(:,1), -1.0j*sk);
 
 %% Freq. loop
 for i = 1:nf
-    jw = 1.0j*sk(i);
+    jw = 1.0j*sk(i) + 0.0j;
     kappa = jw*eps0;
     k1 = sqrt(jw*mu0*kappa);
     kappa_cu = sigma_cu + jw*epsr*eps0;
-    ref_t = (kappa - kappa_cu)/(kappa + kappa_cu);
-    ref_l = ref_t;
+    ref_t = (kappa - kappa_cu)/(kappa + kappa_cu) + 0.0j;
+    ref_l = ref_t + 0.0j;
+    %FIXME sk(i) is Real; crashes during C call.
     if usemat
         [zl, zt] = Mcalculate_impedances(electrodes, k1, jw, mur, kappa, ...
                                          req_abs_error, req_rel_error, ...
