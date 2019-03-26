@@ -1,9 +1,7 @@
 /**
-High performance Hybrid Electromagnetic Model calculations in C.
-
-All parameters' units are in SI if omitted.
-
-@author Pedro Henrique Nascimento Vieira
+High Performance Hybrid Electromagnetic Model calculations in C.
+Constants, auxiliary functions and routines.
+All parameters' units are in the SI base units if omitted.
 
 TODO insert condition to check if sender == receiver?
     during integration and calculate distance from center radius
@@ -12,9 +10,10 @@ TODO insert condition to check if sender == receiver?
 #ifndef ELECTRODE_H_
 #define ELECTRODE_H_
 
+#include "mkl_types.h"
 #include <complex.h>
 #include <stdlib.h>
-#include <mkl_types.h>
+
 #define MKL_Complex16 _Complex double //overwrite type
 
 //default integration options ===============================================
@@ -25,8 +24,9 @@ Type of integration and simplification thereof to be done.
 @param INTG_EXP_LOGNF \f$ \int_0^{L_r} e^{-\gamma \bar r} Log(N_f) dl_r \f$
 @param INTG_LOGNF \f$ e^{-\gamma \bar r} \int_0^{L_r} Log(N_f) dl_r \f$
 */
-enum Integration_type {
-    INTG_NONE = 0,
+enum
+Integration_type {
+    INTG_NONE = 1,
     INTG_DOUBLE,
     INTG_EXP_LOGNF,
     INTG_LOGNF
@@ -78,11 +78,9 @@ electrode
 @param zi total internal impedance of the electrode
 @return 0 on success
 */
-int populate_electrode(Electrode* electrode,
-                       const double start_point[3],
-                       const double end_point[3],
-                       double radius,
-                       _Complex double zi);
+int
+populate_electrode (Electrode* electrode, const double start_point[3],
+                    const double end_point[3], double radius, _Complex double zi);
 
 /** electrodes_file
 Populates an Electrode array from a file. Each Electrode must be defined in
@@ -97,9 +95,9 @@ Any line number greater than `num_electrodes` will be ignored.
     error < 0: number of missing arguments from last line read (as a negative integer)
     error > 0: bad input
 */
-int electrodes_file(const char file_name[],
-                    Electrode* electrodes,
-                    size_t num_electrodes);
+int
+electrodes_file (const char file_name[], Electrode* electrodes
+                 size_t num_electrodes);
 
 /** nodes_file
 Fill a nodes array from a file. Each node must be defined in a single line
@@ -111,9 +109,8 @@ Any line number greater than `num_nodes` will be ignored.
 @param num_nodes number of nodes to read (number of lines in file)
 @return number of missing arguments from last line read (as a negative integer)
 */
-int nodes_file(const char file_name[],
-               double nodes[][3],
-               size_t num_nodes);
+int
+nodes_file (const char file_name[], double nodes[][3], size_t num_nodes);
 
 /** segment_electrode
 Segments an electrode (conductor) populating a passed array of electrodes and
@@ -128,13 +125,10 @@ that are created
 @param unit_zi internal impedance per unit length (Ohm/m)
 @return 0 on success
 */
-int segment_electrode(Electrode* electrodes,
-                      double nodes[][3],
-                      size_t num_segments,
-                      const double* start_point,
-                      const double* end_point,
-                      double radius,
-                      _Complex double unit_zi);
+int
+segment_electrode (Electrode* electrodes, double nodes[][3], size_t num_segments,
+                   const double* start_point, const double* end_point,
+                   double radius, _Complex double unit_zi);
 
 /** integrand_double
 Calculates the integrand \f$ \frac{e^{-\gamma r}}{r} \f$ to be integrated
@@ -150,11 +144,9 @@ using Cubature.
 @see integral
 @see https://github.com/stevengj/cubature
 */
-int integrand_double(unsigned ndim,
-                     const double *t,
-                     void *auxdata,
-                     unsigned fdim,
-                     double *fval);
+int
+integrand_double (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
+                  double *fval);
 
 /** exp_logNf
 Calculates the simplified integrand \f$ e^{-\gamma \bar r} Log(N_f) \f$ to be used
@@ -170,11 +162,9 @@ in Cubature integration.
 @see integral
 @see https://github.com/stevengj/cubature
 */
-int exp_logNf(unsigned ndim,
-              const double *t,
-              void *auxdata,
-              unsigned fdim,
-              double *fval);
+int
+exp_logNf (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
+           double *fval);
 
 /** integral
 Calculates the integral along the sender and receiver using Cubature.
@@ -195,16 +185,10 @@ parts)
 @see Integration_type
 @see https://github.com/stevengj/cubature
 */
-int integral(const Electrode* sender,
-             const Electrode* receiver,
-             _Complex double gamma,
-             size_t max_eval,
-             double req_abs_error,
-             double req_rel_error,
-             int error_norm,
-             int integration_type,
-             double result[2],
-             double error[2]);
+int
+integral (const Electrode* sender, const Electrode* receiver, _Complex double gamma,
+          size_t max_eval, double req_abs_error, double req_rel_error,
+          int error_norm, int integration_type, double result[2], double error[2]);
 
 /** internal_impedance
 Calculates the internal impedance per unit length of cylindrical conductors.
@@ -214,10 +198,8 @@ Calculates the internal impedance per unit length of cylindrical conductors.
 @param mur relative magnetic permeability of the conductor
 @return zin (Ohm/m)
 */
-_Complex double internal_impedance(_Complex double s,
-                                   double rho,
-                                   double radius,
-                                   double mur);
+_Complex double
+internal_impedance (_Complex double s, double rho, double radius, double mur);
 
 // Longitudinal impedance
 /** longitudinal_self
@@ -227,9 +209,8 @@ Calculates the self longitudinal impedance of a given electrode.
 @param mur relative magnetic permeability of the medium
 @return zlp
 */
-_Complex double longitudinal_self(const Electrode* electrode,
-                                  _Complex double s,
-                                  double mur);
+_Complex double
+longitudinal_self (const Electrode* electrode, _Complex double s, double mur);
 
 /** longitudinal_mutual
 Calculates the mutual longitudinal impedance of given electrodes.
@@ -253,18 +234,12 @@ parts)
 @see Integration_type
 @see https://github.com/stevengj/cubature
 */
-_Complex double longitudinal_mutual(const Electrode* sender,
-                                    const Electrode* receiver,
-                                    _Complex double s,
-                                    double mur,
-                                    _Complex double gamma,
-                                    size_t max_eval,
-                                    double req_abs_error,
-                                    double req_rel_error,
-                                    int error_norm,
-                                    int integration_type,
-                                    double result[2],
-                                    double error[2]);
+_Complex double
+longitudinal_mutual (const Electrode* sender, const Electrode* receiver,
+                     _Complex double s, double mur, _Complex double gamma,
+                     size_t max_eval, double req_abs_error, double req_rel_error,
+                     int error_norm, int integration_type, double result[2],
+                     double error[2]);
 
 // Transveral impedance
 /** transversal_self
@@ -273,8 +248,8 @@ Calculates the self transversal impedance of a given electrode.
 @param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
 @return ztp
 */
-_Complex double transversal_self(const Electrode* electrode,
-                                 _Complex double kappa);
+_Complex double
+transversal_self (const Electrode* electrode, _Complex double kappa);
 
 /** transversal_mutual
 Calculates the mutual transversal impedance of given electrodes.
@@ -297,17 +272,11 @@ parts)
 @see Integration_type
 @see https://github.com/stevengj/cubature
 */
-_Complex double transversal_mutual(const Electrode* sender,
-                                   const Electrode* receiver,
-                                   _Complex double kappa,
-                                   _Complex double gamma,
-                                   size_t max_eval,
-                                   double req_abs_error,
-                                   double req_rel_error,
-                                   int error_norm,
-                                   int integration_type,
-                                   double result[2],
-                                   double error[2]);
+_Complex double
+transversal_mutual (const Electrode* sender, const Electrode* receiver,
+                    _Complex double kappa, _Complex double gamma, size_t max_eval,
+                    double req_abs_error, double req_rel_error, int error_norm,
+                    int integration_type, double result[2], double error[2]);
 
 // Electrode system
 
@@ -334,19 +303,12 @@ limit)
 @see Integration_type
 @see https://github.com/stevengj/cubature
 */
-int calculate_impedances(const Electrode* electrodes,
-                         size_t num_electrodes,
-                         _Complex double* zl,
-                         _Complex double* zt,
-                         _Complex double gamma,
-                         _Complex double s,
-                         double mur,
-                         _Complex double kappa,
-                         size_t max_eval,
-                         double req_abs_error,
-                         double req_rel_error,
-                         int error_norm,
-                         int integration_type);
+int
+calculate_impedances (const Electrode* electrodes, size_t num_electrodes,
+                      _Complex double* zl, _Complex double* zt,
+                      _Complex double gamma, _Complex double s, double mur,
+                      _Complex double kappa, size_t max_eval, double req_abs_error,
+                      double req_rel_error, int error_norm, int integration_type);
 
 /** impedances_images
 Add the images effect to the impedance matrices.
@@ -374,22 +336,13 @@ limit)
 @see Integration_type
 @see https://github.com/stevengj/cubature
 */
-int impedances_images(const Electrode* electrodes,
-                      const Electrode* images,
-                      size_t num_electrodes,
-                        _Complex double* zl,
-                      _Complex double* zt,
-                      _Complex double gamma,
-                      _Complex double s,
-                        double mur,
-                      _Complex double kappa,
-                      _Complex double ref_l,
-                        _Complex double ref_t,
-                      size_t max_eval,
-                      double req_abs_error,
-                        double req_rel_error,
-                      int error_norm,
-                      int integration_type);
+int
+impedances_images (const Electrode* electrodes, const Electrode* images,
+                   size_t num_electrodes, _Complex double* zl, _Complex double* zt,
+                   _Complex double gamma, _Complex double s, double mur,
+                   _Complex double kappa, _Complex double ref_l,
+                   _Complex double ref_t, size_t max_eval, double req_abs_error,
+                   double req_rel_error, int error_norm, int integration_type);
 
 // Imitance matrix WE building
 
@@ -407,11 +360,9 @@ will vary with frequency.
 @return 0 on success
 @see fill_impedance
 */
-int fill_incidence(_Complex double* we,
-                   const Electrode* electrodes,
-                   size_t num_electrodes,
-                   const double nodes[][3],
-                   size_t num_nodes);
+int
+fill_incidence (_Complex double* we, const Electrode* electrodes,
+                size_t num_electrodes, const double nodes[][3], size_t num_nodes);
 
 /** fill_impedance
 Fills the imitance matrix `we` = `[[ZL/2, -ZL/2, A], [ZT, ZT, B], [C, D, Yn]]`
@@ -429,13 +380,10 @@ with the impedance matrices `ZT` and `ZL`, and the nodal admittance Yn.
 @return 0 on success
 @see fill_incidence
 */
-int fill_impedance(_Complex double* we,
-                   const Electrode* electrodes,
-                   size_t num_electrodes,
-                   size_t num_nodes,
-                   const _Complex double* zt,
-                   const _Complex double* zl,
-                   const _Complex double* yn);
+int
+fill_impedance (_Complex double* we, const Electrode* electrodes,
+                size_t num_electrodes, size_t num_nodes, const _Complex double* zl,
+                const _Complex double* zt, const _Complex double* yn);
 
 /** solve_electrodes
 Solves the system of equations that defines the electrode system.
@@ -450,32 +398,25 @@ this array in-place
 @return 0 on sucess
 @see https://software.intel.com/en-us/mkl-developer-reference-c-gesv
 */
-int solve_electrodes(_Complex double* we,
-                     _Complex double* ie,
-                     size_t num_electrodes,
-                     size_t num_nodes);
+int
+solve_electrodes (_Complex double* we, _Complex double* ie, size_t num_electrodes,
+                  size_t num_nodes);
 
 /** incidence_alt
 Alternative approach using an equivalent Ynodal
 */
-int incidence_alt(double* a,
-                  double* b,
-                  const Electrode* electrodes,
-                  size_t num_electrodes,
-                  const double nodes[][3],
-                  size_t num_nodes);
+int
+incidence_alt (double* a, double* b, const Electrode* electrodes,
+               size_t num_electrodes, const double nodes[][3], size_t num_nodes);
 
 /** ynodal_eq
 Finds the equivalent nodal admittance matrix of the electrode system.
 TODO put const qualifier to a, b and zl?
 */
-int ynodal_eq(_Complex double* yn,
-              const double* a,
-              const double* b,
-              _Complex double* zl,
-              _Complex double* zt,
-              size_t num_electrodes,
-              size_t num_nodes);
+int
+ynodal_eq (_Complex double* yn, const double* a, const double* b,
+           _Complex double* zl, _Complex double* zt, size_t num_electrodes,
+           size_t num_nodes);
 
 /** harmonic_impedance1
 Calculates the harmonic impedance of a copper electrode system in a
@@ -500,38 +441,24 @@ limit)
 @param zh harmonic impedance array of size `ns`
 @return 0 on success
 */
-int harmonic_impedance1(size_t ns,
-                        const _Complex double* s,
-                        const _Complex double* kappa1,
-                        const _Complex double* kappa2,
-                        const _Complex double* gamma1,
-                        const Electrode* electrodes,
-                        const Electrode* images,
-                        size_t num_electrodes,
-                        const double nodes[][3],
-                        size_t num_nodes,
-                        size_t max_eval,
-                        double req_abs_error,
-                        double req_rel_error,
-                        int error_norm,
-                        double rsource,
-                        _Complex double* zh);
+int
+harmonic_impedance1 (size_t ns, const _Complex double* s,
+                     const _Complex double* kappa1, const _Complex double* kappa2,
+                     const _Complex double* gamma1, const Electrode* electrodes,
+                     const Electrode* images, size_t num_electrodes,
+                     const double nodes[][3], size_t num_nodes, size_t max_eval,
+                     double req_abs_error, double req_rel_error, int error_norm,
+                     double rsource, _Complex double* zh);
 
-int harmonic_impedance1_alt(size_t ns,
-                            const _Complex double* s,
-                            const _Complex double* kappa1,
-                            const _Complex double* kappa2,
-                            const _Complex double* gamma1,
-                            const Electrode* electrodes,
-                            const Electrode* images,
-                            size_t num_electrodes,
-                            const double nodes[][3],
-                            size_t num_nodes,
-                            size_t max_eval,
-                            double req_abs_error,
-                            double req_rel_error,
-                            int error_norm,
-                            double rsource,
-                            _Complex double* zh);
+int
+harmonic_impedance1_alt (size_t ns, const _Complex double* s,
+                         const _Complex double* kappa1,
+                         const _Complex double* kappa2,
+                         const _Complex double* gamma1,
+                         const Electrode* electrodes, const Electrode* images,
+                         size_t num_electrodes, const double nodes[][3],
+                         size_t num_nodes, size_t max_eval, double req_abs_error,
+                         double req_rel_error, int error_norm, double rsource,
+                         _Complex double* zh);
 
 #endif /* ELECTRODE_H_ */

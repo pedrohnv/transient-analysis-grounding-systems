@@ -1,13 +1,8 @@
 /**
-High performance Hybrid Electromagnetic Model calculations in C.
-
-All parameters' units are in SI if omitted.
-
-@author Pedro Henrique Nascimento Vieira
-
+High Performance Hybrid Electromagnetic Model calculations in C.
 Constants, auxiliary functions and routines.
+All parameters' units are in the SI base units if omitted.
 */
-
 #ifndef AUXILIARY_H_
 #define AUXILIARY_H_
 
@@ -16,8 +11,8 @@ Constants, auxiliary functions and routines.
 
 //constants
 #define PI 3.1415926535897932384626433832795029L
-#define TWO_PI 6.283185307179586
-#define FOUR_PI 12.56637061435917
+#define TWO_PI 2*PI
+#define FOUR_PI 4*PI
 #define MU0 1.256637061435917e-6 //permeability vac.
 #define EPS0 8.854187817620e-12 //permittivity vac.
 #define RHO_CU 1.689e-8 //copper resistivity
@@ -33,7 +28,8 @@ Fill array `u` with `n` linearly spaced numbers between `a` and `b` (included).
 @return pointer to filled array
 @see https://github.com/ntessore/algo
 */
-double* linspace(double a, double b, size_t n, double u[]);
+double *
+linspace (double a, double b, size_t n, double u[]);
 
 /** logspace
 Fill array `u` with `n` logarithmically spaced numbers between `10^a` and
@@ -46,7 +42,8 @@ Fill array `u` with `n` logarithmically spaced numbers between `10^a` and
 @return pointer to filled array
 @see https://github.com/ntessore/algo
 */
-double* logspace(double a, double b, size_t n, double u[]);
+double *
+logspace (double a, double b, size_t n, double u[]);
 
 /** wave_length
 Computes the harmonic electromagnetic wave length in a lossy medium.
@@ -57,7 +54,8 @@ Computes the harmonic electromagnetic wave length in a lossy medium.
 @param mu medium magnetic permeability
 @return lambda wave length (m)
 */
-double wave_length(double f, double sigma, double eps, double mu);
+double
+wave_length (double f, double sigma, double eps, double mu);
 
 /** equal_points
 Check if two points are the same.
@@ -65,7 +63,8 @@ Check if two points are the same.
 @param point_2 second point in \f$ R^3 \f$
 @return identity 0 if false, 1 if true
 */
-int equal_points(const double point_1[3], const double point_2[3]);
+int
+equal_points (const double point_1[3], const double point_2[3]);
 
 /** vector_norm
 Computes the Norm_2 (euclidian length) of the vector which starts at
@@ -74,17 +73,8 @@ start_point ends at end_point.
 @param end_point array `(x,y,z)` that defines the ending point
 @return length Norm_2
 */
-double vector_norm(const double start_point[3], const double end_point[3]);
-
-/** copy_array
-Copy `source` array into `target` array of complex numbers.
-@param source pointer to the array to be copied
-@param target pointer to array which the copy is to be stored
-@para size size of the array
-@return 0 on success
-*/
-int copy_array(const _Complex double* source, _Complex double* target,
-               size_t size);
+double
+vector_norm (const double start_point[3], const double end_point[3]);
 
 /** complex_matrix_file
 Prints a complex (double) matrix to a file.

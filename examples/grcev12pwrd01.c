@@ -19,7 +19,9 @@ doi: 10.1109/61.568238
 #include <time.h>
 //#include <omp.h>
 
-int run_case(int gs, int num_electrodes, int num_nodes) {
+int
+run_case (int gs, int num_electrodes, int num_nodes)
+{
     size_t max_eval = 200;
     double req_abs_error = 1e-3;
     double req_rel_error = 1e-4;
@@ -31,7 +33,7 @@ int run_case(int gs, int num_electrodes, int num_nodes) {
     double er = 10.0; // soil rel. permitivitty
     double rho_c = 1.9e-6; // copper resistivity
     // frequencies of interest
-    int nf = 150;
+    size_t nf = 150;
     double freq[nf];
     logspace(2, 6.4, nf, freq);
     // electrode definition
@@ -45,15 +47,15 @@ int run_case(int gs, int num_electrodes, int num_nodes) {
     double nodes[num_nodes][3];
     sprintf(file_name, "nodes_gs%d.txt", gs);
     nodes_file(file_name, nodes, num_nodes);
-    for (int m = 0; m < num_electrodes; m++) {
+    for (size_t m = 0; m < num_electrodes; m++) {
         images[m].start_point[2] = -images[m].start_point[2];
         images[m].end_point[2] = -images[m].end_point[2];
         images[m].middle_point[2] = -images[m].middle_point[2];
     }
-    int ne2 = num_electrodes*num_electrodes;
-    int nn2 = num_nodes*num_nodes;
-    int ss1 = (2*num_electrodes + num_nodes);
-    int ss2 = ss1*ss1;
+    size_t ne2 = num_electrodes*num_electrodes;
+    size_t nn2 = num_nodes*num_nodes;
+    size_t ss1 = (2*num_electrodes + num_nodes);
+    size_t ss2 = ss1*ss1;
     _Complex double kappa, gamma, zinternal;
     _Complex double* zl = malloc(sizeof(_Complex double)*ne2);
     _Complex double* zt = malloc(sizeof(_Complex double)*ne2);
@@ -62,13 +64,12 @@ int run_case(int gs, int num_electrodes, int num_nodes) {
     _Complex double* ie_cp = (_Complex double*) calloc(ss1, sizeof(_Complex double));
     _Complex double* we = malloc(sizeof(_Complex double)*ss2);
     _Complex double* we_cp = malloc(sizeof(_Complex double)*ss2);
-    int i, k;
     ie[ss1 - num_nodes] = 1.0;
     fill_incidence(we, electrodes, num_electrodes, nodes, num_nodes);
     // solve for each frequency: WE*VE = IE
     _Complex double s;
     _Complex double ref_l, ref_t;
-    for (i = 0; i < nf; i++) {
+    for (size_t i = 0; i < nf; i++) {
         s = I*TWO_PI*freq[i];
         kappa = (sigma + s*er*EPS0); //soil complex conductivity
         gamma = csqrt(s*MU0*kappa); //soil propagation constant
@@ -81,7 +82,7 @@ int run_case(int gs, int num_electrodes, int num_nodes) {
                              ERROR_PAIRED, INTG_DOUBLE);
         zinternal = internal_impedance(s, rho_c,
             electrodes[0].radius, 1.0)*electrodes[0].length;
-        for (k = 0; k < num_electrodes; k++) {
+        for (size_t k = 0; k < num_electrodes; k++) {
             zl[k*num_electrodes + k] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
@@ -112,7 +113,9 @@ int run_case(int gs, int num_electrodes, int num_nodes) {
     return 0;
 }
 
-int main() {
+int
+main ()
+{
     clock_t begin, end;
     double time_spent;
     // ===================================================

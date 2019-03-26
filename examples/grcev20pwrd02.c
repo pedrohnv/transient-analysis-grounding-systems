@@ -15,7 +15,9 @@ ground rod”. In: IEEE Transactions on Power Delivery 20.2 (2005), pp. 1598–
 #include <auxiliary.h>
 //#include <omp.h>
 
-int run_case(double length, double rho, char file_name[]) {
+int
+run_case (double length, double rho, char file_name[])
+{
     // parameters
     double h = 0.001; //burial depth
     double r = 1.25e-2; //radius
@@ -24,7 +26,7 @@ int run_case(double length, double rho, char file_name[]) {
     double rho_c = 1.9e-6; //copper resistivity
     //char file_name[] = "20pwrd02grcev_L<>rho<>.dat";
     // frequencies of interest
-    int nf = 250;
+    size_t nf = 250;
     double freq[nf];
     double start_point[3] = {0., 0., -h};
     double end_point[3] = {0., 0., -h - length};
@@ -37,8 +39,8 @@ int run_case(double length, double rho, char file_name[]) {
     logspace(2, 7, nf, freq);
     // electrode definition and segmentation
     double lambda = wave_length(freq[nf - 1], sigma, er*EPS0, 1.0); //smallest
-    int num_electrodes = ceil( length/(lambda/6.0) ) ;
-    int num_nodes = num_electrodes + 1;
+    size_t num_electrodes = ceil( length/(lambda/6.0) ) ;
+    size_t num_nodes = num_electrodes + 1;
     double nodes[num_nodes][3];
     Electrode* electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     // the internal impedance is added "outside" later
@@ -53,10 +55,10 @@ int run_case(double length, double rho, char file_name[]) {
     segment_electrode(
         images, nodes_images, num_electrodes, start_point, end_point, r, 0.0);
     //build system to be solved
-    int ne2 = num_electrodes*num_electrodes;
-    int nn2 = num_nodes*num_nodes;
-    int ss1 = (2*num_electrodes + num_nodes);
-    int ss2 = ss1*ss1;
+    size_t ne2 = num_electrodes*num_electrodes;
+    size_t nn2 = num_nodes*num_nodes;
+    size_t ss1 = (2*num_electrodes + num_nodes);
+    size_t ss2 = ss1*ss1;
     _Complex double s, ref_l, ref_t;
     _Complex double kappa, gamma, zinternal, kappa_air;
     _Complex double* zl = malloc(sizeof(_Complex double)*ne2);
@@ -66,11 +68,10 @@ int run_case(double length, double rho, char file_name[]) {
     _Complex double* ie_cp = malloc(sizeof(_Complex double)*ss1);
     _Complex double* we = malloc(sizeof(_Complex double)*ss2);
     _Complex double* we_cp = malloc(sizeof(_Complex double)*ss2);
-    int i, k;
     ie[ss1 - num_nodes] = 1.0;
     fill_incidence(we, electrodes, num_electrodes, nodes, num_nodes);
     // solve for each frequency: WE*VE = IE
-    for (i = 0; i < nf; i++) {
+    for (size_t i = 0; i < nf; i++) {
         s = I*TWO_PI*freq[i];
         kappa = (sigma + s*er*EPS0); //soil complex conductivity
         gamma = csqrt(s*MU0*kappa); //soil propagation constant
@@ -82,7 +83,7 @@ int run_case(double length, double rho, char file_name[]) {
             electrodes, num_electrodes, zl, zt, gamma, s, 1.0, kappa,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         zinternal = internal_impedance(s, rho_c, r, 1.0)*electrodes[0].length;
-        for (k = 0; k < num_electrodes; k++) {
+        for (size_t k = 0; k < num_electrodes; k++) {
             zl[k*num_electrodes + k] += zinternal;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
@@ -112,7 +113,9 @@ int run_case(double length, double rho, char file_name[]) {
     return 0;
 }
 
-int run_case2(double length, double rho, char file_name[]) {
+int
+run_case2 (double length, double rho, char file_name[])
+{
     // parameters
     double h = 0.001; //burial depth
     double r = 1.25e-2; //radius
@@ -120,7 +123,7 @@ int run_case2(double length, double rho, char file_name[]) {
     double er = 10.0; //soil rel. permitivitty
     //char file_name[] = "20pwrd02grcev_L<>rho<>.dat";
     // frequencies of interest
-    int nf = 250;
+    size_t nf = 250;
     double freq[nf];
     double start_point[3] = {0., 0., -h};
     double end_point[3] = {0., 0., -h - length};
@@ -134,8 +137,8 @@ int run_case2(double length, double rho, char file_name[]) {
     logspace(2, 7, nf, freq);
     // electrode definition and segmentation
     double lambda = wave_length(freq[nf - 1], sigma, er*EPS0, 1.0); //smallest
-    int num_electrodes = ceil( length/(lambda/6.0) ) ;
-    int num_nodes = num_electrodes + 1;
+    size_t num_electrodes = ceil( length/(lambda/6.0) ) ;
+    size_t num_nodes = num_electrodes + 1;
     double nodes[num_nodes][3];
     Electrode* electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     // the internal impedance is added "outside" later
@@ -153,7 +156,7 @@ int run_case2(double length, double rho, char file_name[]) {
     _Complex double *kappa1 = malloc(sizeof(_Complex double)*nf);
     _Complex double *kappa2 = malloc(sizeof(_Complex double)*nf);
     _Complex double *gamma1 = malloc(sizeof(_Complex double)*nf);
-    for (int i = 0; i < nf; i++) {
+    for (size_t i = 0; i < nf; i++) {
         s[i] = I*TWO_PI*freq[i];
         kappa1[i] = sigma + s[i]*er*EPS0;
         gamma1[i] = csqrt(s[i]*MU0*kappa1[i]);
@@ -165,7 +168,7 @@ int run_case2(double length, double rho, char file_name[]) {
     //harmonic_impedance1_alt(
         nf, s, kappa1, kappa2, gamma1, electrodes, images, num_electrodes,
         nodes, num_nodes, 200, 1e-3, 1e-4, ERROR_PAIRED, rsource, zh);
-    for (int i = 0; i < nf; i++) {
+    for (size_t i = 0; i < nf; i++) {
         fprintf(save_file, "%f %f\n", creal(zh[i]), cimag(zh[i]));
     }
     fclose(save_file);
@@ -175,7 +178,9 @@ int run_case2(double length, double rho, char file_name[]) {
     return 0;
 }
 
-int main(int argc, char *argv[]) {
+int
+main (int argc, char *argv[])
+{
     printf("test case 20pwrd02grcev\n=== START ===\n");
     run_case(3.0, 10.0, "examples/20pwrd02grcev_L3rho10.dat");
     run_case(3.0, 100.0, "examples/20pwrd02grcev_L3rho100.dat");
