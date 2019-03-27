@@ -3,6 +3,7 @@ Funtions to interface the C code to Wolfram Mathematica.
 
 FIXME in notebook files:
 make sure Mathematica can see all dependencies (MKL and SLATEC)
+TODO argument checking
 */
 #include "WolframLibrary.h"
 #include "electrode.h"
@@ -31,7 +32,6 @@ DLLEXPORT int
 Mcalculate_impedances (WolframLibraryData libData, mint Argc, MArgument *Args,
                        MArgument Res)
 {
-    int err; // error code
     MTensor elec_tensor = MArgument_getMTensor(Args[0]);
     mcomplex gamma = MArgument_getComplex(Args[1]);
     mcomplex s = MArgument_getComplex(Args[2]);
@@ -74,7 +74,7 @@ Mcalculate_impedances (WolframLibraryData libData, mint Argc, MArgument *Args,
     MTensor zlzt;
     mcomplex *data;
     mint out_dim[] = {2*ne2};
-    err = libData->MTensor_new(MType_Complex, 1, out_dim, &zlzt);
+    libData->MTensor_new(MType_Complex, 1, out_dim, &zlzt);
     data = libData->MTensor_getComplexData(zlzt);
     for (size_t i = 0; i < ne2; i++) {
         data[i].ri[0] = creal(zl[i]);
@@ -115,7 +115,6 @@ DLLEXPORT int
 Mimpedances_images (WolframLibraryData libData, mint Argc, MArgument *Args,
                     MArgument Res)
 {
-    int err; // error code
     MTensor elec_tensor = MArgument_getMTensor(Args[0]);
     mcomplex gamma = MArgument_getComplex(Args[1]);
     mcomplex s = MArgument_getComplex(Args[2]);
@@ -174,7 +173,7 @@ Mimpedances_images (WolframLibraryData libData, mint Argc, MArgument *Args,
     MTensor zlzt;
     mcomplex *data;
     mint out_dim[] = {2*ne2};
-    err = libData->MTensor_new(MType_Complex, 1, out_dim, &zlzt);
+    libData->MTensor_new(MType_Complex, 1, out_dim, &zlzt);
     data = libData->MTensor_getComplexData(zlzt);
     for (size_t i = 0; i < ne2; i++) {
         data[i].ri[0] = creal(zl[i]);
@@ -194,7 +193,7 @@ Mimpedances_images (WolframLibraryData libData, mint Argc, MArgument *Args,
 
 /** Mharmonic_impedance
 
-*/
+*
 DLLEXPORT int
 Mharmonic_impedance1 (WolframLibraryData libData, mint Argc, MArgument *Args,
                       MArgument Res)
@@ -292,3 +291,4 @@ Mharmonic_impedance1 (WolframLibraryData libData, mint Argc, MArgument *Args,
     free(zh);
     return LIBRARY_NO_ERROR;
 }
+*/
