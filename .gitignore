@@ -4,3 +4,5 @@
 *.a
 *.o
 *.exe
+*.lib
+*.mexw64
