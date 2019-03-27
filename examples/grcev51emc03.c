@@ -1,5 +1,5 @@
 /*
-Test case 51emc03grcev
+Test case grcev51emc03
 
 Reproducing the results in [1] for an horizontal electrode buriend in ground.
 
@@ -9,6 +9,8 @@ Electrodes”. In: IEEE Transactions on Electromagnetic Compatibility 51.3
 */
 #include "auxiliary.h"
 #include "electrode.h"
+#include "linalg.h"
+#include "cubature.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -112,13 +114,13 @@ run_case (double length, double rho, char file_name[])
 int
 main (int argc, char *argv[])
 {
-    printf("test case 51emc03grcev\n=== START ===\n");
-    run_case(10.0, 10.0, "examples/51emc03grcev_L10rho10.dat");
-    run_case(10.0, 100.0, "examples/51emc03grcev_L10rho100.dat");
-    run_case(10.0, 1000.0, "examples/51emc03grcev_L10rho1000.dat");
-    run_case(100.0, 10.0, "examples/51emc03grcev_L100rho10.dat");
-    run_case(100.0, 100.0, "examples/51emc03grcev_L100rho100.dat");
-    run_case(100.0, 1000.0, "examples/51emc03grcev_L100rho1000.dat");
+    printf("test case grcev51emc03\n=== START ===\n");
+    run_case(10.0, 10.0, "grcev51emc03_L10rho10.dat");
+    run_case(10.0, 100.0, "grcev51emc03_L10rho100.dat");
+    run_case(10.0, 1000.0, "grcev51emc03_L10rho1000.dat");
+    run_case(100.0, 10.0, "grcev51emc03_L100rho10.dat");
+    run_case(100.0, 100.0, "grcev51emc03_L100rho100.dat");
+    run_case(100.0, 1000.0, "grcev51emc03_L100rho1000.dat");
     printf("==== END ====\n");
     return 0;
 }

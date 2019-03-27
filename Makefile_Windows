@@ -12,66 +12,64 @@ INTELFLAGS = -DMKL_ILP64
 CUBATUREPATH = cubature
 SLATECPATH = slatec
 WOLFRAMPATH = "C:\\Program Files\\Wolfram Research\\Mathematica\\11.3\\SystemFiles\\IncludeFiles\\C"
-INCLUDE = -Isrc -I$(CUBATUREPATH) -I$(MKLROOT)\\include -I$(SLATECPATH)\\lib -I$(MKLROOT)\\include
-LINK = -L. $(INTELLINK) $(SLATECPATH)\\lib\\libslatec.a -lgfortran
-CFLAGS = -Wall -fno-exceptions -std=c11 $(INTELFLAGS) -Werror -g
-#CFLAGS = -Wall -std=c11 $(INTELFLAGS) -g
+INCLUDE = -Isrc -I$(CUBATUREPATH)
+LINK = -L.
+CFLAGS = -Wall -Werror -fno-exceptions -std=c11 -g
 OBJECTS = electrode.o auxiliary.o hcubature.o
-
 #Compilers
-CC = gcc
+CC = gcc # must be compliant to C Standard 99
 FC = gfortran
 
-.DEFAULT_GOAL := dynamicLibrary
+.DEFAULT_GOAL := dynamic_library
 
-.PHONY	:	clean cleanout allclean slatec libhem.so dynamicLibrary wolfram
+.PHONY	:	clean cleanout dynamicLibrary
 
-clean	:
-		rm -f *.o *.obj *.dat
-		cd examples && rm -f *.o *.obj *.dat
-
+clean	:	cleanout
+		rm -f *.exe *.dll *.lib
 cleanout	:
-		rm -f *.a *.exe *.dll
-		cd examples && rm -f *.a *.exe *.dll
-
-cleanall	:
-		make clean
-		make cleanout
-		cd $(SLATECPATH) && $(MAKE) clean
-		cd $(CUBATUREPATH) && $(MAKE) clean
+		rm -f *.o *.dat
 
 hcubature.o	:	$(CUBATUREPATH)\\hcubature.c
 		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -c $(CUBATUREPATH)\\hcubature.c $(LINK)
 
-auxiliary.o	:	auxiliary.c
-		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -c auxiliary.c $(LINK)
+auxiliary.o	:	src\\auxiliary.c
+		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -c src\\auxiliary.c $(LINK)
 
-electrode.o	:	electrode.c auxiliary.o hcubature.o
-		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -c electrode.c $(LINK)
+electrode.o	:	src\\electrode.c
+		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -c src\\electrode.c $(LINK)
 
-dynamicLibrary	:
-		$(CC) $(CFLAGS) -fPIC -shared $(INCLUDE) -o libhem.dll electrode.c auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
+linalg.o	:	src\\linalg.c
+		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -I$(MKLROOT)\\include -c src\\linalg.c $(LINK)
 
-test	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o testing.exe testing.c $(OBJECTS) $(LINK)
+libhem_electrode.dll	:	$(OBJECTS)
+		$(CC) $(CFLAGS) -fPIC -shared $(INCLUDE) -o libhem_electrode.dll $(OBJECTS) $(LINK) -Wl,--out-implib,libhem_electrode.lib
 
-testDLL	:	libhem.dll
-		$(CC) $(CFLAGS) $(INCLUDE) -o testingDLL.exe testing.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem
+libhem_linalg.dll	:	linalg.o
+		$(CC) $(CFLAGS) $(INTELFLAGS) -fPIC -shared $(INCLUDE) -I$(MKLROOT)\\include -o libhem_linalg.dll linalg.o $(OBJECTS) $(LINK) $(INTELLINK) -Wl,--out-implib,libhem_linalg.lib
+
+dynamic_library	:	libhem_electrode.dll libhem_linalg.dll
+		make cleanout
+
+test	:	linalg.o $(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -I$(MKLROOT)\\include -o test.exe src\\testing.c linalg.o $(OBJECTS) $(LINK) $(INTELLINK)
+
+test_dynlib	:	libhem_electrode.dll libhem_linalg.dll
+		$(CC) $(CFLAGS) $(INCLUDE) -I$(MKLROOT)\\include -o test_dynlib.exe src\\testing.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem_electrode -lhem_linalg
+
+wolfram_electrode	:
+		$(CC) $(CFLAGS) -fPIC -shared $(INCLUDE) -I$(WOLFRAMPATH) -o libhem_electrode_mma.dll interfaces\\mathematica\\interface_wolfram.c src\\electrode.c src\\auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
 
 slatec	:
 		cd $(SLATECPATH) && $(MAKE) FC=$(FC) all
 
-wolfram	:
-		$(CC) -O3 -fPIC -shared -std=c11 $(INTELFLAGS) -Werror $(INCLUDE) -I$(WOLFRAMPATH) -o interfaces\\mathematica\\libhem_mma.dll interface_wolfram.c electrode.c auxiliary.c $(CUBATUREPATH)\\hcubature.c $(LINK)
-
-timing	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o timing.exe examples\\timing.c $(OBJECTS) $(LINK)
+timing	:	libhem_electrode.dll libhem_linalg.dll
+		$(CC) $(CFLAGS) $(INCLUDE) -I$(MKLROOT)\\include -o timing.exe examples\\timing.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem_electrode -lhem_linalg
 # examples are named based on publication: author_volume_journal_issue
-grcev20pwrd0	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o ex20pwrd02grcev.exe examples\\grcev20pwrd02.c $(OBJECTS) $(LINK)
+grcev20pwrd02	:	libhem_electrode.dll libhem_linalg.dll
+		$(CC) $(CFLAGS) $(INCLUDE) -I$(MKLROOT)\\include -o grcev20pwrd02.exe examples\\grcev20pwrd02.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem_electrode -lhem_linalg
 
-grcev51emc03	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o ex51emc03grcev.exe examples\\grcev51emc03.c $(OBJECTS) $(LINK)
+grcev51emc03	:	libhem_electrode.dll libhem_linalg.dll
+		$(CC) $(CFLAGS) $(INCLUDE) -I$(MKLROOT)\\include -o grcev51emc03.exe examples\\grcev51emc03.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem_electrode -lhem_linalg
 
-grcev12pwrd01	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o ex12pwrd01grcev.exe examples\\grcev12pwrd01.c $(OBJECTS) $(LINK)
+grcev12pwrd01	:	libhem_electrode.dll libhem_linalg.dll
+		$(CC) $(CFLAGS) $(INCLUDE) -I$(MKLROOT)\\include -o grcev12pwrd01.exe examples\\grcev12pwrd01.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem_electrode -lhem_linalg

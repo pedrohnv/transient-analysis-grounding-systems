@@ -1,5 +1,5 @@
 /*
-Test case 12pwrd01grcev-a
+Test case grcev12pwrd01-a
 
 Reproducing the results in [1] for a grounding grid.
 Execution time is expected to be up to 20 min.
@@ -11,6 +11,8 @@ doi: 10.1109/61.568238
 */
 #include "auxiliary.h"
 #include "electrode.h"
+#include "linalg.h"
+#include "cubature.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

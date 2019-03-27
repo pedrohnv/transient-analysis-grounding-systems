@@ -1,5 +1,5 @@
 /*
-Test case 20pwrd02grcev
+Test case grcev20pwrd02
 
 Reproducing the results in [1] for a vertical electrode buriend in ground.
 
@@ -9,6 +9,8 @@ ground rod”. In: IEEE Transactions on Power Delivery 20.2 (2005), pp. 1598–
 */
 #include "auxiliary.h"
 #include "electrode.h"
+#include "linalg.h"
+#include "cubature.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -23,7 +25,7 @@ run_case (double length, double rho, char file_name[])
     double sigma = 1/rho; // soil conductivity
     double er = 10.0; //soil rel. permitivitty
     double rho_c = 1.9e-6; //copper resistivity
-    //char file_name[] = "20pwrd02grcev_L<>rho<>.dat";
+    //char file_name[] = "grcev20pwrd02_L<>rho<>.dat";
     // frequencies of interest
     size_t nf = 250;
     double freq[nf];
@@ -120,7 +122,7 @@ run_case2 (double length, double rho, char file_name[])
     double r = 1.25e-2; //radius
     double sigma = 1/rho; // soil conductivity
     double er = 10.0; //soil rel. permitivitty
-    //char file_name[] = "20pwrd02grcev_L<>rho<>.dat";
+    //char file_name[] = "grcev20pwrd02_L<>rho<>.dat";
     // frequencies of interest
     size_t nf = 250;
     double freq[nf];
@@ -180,15 +182,15 @@ run_case2 (double length, double rho, char file_name[])
 int
 main (int argc, char *argv[])
 {
-    printf("test case 20pwrd02grcev\n=== START ===\n");
-    run_case(3.0, 10.0, "examples/20pwrd02grcev_L3rho10.dat");
-    run_case(3.0, 100.0, "examples/20pwrd02grcev_L3rho100.dat");
-    run_case(3.0, 1000.0, "examples/20pwrd02grcev_L3rho1000.dat");
-    run_case(24.0, 10.0, "examples/20pwrd02grcev_L24rho10.dat");
-    run_case(24.0, 100.0, "examples/20pwrd02grcev_L24rho100.dat");
-    run_case(24.0, 1000.0, "examples/20pwrd02grcev_L24rho1000.dat");
-    run_case(3.0, 30.0, "examples/20pwrd02grcev_L3rho30.dat");
-    run_case(30.0, 30.0, "examples/20pwrd02grcev_L30rho30.dat");
+    printf("test case grcev20pwrd02\n=== START ===\n");
+    run_case(3.0, 10.0, "grcev20pwrd02_L3rho10.dat");
+    run_case(3.0, 100.0, "grcev20pwrd02_L3rho100.dat");
+    run_case(3.0, 1000.0, "grcev20pwrd02_L3rho1000.dat");
+    run_case(24.0, 10.0, "grcev20pwrd02_L24rho10.dat");
+    run_case(24.0, 100.0, "grcev20pwrd02_L24rho100.dat");
+    run_case(24.0, 1000.0, "grcev20pwrd02_L24rho1000.dat");
+    run_case(3.0, 30.0, "grcev20pwrd02_L3rho30.dat");
+    run_case(30.0, 30.0, "grcev20pwrd02_L30rho30.dat");
     printf("==== END ====\n");
     return 0;
 }
