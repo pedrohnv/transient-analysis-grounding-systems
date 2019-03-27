@@ -175,8 +175,8 @@ Calculates the integral along the sender and receiver using Cubature.
 @param gamma medium propagation constant
 @param max_eval specifies a maximum number of function evaluations (0 for no
 limit)
-@param reqAbsError the absolute error requested (0 to ignore)
-@param reqRelError the relative error requested (0 to ignore)
+@param req_abs_error the absolute error requested (0 to ignore)
+@param req_rel_error the relative error requested (0 to ignore)
 @param error_norm (enumeration defined in cubature.h) error checking scheme
 @param integration_type type of integration to be done.
 @param result array[2] where to store the integral result (real and imaginary
@@ -223,8 +223,8 @@ Calculates the mutual longitudinal impedance of given electrodes.
 @param gamma medium propagation constant
 @param max_eval specifies a maximum number of function evaluations (0 for no
 limit)
-@param reqAbsError the absolute error requested (0 to ignore)
-@param reqRelError the relative error requested (0 to ignore)
+@param req_abs_error the absolute error requested (0 to ignore)
+@param req_rel_error the relative error requested (0 to ignore)
 @param error_norm (enumeration defined in cubature.h) error checking scheme
 @param integration_type type of integration to be done.
 @param result array[2] where to store the integral result (real and imaginary
@@ -261,8 +261,8 @@ Calculates the mutual transversal impedance of given electrodes.
 @param gamma medium propagation constant
 @param max_eval specifies a maximum number of function evaluations (0 for no
 limit)
-@param reqAbsError the absolute error requested (0 to ignore)
-@param reqRelError the relative error requested (0 to ignore)
+@param req_abs_error the absolute error requested (0 to ignore)
+@param req_rel_error the relative error requested (0 to ignore)
 @param error_norm (enumeration defined in cubature.h) error checking scheme
 @param integration_type type of integration to be done.
 @param result array[2] where to store the integral result (real and imaginary
@@ -296,8 +296,8 @@ Calculates the impedance matrices.
 @param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
 @param max_eval specifies a maximum number of function evaluations (0 for no
 limit)
-@param reqAbsError the absolute error requested (0 to ignore)
-@param reqRelError the relative error requested (0 to ignore)
+@param req_abs_error the absolute error requested (0 to ignore)
+@param req_rel_error the relative error requested (0 to ignore)
 @param error_norm (enumeration defined in cubature.h) error checking scheme
 @param integration_type type of integration to be done.
 @return 0 on sucess
@@ -329,8 +329,8 @@ Add the images effect to the impedance matrices.
 @param ref_t transversal current reflection coefficient
 @param max_eval specifies a maximum number of function evaluations (0 for no
 limit)
-@param reqAbsError the absolute error requested (0 to ignore)
-@param reqRelError the relative error requested (0 to ignore)
+@param req_abs_error the absolute error requested (0 to ignore)
+@param req_rel_error the relative error requested (0 to ignore)
 @param error_norm (enumeration defined in cubature.h) error checking scheme
 @param integration_type type of integration to be done.
 @return 0 on sucess

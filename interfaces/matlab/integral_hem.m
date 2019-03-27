@@ -1,4 +1,24 @@
-% exp(-gamma*r)/r
+% Computes the numerical integration of integral2(exp(-gamma*r)/r, dls, dlr)
+% using pure MATLAB routines.
+% Parameters
+% ----------
+%   sender: Electrode struct
+%       see new_electrode
+%   receiver: Electrode struct
+%       see new_electrode
+%   gamma: complex
+%       medium propagation constant
+%   req_abs_error: real
+%       the absolute error requested (0 to ignore)
+%   req_rel_error: real
+%       the relative error requested (0 to ignore)
+%   intg_type: Enumeration
+%       type of integration to be done (see Integration_type)
+%   
+% Returns
+% -------
+%   intg: complex
+%       integral result
 function intg = integral_hem(sender, receiver, gamma, req_abs_error, req_rel_error, intg_type)
     if nargin < 6
         intg_type = Integration_type.INTG_LOGNF;
