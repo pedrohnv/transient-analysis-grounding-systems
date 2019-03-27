@@ -466,7 +466,7 @@ fill_incidence (_Complex double *we, const Electrode *electrodes,
             if (condition > 0) no_incidence = 0; //false
         }
         if (no_incidence) {
-            printf("No electrode is connected to node[%i]\n", n);
+            printf("No electrode is connected to node[%i]\n", (int) n);
             return 1;
         }
     }
@@ -534,7 +534,7 @@ incidence_alt (double *a, double *b, const Electrode *electrodes,
             if (condition > 0) no_incidence = 0; //false
         }
         if (no_incidence) {
-            printf("No electrode is connected to node[%i]\n", n);
+            printf("No electrode is connected to node[%i]\n", (int) n);
             return 1;
         }
     }
