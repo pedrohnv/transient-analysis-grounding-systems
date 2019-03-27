@@ -5,6 +5,7 @@ Functions for testing the code
 #include "cubature.h"
 #include "electrode.h"
 #include "auxiliary.h"
+#include "linalg.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -196,7 +197,7 @@ test_case (double rho, double length, double frac)
         nodes[i][1] = 0.0;
         nodes[i][2] = segment[i];
     }
-    for ( size_ti = 0; i < nn2; i++) {
+    for (size_t i = 0; i < nn2; i++) {
         yn[i] = 0.0;
     }
     Electrode electrodes[num_electrodes];
