@@ -4,7 +4,7 @@
 %
 % [1] Noda, Taku, and Shigeru Yokoyama. "Thin wire representation in finite difference time domain
 % surge simulation." IEEE Transactions on Power Delivery 17.3 (2002): 840-847.
-usemat = true; % use the pure MATLAB routines?
+usemat = false; % use the pure MATLAB routines?
 if ~usemat
     if ispc % windows?
         mex calculate_impedances.c interface_matlab.c ..\\..\\src\\electrode.c ..\\..\\cubature\\hcubature.c ..\\..\\src\\auxiliary.c -I. -I..\\..\\src -I..\\..\\cubature
@@ -56,7 +56,7 @@ max_eval = 200;
 req_abs_error = 1e-3;
 req_rel_error = 1e-4;
 error_norm = 1; %paired, only used in C routines
-intg_type = Integration_type.INTG_LOGNF;
+type = Integration_type.LOGNF;
 
 %% Electrodes
 x = 10;
@@ -125,17 +125,17 @@ for i = 1:nf
     if usemat
         [zl, zt] = Mcalculate_impedances(electrodes, k1, jw, mur, kappa, ...
                                          req_abs_error, req_rel_error, ...
-                                         intg_type);
+                                         type);
         [zl, zt] = Mimpedances_images(electrodes, images, zl, zt, k1, jw, mur, kappa, ...
                                       ref_l, ref_t, req_abs_error, ...
-                                      req_rel_error, intg_type);
+                                      req_rel_error, type);
     else
         [zl, zt] = calculate_impedances(electrodes, k1, jw, mur, kappa, ...
                                         max_eval, req_abs_error, req_rel_error, ...
-                                        error_norm, intg_type);
+                                        error_norm, type);
         [zl, zt] = impedances_images(electrodes, images, zl, zt, k1, jw, mur, kappa, ...
                                      ref_l, ref_t, max_eval, req_abs_error, ...
-                                     req_rel_error, error_norm, intg_type);
+                                     req_rel_error, error_norm, type);
     end
     yn = mAT*inv(zt)*mA + mBT*inv(zl)*mB;
     yn(inj_node,inj_node) = yn(inj_node,inj_node) + gf;
