@@ -12,16 +12,16 @@
 %       the absolute error requested (0 to ignore)
 %   req_rel_error: real
 %       the relative error requested (0 to ignore)
-%   intg_type: Enumeration
+%   type: Enumeration
 %       type of integration to be done (see Integration_type)
 %   
 % Returns
 % -------
 %   intg: complex
 %       integral result
-function intg = integral_hem(sender, receiver, gamma, req_abs_error, req_rel_error, intg_type)
+function intg = integral_hem(sender, receiver, gamma, req_abs_error, req_rel_error, type)
     if nargin < 6
-        intg_type = Integration_type.INTG_LOGNF;
+        type = Integration_type.LOGNF;
     end
     if nargin < 5
         req_rel_error = 1e-4;
@@ -34,23 +34,23 @@ function intg = integral_hem(sender, receiver, gamma, req_abs_error, req_rel_err
     point_s = @(ts) transpose(ts).*(sender.end_point - sender.start_point) + sender.start_point;
     point_r = @(tr) transpose(tr).*(receiver.end_point - receiver.start_point) + receiver.start_point;
     r = @(ts,tr) transpose(vecnorm(point_s(ts) - point_r(tr), 2, 2));
-    if intg_type == Integration_type.INTG_NONE
+    if type == Integration_type.NONE
         rbar = vecnorm(sender.middle_point - receiver.middle_point, 2, 2);
         intg = ls*lr*exp(-gamma*rbar)/rbar;
-    elseif intg_type == Integration_type.INTG_DOUBLE
-        % FIXME error
+    elseif type == Integration_type.DOUBLE
+        % FIXME error: Matrix dimensions must agree.
         fun = @(ts,tr) exp(-gamma*r(ts,tr))./r(ts,tr);
         intg = integral2(fun, 0.0, 1.0, 0.0, 1.0, ...
                          'AbsTol', req_abs_error, 'RelTol', req_rel_error);
         intg = intg*ls*lr;
-    elseif intg_type == Integration_type.INTG_EXP_LOGNF
+    elseif type == Integration_type.EXP_LOGNF
         r1 = @(tr) transpose(vecnorm(sender.start_point - point_r(tr), 2, 2));
         r2 = @(tr) transpose(vecnorm(sender.end_point - point_r(tr), 2, 2));
         rbar = @(tr) transpose(vecnorm(sender.middle_point - point_r(tr), 2, 2));
         fun = @(tr) exp(-gamma*rbar(tr)).*log( (r1(tr) + r2(tr) + ls)./(r1(tr) + r2(tr) - ls) );
         intg = integral(fun, 0.0, 1.0, 'AbsTol', req_abs_error, 'RelTol', req_rel_error);
         intg = intg*ls;
-    elseif intg_type == Integration_type.INTG_LOGNF
+    elseif type == Integration_type.LOGNF
         r1 = @(tr) transpose(vecnorm(sender.start_point - point_r(tr), 2, 2));
         r2 = @(tr) transpose(vecnorm(sender.end_point - point_r(tr), 2, 2));
         fun = @(tr) log( (r1(tr) + r2(tr) + ls)./(r1(tr) + r2(tr) - ls) );
