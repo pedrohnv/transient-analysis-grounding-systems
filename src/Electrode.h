@@ -183,7 +183,7 @@ limit)
 parts)
 @param error array[2] where to store the integral error (real and imaginary
 parts)
-@return 0 on success
+@return 0 on success, -10 if integration_type is unrecognized.
 @see Integration_type
 @see https://github.com/stevengj/cubature
 */

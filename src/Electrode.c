@@ -230,6 +230,9 @@ integral (const Electrode *sender, const Electrode *receiver,
             result[0] = creal(exp_gr) * receiver->length;
             result[1] = cimag(exp_gr) * receiver->length;
             break;
+        default:
+            failure = -10;
+            break;
     }
     free(auxdata);
     return failure;

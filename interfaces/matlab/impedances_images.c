@@ -1,7 +1,6 @@
+#include "mex.h"
 #include "interface_matlab.h"
 #include "electrode.h"
-#include "mex.h"
-//mex impedances_images.c InterfaceMatlab.c ..\\..\\cubature\\hcubature.c -I. -I..\\..\\cubature
 
 /**
 Add the image effects to the impedance matrices of the electrode system.
@@ -10,8 +9,64 @@ TODO describe args
 void
 mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-    //TODO check inputs and print useful error messages
-    //mxGetNumberOfElements = N_array_elements + N_struct_fields
+    if (nrhs != 15) {
+        mexErrMsgTxt("Exactly 15 arguments are expected.\n");
+    }
+    if (mxGetClassID(prhs[0]) != mxSTRUCT_CLASS) {
+        mexErrMsgTxt("1st argument must be an Electrode struct.\n");
+    }
+    if (mxGetClassID(prhs[1]) != mxSTRUCT_CLASS) {
+        mexErrMsgTxt("2nd argument must be an Electrode struct.\n");
+    }
+    if (mxGetClassID(prhs[2]) != mxDOUBLE_CLASS) {
+        mexErrMsgTxt("3rd argument must be a complex matrix.\n");
+        // TODO check size
+    }
+    if (mxGetClassID(prhs[3]) != mxDOUBLE_CLASS) {
+        mexErrMsgTxt("4th argument must be a complex matrix.\n");
+        // TODO check size
+    }
+    if (mxGetClassID(prhs[4]) != mxDOUBLE_CLASS) {
+        mexErrMsgTxt("5th argument must be a complex number.\n");
+    }
+    if (mxGetClassID(prhs[5]) != mxDOUBLE_CLASS) {
+        mexErrMsgTxt("6th argument must be a complex number.\n");
+    }
+    if (mxGetClassID(prhs[6]) != mxDOUBLE_CLASS
+        || mxIsComplex(prhs[6])) {
+        mexErrMsgTxt("7th argument must be a real number.\n");
+    }
+    if (mxGetClassID(prhs[7]) != mxDOUBLE_CLASS) {
+        mexErrMsgTxt("8th argument must be a complex number.\n");
+    }
+    if (mxGetClassID(prhs[8]) != mxDOUBLE_CLASS) {
+        mexErrMsgTxt("9th argument must be a complex number.\n");
+    }
+    if (mxGetClassID(prhs[9]) != mxDOUBLE_CLASS) {
+        mexErrMsgTxt("10th argument must be a complex number.\n");
+    }
+    if (mxGetClassID(prhs[10]) != mxDOUBLE_CLASS
+        || mxIsComplex(prhs[10])) {
+        mexErrMsgTxt("11th argument must be a real integer.\n");
+    }
+    if (mxGetClassID(prhs[11]) != mxDOUBLE_CLASS
+        || mxIsComplex(prhs[11])) {
+        mexErrMsgTxt("12th argument must be a real number.\n");
+    }
+    if (mxGetClassID(prhs[12]) != mxDOUBLE_CLASS
+        || mxIsComplex(prhs[12])) {
+        mexErrMsgTxt("13th argument must be a real number.\n");
+    }
+    // FIXME get Enumeration value
+    if (mxGetClassID(prhs[13]) != mxINT16_CLASS
+        || mxIsComplex(prhs[13])) {
+        mexErrMsgTxt("14th argument must be an INT16.\n");
+    }
+    if (mxGetClassID(prhs[14]) != mxINT16_CLASS
+        || mxIsComplex(prhs[14])) {
+        mexErrMsgTxt("15th argument must be an INT16.\n");
+    }
+    // ================
     size_t num_electrodes = mxGetNumberOfElements(prhs[0]);
     Electrode *electrodes = malloc(sizeof(Electrode)*num_electrodes);
     Electrode *images = malloc(sizeof(Electrode)*num_electrodes);
@@ -26,7 +81,7 @@ mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     _Complex double *zl = malloc(sizeof(_Complex double)*ne2);
     _Complex double *zt = malloc(sizeof(_Complex double)*ne2);
     #if MX_HAS_INTERLEAVED_COMPLEX
-        mxComplexDoubles *zldata, *ztdata;
+        mxComplexDoubles *zldata, *ztdata;// FIXME unknown type
         zldata = mxGetComplexDoubles(prhs[0]);
         ztdata = mxGetComplexDoubles(prhs[1]);
         for (size_t k = 0; k < num_electrodes; k++) {
@@ -52,44 +107,17 @@ mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             }
         }
     #endif
-    _Complex double gamma; //prhs[4]
-    _Complex double s; //prhs[5]
+    _Complex double gamma = get_complex(prhs[4]);
+    _Complex double s = get_complex(prhs[5]);
     double mur = (double) mxGetScalar(prhs[6]);
-    _Complex double kappa; //prhs[7]
-    _Complex double ref_l; //prhs[8]
-    _Complex double ref_t; //prhs[9]
+    _Complex double kappa = get_complex(prhs[7]);
+    _Complex double ref_l = get_complex(prhs[8]);
+    _Complex double ref_t = get_complex(prhs[9]);
     size_t max_eval = (size_t) mxGetScalar(prhs[10]);
     double req_abs_error = (double) mxGetScalar(prhs[11]);
     double req_rel_error = (double) mxGetScalar(prhs[12]);
     int error_norm = (int) mxGetScalar(prhs[13]);
     int integration_type = (int) mxGetScalar(prhs[14]);
-    #if MX_HAS_INTERLEAVED_COMPLEX
-        mxComplexDoubles *pc;
-        pc = mxGetComplexDoubles(prhs[4]);
-        gamma = (*pc).real + I*(*pc).imag);
-        pc = mxGetComplexDoubles(prhs[5]);
-        s = (*pc).real + I*(*pc).imag);
-        pc = mxGetComplexDoubles(prhs[7]);
-        kappa = (*pc).real + I*(*pc).imag);
-    #else
-        double *pr, *pi;
-        //FIXME will crash if any of the arguments is REAL in Matlab side...
-        pr = (double *) mxGetPr(prhs[4]);
-        pi = (double *) mxGetPi(prhs[4]);
-        gamma = (*pr) + I*(*pi);
-        pr = (double *) mxGetPr(prhs[5]);
-        pi = (double *) mxGetPi(prhs[5]);
-        s = (*pr) + I*(*pi);
-        pr = (double *) mxGetPr(prhs[7]);
-        pi = (double *) mxGetPi(prhs[7]);
-        kappa = (*pr) + I*(*pi);
-        pr = (double *) mxGetPr(prhs[8]);
-        pi = (double *) mxGetPi(prhs[8]);
-        ref_l = (*pr) + I*(*pi);
-        pr = (double *) mxGetPr(prhs[9]);
-        pi = (double *) mxGetPi(prhs[9]);
-        ref_t = (*pr) + I*(*pi);
-    #endif
     impedances_images(electrodes, images, num_electrodes, zl, zt, gamma, s, mur,
                       kappa, ref_l, ref_t, max_eval, req_abs_error, req_rel_error,
                       error_norm, integration_type);
