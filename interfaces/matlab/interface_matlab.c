@@ -48,9 +48,15 @@ cast_electrode (const mxArray *matlab_elect, mwIndex index, Electrode* electrode
             electrode->radius = (double) mxGetScalar(field_array_ptr);
         } else if (strcmp(field_name, "zi") == 0) {
             #if MX_HAS_INTERLEAVED_COMPLEX
-                mxComplexDoubles *pc;
-                pc = mxGetComplexDouble(field_array_ptr);
-                electrode->zi = (*pc).real + (*pc).imag*I;
+                mxComplexDouble *pc;
+                mxDouble *p;
+                if (mxIsComplex(field_array_ptr)) {
+                    pc = mxGetComplexDoubles(field_array_ptr);
+                    electrode->zi = (*pc).real + (*pc).imag*I;
+                } else {
+                    p = mxGetDoubles(field_array_ptr);
+                    electrode->zi = (*p) + I*0.0;
+                }
             #else
                 pr = (double *) mxGetPr(field_array_ptr);
                 electrode->zi = (*pr);
@@ -85,12 +91,14 @@ get_complex(const mxArray *array_ptr)
     _Complex double value;
     #if MX_HAS_INTERLEAVED_COMPLEX
         mxComplexDouble *pc;
+        mxDouble *p;
         if (mxIsComplex(array_ptr)) {
             pc = mxGetComplexDoubles(array_ptr);
             value = (*pc).real + I*(*pc).imag;
         }
         else {
-            value = *mxGetDoubles(array_ptr);;
+            p = mxGetDoubles(array_ptr);
+            value = (*p);
         }
     #else
         double *pr, *pi;

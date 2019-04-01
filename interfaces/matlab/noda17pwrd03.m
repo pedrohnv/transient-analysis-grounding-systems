@@ -8,11 +8,11 @@ usemat = false; % use the pure MATLAB routines?
 if ~usemat
     if verLessThan('matlab', '9.4') % running on a release < R2018a ?
         if ispc % windows?
-            mex calculate_impedances.c interface_matlab.c ..\\..\\src\\electrode.c ..\\..\\cubature\\hcubature.c ..\\..\\src\\auxiliary.c -I. -I..\\..\\src -I..\\..\\cubature
-            mex impedances_images.c interface_matlab.c ..\\..\\src\\electrode.c ..\\..\\cubature\\hcubature.c ..\\..\\src\\auxiliary.c -I. -I..\\..\\src -I..\\..\\cubature
+            mex -R2017b calculate_impedances.c interface_matlab.c ..\\..\\src\\electrode.c ..\\..\\cubature\\hcubature.c ..\\..\\src\\auxiliary.c -I. -I..\\..\\src -I..\\..\\cubature
+            mex -R2017b impedances_images.c interface_matlab.c ..\\..\\src\\electrode.c ..\\..\\cubature\\hcubature.c ..\\..\\src\\auxiliary.c -I. -I..\\..\\src -I..\\..\\cubature
         else
-            mex calculate_impedances.c interface_matlab.c ../../src/electrode.c ../../cubature/hcubature.c ../../src/auxiliary.c -I. -I../../src -I../../cubature
-            mex impedances_images.c interface_matlab.c ../../src/electrode.c ../../cubature/hcubature.c ../../src/auxiliary.c -I. -I../../src -I../../cubature
+            mex -R2017b calculate_impedances.c interface_matlab.c ../../src/electrode.c ../../cubature/hcubature.c ../../src/auxiliary.c -I. -I../../src -I../../cubature
+            mex -R2017b impedances_images.c interface_matlab.c ../../src/electrode.c ../../cubature/hcubature.c ../../src/auxiliary.c -I. -I../../src -I../../cubature
         end
     else
         % R2018a onwards has interleaved complex API (better performance),
@@ -68,7 +68,7 @@ max_eval = 200;
 req_abs_error = 1e-3;
 req_rel_error = 1e-4;
 error_norm = 1; %paired, only used in C routines
-intg_type = Integration_type.LOGNF;
+intg_type = Integration_type.DOUBLE;
 
 %% Electrodes
 x = 10;
@@ -133,7 +133,6 @@ for i = 1:nf
     kappa_cu = sigma_cu + jw*epsr*eps0;
     ref_t = (kappa - kappa_cu)/(kappa + kappa_cu) + 0.0j;
     ref_l = ref_t + 0.0j;
-    %FIXME sk(i) is Real; crashes during C call.
     if usemat
         [zl, zt] = Mcalculate_impedances(electrodes, k1, jw, mur, kappa, ...
                                          req_abs_error, req_rel_error, ...

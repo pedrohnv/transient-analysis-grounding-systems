@@ -1,7 +1,8 @@
 #include "mex.h"
 #include "interface_matlab.h"
 #include "electrode.h"
-//mex calculate_impedances.c InterfaceMatlab.c ..\\..\\cubature\\hcubature.c -I. -I..\\..\\cubature
+#include <complex.h>
+#include <string.h>
 
 /**
 Calculate the impedance matrices of the electrode system.
@@ -67,15 +68,15 @@ mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     int error_norm = (int) mxGetScalar(prhs[8]);
     int integration_type = (int) mxGetScalar(prhs[9]);
     size_t ne2 = num_electrodes*num_electrodes;
-    _Complex double *zl = malloc(sizeof(_Complex double)*ne2);
-    _Complex double *zt = malloc(sizeof(_Complex double)*ne2);
+    _Complex double *zl = malloc(ne2*sizeof(_Complex double));
+    _Complex double *zt = malloc(ne2*sizeof(_Complex double));
     calculate_impedances(electrodes, num_electrodes, zl, zt, gamma, s, mur,
                          kappa, max_eval, req_abs_error, req_rel_error,
                          error_norm, integration_type);
     plhs[0] = mxCreateDoubleMatrix((mwSize)num_electrodes, (mwSize)num_electrodes, mxCOMPLEX);
     plhs[1] = mxCreateDoubleMatrix((mwSize)num_electrodes, (mwSize)num_electrodes, mxCOMPLEX);
     #if MX_HAS_INTERLEAVED_COMPLEX
-        mxComplexDoubles *zldata, *ztdata;// FIXME unknown type
+        mxComplexDouble *zldata, *ztdata;// FIXME unknown type
         zldata = mxGetComplexDoubles(plhs[0]);
         ztdata = mxGetComplexDoubles(plhs[1]);
         for (size_t k = 0; k < num_electrodes; k++) {
