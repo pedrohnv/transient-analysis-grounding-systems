@@ -70,18 +70,6 @@ cast_electrode (const mxArray *matlab_elect, mwIndex index, Electrode* electrode
             mexErrMsgTxt("");
         }
     }
-    /*mexPrintf("start: %f, ", electrode->start_point[0]);
-    mexPrintf("%f, ", electrode->start_point[1]);
-    mexPrintf("%f\n", electrode->start_point[2]);
-    mexPrintf("end: %f, ", electrode->end_point[0]);
-    mexPrintf("%f, ", electrode->end_point[1]);
-    mexPrintf("%f\n", electrode->end_point[2]);
-    mexPrintf("middle: %f, ", electrode->middle_point[0]);
-    mexPrintf("%f, ", electrode->middle_point[1]);
-    mexPrintf("%f\n", electrode->middle_point[2]);
-    mexPrintf("radius: %f\n", electrode->radius);
-    mexPrintf("length: %f\n", electrode->length);
-    mexPrintf("zi: %f + I*%f\n\n", creal(electrode->zi), cimag(electrode->zi));*/
     return 0;
 }
 
