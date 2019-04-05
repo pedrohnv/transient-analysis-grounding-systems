@@ -1,9 +1,11 @@
 % Numerical Laplace Transform of an arbitrary function f(t).
+% 
 % Parameters
 % ----------
 %   f : vector of the sampled function in time domain
 %   t : vector of the time of the samples
 %   s : vector of "frequency" points of interest
+% 
 % Returns
 % -------
 %   F(s) : vector of the sampled function in "frequency" domain

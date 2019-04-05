@@ -1,3 +1,14 @@
+% Splits a list of `electrodes` in `n` segments of equal length.
+% 
+% Parameters
+% ----------
+%   electrodes : the electrode struct array to be split
+%   frac : upper bound of the desired length of each segment
+% 
+% Returns
+% -------
+%   elecs : vector of electrode struct
+%   nodes : vector of unique nodes to which the segments are connected
 function [elecs, nodes] = seg_electrode_list(electrodes, frac)
     num_elec = 0; %after segmentation
 	for i=1:length(electrodes)

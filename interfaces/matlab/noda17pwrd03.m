@@ -4,28 +4,8 @@
 %
 % [1] Noda, Taku, and Shigeru Yokoyama. "Thin wire representation in finite difference time domain
 % surge simulation." IEEE Transactions on Power Delivery 17.3 (2002): 840-847.
-usemat = false; % use the pure MATLAB routines?
-if ~usemat
-    if verLessThan('matlab', '9.4') % running on a release < R2018a ?
-        if ispc % windows?
-            mex -R2017b calculate_impedances.c interface_matlab.c ..\\..\\src\\electrode.c ..\\..\\cubature\\hcubature.c ..\\..\\src\\auxiliary.c -I. -I..\\..\\src -I..\\..\\cubature
-            mex -R2017b impedances_images.c interface_matlab.c ..\\..\\src\\electrode.c ..\\..\\cubature\\hcubature.c ..\\..\\src\\auxiliary.c -I. -I..\\..\\src -I..\\..\\cubature
-        else
-            mex -R2017b calculate_impedances.c interface_matlab.c ../../src/electrode.c ../../cubature/hcubature.c ../../src/auxiliary.c -I. -I../../src -I../../cubature
-            mex -R2017b impedances_images.c interface_matlab.c ../../src/electrode.c ../../cubature/hcubature.c ../../src/auxiliary.c -I. -I../../src -I../../cubature
-        end
-    else
-        % R2018a onwards has interleaved complex API (better performance),
-        % but needs a flag to use it
-        if ispc % windows?
-            mex -R2018a calculate_impedances.c interface_matlab.c ..\\..\\src\\electrode.c ..\\..\\cubature\\hcubature.c ..\\..\\src\\auxiliary.c -I. -I..\\..\\src -I..\\..\\cubature
-            mex -R2018a impedances_images.c interface_matlab.c ..\\..\\src\\electrode.c ..\\..\\cubature\\hcubature.c ..\\..\\src\\auxiliary.c -I. -I..\\..\\src -I..\\..\\cubature
-        else
-            mex -R2018a calculate_impedances.c interface_matlab.c ../../src/electrode.c ../../cubature/hcubature.c ../../src/auxiliary.c -I. -I../../src -I../../cubature
-            mex -R2018a impedances_images.c interface_matlab.c ../../src/electrode.c ../../cubature/hcubature.c ../../src/auxiliary.c -I. -I../../src -I../../cubature
-        end
-    end
-end
+
+% setup() % To compile MEX files
 
 %% Parameters
 mu0 = pi*4e-7;
@@ -67,7 +47,7 @@ lambda = (2*pi/omega)*(1/sqrt( epsr*eps0*mu0/2*(1 + sqrt(1 + (sigma1/(omega*epsr
 max_eval = 200;
 req_abs_error = 1e-3;
 req_rel_error = 1e-4;
-error_norm = 1; %paired, only used in C routines
+error_norm = Error_norm.PAIRED;
 intg_type = Integration_type.DOUBLE;
 
 %% Electrodes
@@ -127,27 +107,18 @@ ent_freq = laplace_transform(source(:,2), source(:,1), -1.0j*sk);
 
 %% Freq. loop
 for i = 1:nf
-    jw = 1.0j*sk(i) + 0.0j;
+    jw = 1.0j*sk(i);
     kappa = jw*eps0;
     k1 = sqrt(jw*mu0*kappa);
     kappa_cu = sigma_cu + jw*epsr*eps0;
     ref_t = (kappa - kappa_cu)/(kappa + kappa_cu) + 0.0j;
     ref_l = ref_t + 0.0j;
-    if usemat
-        [zl, zt] = Mcalculate_impedances(electrodes, k1, jw, mur, kappa, ...
-                                         req_abs_error, req_rel_error, ...
-                                         intg_type);
-        [zl, zt] = Mimpedances_images(electrodes, images, zl, zt, k1, jw, mur, kappa, ...
-                                      ref_l, ref_t, req_abs_error, ...
-                                      req_rel_error, intg_type);
-    else
-        [zl, zt] = calculate_impedances(electrodes, k1, jw, mur, kappa, ...
-                                        max_eval, req_abs_error, req_rel_error, ...
-                                        int16(error_norm), int16(intg_type));
-        [zl, zt] = impedances_images(electrodes, images, zl, zt, k1, jw, mur, kappa, ...
-                                     ref_l, ref_t, max_eval, req_abs_error, ...
-                                     req_rel_error, int16(error_norm), int16(intg_type));
-    end
+    [zl, zt] = calculate_impedances(electrodes, k1, jw, mur, kappa, ...
+                                    max_eval, req_abs_error, req_rel_error, ...
+                                    error_norm, intg_type);
+    [zl, zt] = impedances_images(electrodes, images, zl, zt, k1, jw, mur, kappa, ...
+                                 ref_l, ref_t, max_eval, req_abs_error, ...
+                                 req_rel_error, error_norm, intg_type);
     yn = mAT*inv(zt)*mA + mBT*inv(zl)*mB;
     yn(inj_node,inj_node) = yn(inj_node,inj_node) + gf;
     exci(inj_node) = ent_freq(i)*gf;

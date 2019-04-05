@@ -1,3 +1,14 @@
+% Splits `electrode` in `n` segments of equal length.
+% 
+% Parameters
+% ----------
+%   electrode : the electrode struct to be split
+%   num_segments : number of segments into which electrode will be split
+% 
+% Returns
+% -------
+%   segments : vector of electrode struct
+%   nodes : vector of unique nodes to which the segments are connected
 function [segments, nodes] = segment_electrode(electrode, num_segments)
     nn = num_segments + 1;
     nodes = zeros(nn, 3);
