@@ -10,6 +10,4 @@ The `examples` folder contains various C files which reproduce results published
 
 These codes make use of [cubature](https://github.com/stevengj/cubature). It also uses [Intel's MKL](https://software.intel.com/en-us/mkl).
 
-It is assumed that the user has an optmized [BLAS](https://www.netlib.org/blas/) in their machine (install [ATLAS](http://math-atlas.sourceforge.net/) if you are unsure).
-
 Don't forget to define `#MKLROOT` (use the bash script `mklvars.sh` that is shipped together with intel's MKL). In my case I use the command `source mklvars.sh intel64`.
