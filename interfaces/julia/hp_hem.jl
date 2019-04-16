@@ -26,6 +26,23 @@ function new_electrode(start_point, end_point, radius, internal_impedance)
                      norm(start_point - end_point), radius, internal_impedance)
 end;
 
+"""
+Makes a 2D, xy-coordinates, plot of the electrodes and nodes.
+Call 'using Plots' before calling this function.
+"""
+function plot_elecnodes(electrodes, nodes)
+	pontos = nodes[:,1:2]
+	scatter(pontos[:,1], pontos[:,2], legend=false)
+	for i=1:num_electrodes-1
+		e = electrodes[i];
+		plot!([e.start_point[1], e.end_point[1]], [e.start_point[2], e.end_point[2]],
+		      line=(:black))
+	end
+	e = electrodes[end];
+	plot!([e.start_point[1], e.end_point[1]], [e.start_point[2], e.end_point[2]],
+	      line=(:black), legend=false)
+end;
+
 function segment_electrode(electrode::Electrode, num_segments::Int)
     nn = num_segments + 1;
     nodes = Array{Float64}(undef, nn, 3);
