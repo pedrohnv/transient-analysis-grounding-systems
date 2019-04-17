@@ -40,7 +40,7 @@ function plot_elecnodes(electrodes, nodes)
 	end
 	e = electrodes[end];
 	plot!([e.start_point[1], e.end_point[1]], [e.start_point[2], e.end_point[2]],
-	      line=(:black), legend=false)
+	      line=(:black), legend=false, aspect_ratio=1)
 end;
 
 function segment_electrode(electrode::Electrode, num_segments::Int)
