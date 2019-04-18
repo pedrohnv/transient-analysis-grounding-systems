@@ -178,3 +178,39 @@ function incidence(electrodes::Vector{Electrode}, nodes::Matrix{Float64})
     end
     return a, b
 end;
+
+function immittance(electrodes, nodes, zl, zt, ye);
+	# build global immittance matrix
+	m = length(electrodes);
+    n = size(nodes)[1];
+	N = 2*m + n;
+    we = zeros(ComplexF64, (N,N));
+    for k = 1:n
+        for i = 1:m
+            if isapprox(collect(electrodes[i].start_point), nodes[k,:])
+                we[i+n, k] = -1.0;
+                we[i+n+m, k] = -0.5;
+				we[k, i+n] = 1.0;
+            elseif isapprox(collect(electrodes[i].end_point), nodes[k,:])
+				we[i+n, k] = 1.0;
+                we[i+n+m, k] = -0.5;
+                we[k, i+n+m] = 1.0;
+            end
+        end
+    end
+	for k = 1:n
+		for i = 1:n
+			we[i, k] = ye[i, k];
+		end
+	end
+	for k = 1:m
+		for i = 1:m
+			zl2 = zl[i, k]/2;
+			we[i+n, k+n] = zl2;
+			we[i+n, k+n+m] = -zl2;
+			we[i+n+m, k+n] = zt[i, k];
+			we[i+n+m, k+n+m] = zt[i, k];
+		end
+	end
+	return we
+end;
