@@ -8,9 +8,9 @@ algebra libraries, e.g., Intel MKL or LAPACK.
 #ifndef LINALG_H_
 #define LINALG_H_
 
-#include "electrode.h"
 #include <complex.h>
 #include <string.h>
+#include "electrode.h"
 #include "mkl_types.h"
 #define MKL_Complex16 _Complex double //overwrite type
 

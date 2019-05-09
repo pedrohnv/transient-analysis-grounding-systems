@@ -1,6 +1,3 @@
-#include "electrode.h"
-#include "auxiliary.h"
-#include "cubature.h"
 #include <math.h>
 #include <float.h>
 #include <complex.h>
@@ -8,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 //#include <omp.h>
+#include "electrode.h"
+#include "auxiliary.h"
+#include "cubature.h"
 
 int
 populate_electrode (Electrode *electrode, const double start_point[3],

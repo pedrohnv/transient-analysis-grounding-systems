@@ -1,13 +1,13 @@
-#include "electrode.h"
-#include "auxiliary.h"
-#include "linalg.h"
-#include "mkl.h"
-#include "mkl_lapacke.h"
 #include <complex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 //#include <omp.h>
+#include "electrode.h"
+#include "auxiliary.h"
+#include "linalg.h"
+#include "mkl.h"
+#include "mkl_lapacke.h"
 
 int
 fill_incidence (_Complex double *we, const Electrode *electrodes,

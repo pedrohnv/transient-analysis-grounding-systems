@@ -16,8 +16,6 @@ TODO insert condition to check if sender == receiver?
 #include <complex.h>
 #include <stdlib.h>
 
-#define MKL_Complex16 _Complex double //overwrite type
-
 //default integration options ===============================================
 /** Integration_type
 Type of integration and simplification thereof to be done.
