@@ -3,6 +3,8 @@ High Performance Hybrid Electromagnetic Model, a computer implementation.
 
 Cite the current release: [![DOI](https://zenodo.org/badge/151085118.svg)](https://zenodo.org/badge/latestdoi/151085118)
 
+The permanent DOI is https://doi.org/10.5281/zenodo.2644010, which always resolves to the last release.
+
 This library is intended to be easy to use. Interfaces to use it from other programming languages are provided for (work in progress, Julia is the recommended one):
 
   Julia https://github.com/pedrohnv/hp_hem_julia  
