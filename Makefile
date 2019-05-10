@@ -9,7 +9,6 @@ INTELLINK = -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_
 INTELFLAGS = -DMKL_ILP64 -m64
 CUBATUREPATH = cubature
 SLATECPATH = slatec
-WOLFRAMPATH = /usr/local/Wolfram/Mathematica/11.3/SystemFiles/IncludeFiles/C/
 INCLUDE = -Isrc -I$(CUBATUREPATH)
 LINK = -L. -lm
 CFLAGS = -Wall -Werror -fno-exceptions -std=c11 -O3
@@ -53,9 +52,6 @@ test	:	linalg.o $(OBJECTS)
 
 test_dynlib	:	libhem_electrode.so libhem_linalg.so
 		$(CC) $(CFLAGS) $(INCLUDE) -o test_dynlib.exe src/testing.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem_linalg -lhem_electrode
-
-wolfram_electrode	:
-		$(CC) $(CFLAGS) -fPIC -shared $(INCLUDE) -I$(WOLFRAMPATH) -o libhem_electrode_mma.so interfaces/mathematica/interface_wolfram.c src/electrode.c src/auxiliary.c $(CUBATUREPATH)/hcubature.c $(LINK)
 
 slatec	:
 		cd $(SLATECPATH) && $(MAKE) FC=$(FC) all
