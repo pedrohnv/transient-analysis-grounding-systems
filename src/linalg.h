@@ -11,8 +11,6 @@ algebra libraries, e.g., Intel MKL or LAPACK.
 #include <complex.h>
 #include <string.h>
 #include "electrode.h"
-#include "mkl_types.h"
-#define MKL_Complex16 _Complex double //overwrite type
 
 // Imitance matrix WE building
 /** fill_incidence
@@ -129,5 +127,24 @@ harmonic_impedance1_alt (size_t ns, const _Complex double *s,
                          size_t num_nodes, size_t max_eval, double req_abs_error,
                          double req_rel_error, int error_norm, double rsource,
                          _Complex double *zh);
+
+// BLAS routines
+extern void
+zgemm_ (char *transa, char *transb, int *m, int *n, int *k,
+        _Complex double *alpha, _Complex double *a, int *lda,
+        _Complex double *b, int *ldb, _Complex double *beta,
+        _Complex double *c, int *ldc);
+
+// LAPACK routines
+extern void
+zgesv_ (int *n, int *nrhs, _Complex double *a, int *lda, int* ipiv,
+        _Complex double *b, int *ldb, int* info);
+
+extern void
+zgetrf_ (int *m, int *n, _Complex double *a, int *lda, int *ipiv, int *info);
+
+extern void
+zgetri_ (int *n, _Complex double *a, int *lda, int *ipiv,
+         _Complex double *work, int *lwork, int *info);
 
 #endif /* LINALG_H_ */

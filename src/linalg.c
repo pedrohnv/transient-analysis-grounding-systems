@@ -6,8 +6,6 @@
 #include "electrode.h"
 #include "auxiliary.h"
 #include "linalg.h"
-#include "mkl.h"
-#include "mkl_lapacke.h"
 
 int
 fill_incidence (_Complex double *we, const Electrode *electrodes,
@@ -132,12 +130,14 @@ incidence_alt (double *a, double *b, const Electrode *electrodes,
 }
 
 int
-solve_electrodes (_Complex double *we, _Complex double *ie, size_t num_electrodes,
-                  size_t num_nodes)
+solve_electrodes (_Complex double *we, _Complex double *ie,
+                  size_t num_electrodes, size_t num_nodes)
 {
-    MKL_INT n = num_electrodes*2 + num_nodes;
-    MKL_INT ipiv[n]; //pivot indices
-    int info = LAPACKE_zgesv(LAPACK_ROW_MAJOR, n, 1, we, n, ipiv, ie, 1);
+    int n = num_electrodes*2 + num_nodes;
+    int ipiv[n]; //pivot indices
+    int info;
+    int nrhs = 1;
+    zgesv_(&n, &nrhs, we, &n, ipiv, ie, &n, &info);
     /* Check for the exact singularity */
     if (info > 0) {
         printf("The diagonal element of the triangular factor of WE,\n");
@@ -153,15 +153,17 @@ ynodal_eq (_Complex double *yn, const double *a, const double *b,
            _Complex double *zl, _Complex double *zt, size_t num_electrodes,
            size_t num_nodes)
 {
+    int ne = (int) num_electrodes;
+    int nn = (int) num_nodes;
     // TODO use COLUMN_MAJOR matrices, to avoid LAPACKE doing the matrix
     // copying when they are ROW_MAJOR
     // FIXME copy arrays a and b into complex arr, else the zgemm will give
     // wrong results.
     //Force a and b to be (_Complex double*) arguments instead of (double*)?
-    lapack_complex_double *arr = malloc(
-                   sizeof(lapack_complex_double)*(num_electrodes*num_nodes));
+    _Complex double *arr = malloc(sizeof(_Complex double) * (ne*nn));
     // yn = aT*(zt^-1)*a + bT*(zl^-1)*b
-    lapack_int *ipiv = malloc(sizeof(lapack_int)*num_electrodes);
+    int *ipiv = malloc(sizeof(int)*ne);
+    int info;
     // invert zl and zt taking advantage of its symmetry
     /* inv(ZT) is "exploding" (~10e280)
     LAPACKE_zsytrf(LAPACK_ROW_MAJOR, 'U', num_electrodes, zt, num_electrodes, ipiv);
@@ -171,51 +173,48 @@ ynodal_eq (_Complex double *yn, const double *a, const double *b,
     // invert zl and zt by general matrix LU factorization
     // as both zl and zt are symmetric, it does not matter if COL or ROW MAJOR.
     // Use COL Major so LAPACKE does not transpose them.
-    LAPACKE_zgetrf(LAPACK_COL_MAJOR, num_electrodes, num_electrodes,
-                   zt, num_electrodes, ipiv);
-    LAPACKE_zgetri(LAPACK_COL_MAJOR, num_electrodes, zt, num_electrodes, ipiv);
-    LAPACKE_zgetrf(LAPACK_COL_MAJOR, num_electrodes, num_electrodes,
-                   zl, num_electrodes, ipiv);
-    LAPACKE_zgetri(LAPACK_COL_MAJOR, num_electrodes, zl, num_electrodes, ipiv);
+    _Complex double *work = malloc(sizeof(_Complex double)*ne);
+    zgetrf_(&ne, &ne, zt, &ne, ipiv, &info);
+    zgetri_(&ne, zt, &ne, ipiv, work, &ne, &info);
+    zgetrf_(&ne, &ne, zl, &ne, ipiv, &info);
+    zgetri_(&ne, zl, &ne, ipiv, work, &ne, &info);
     free(ipiv);
-    const double alpha = 1.0;
-    const double beta = 0.0;
-    lapack_complex_double *c = malloc(
-                   sizeof(lapack_complex_double)*(num_electrodes*num_nodes));
+    free(work);
+    _Complex double alpha = 1.0;
+    _Complex double beta = 0.0;
+    _Complex double *c = malloc(sizeof(_Complex double) * (num_electrodes*num_nodes));
     // c = yt*a
     for (size_t i = 0; i < num_electrodes*num_nodes; i++) {
-        arr[i] = (lapack_complex_double) a[i];
+        arr[i] = (_Complex double) a[i];
     }
     /*cblas_zsymm(CblasRowMajor, CblasLeft, CblasUpper,
                 num_electrodes, num_nodes,
                 &alpha, zt, num_electrodes, a, num_nodes,
                 &beta, c, num_nodes);*/
-    cblas_zgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-                num_electrodes, num_nodes, num_electrodes,
-                &alpha, zt, num_electrodes, arr, num_nodes,
-                &beta, c, num_nodes);
+    char notrans = 'N';
+    char trans = 'T';
+    zgemm_(&notrans, &notrans, &ne, &nn,
+           &ne, &alpha, zt, &ne,
+           arr, &nn, &beta, c, &nn);
     // yn = aT*c
-    cblas_zgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                num_nodes, num_nodes, num_electrodes,
-                &alpha, arr, num_nodes, c, num_nodes,
-                &beta, yn, num_nodes);
+    zgemm_(&trans, &notrans, &nn, &nn,
+           &ne, &alpha, arr, &nn,
+           c, &nn, &beta, yn, &nn);
     // c = yl*b
     for (size_t i = 0; i < num_electrodes*num_nodes; i++) {
-        arr[i] = (lapack_complex_double) b[i];
+        arr[i] = (_Complex double) b[i];
     }
     /*cblas_zsymm(CblasRowMajor, CblasLeft, CblasUpper,
                 num_electrodes, num_nodes,
                 &alpha, zl, num_electrodes, b, num_nodes,
                 &beta, c, num_nodes);*/
-    cblas_zgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-                num_electrodes, num_nodes, num_electrodes,
-                &alpha, zl, num_electrodes, arr, num_nodes,
-                &beta, c, num_nodes);
+    zgemm_(&notrans, &notrans, &ne, &nn,
+           &ne, &alpha, zl, &nn,
+           arr, &nn, &beta, c, &nn);
     // yn = bT*c + yn
-    cblas_zgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                num_nodes, num_nodes, num_electrodes,
-                &alpha, arr, num_nodes, c, num_nodes,
-                &alpha, yn, num_nodes);
+    zgemm_(&trans, &notrans, &nn, &nn,
+           &ne, &alpha, arr, &nn,
+           c, &nn, &alpha, yn, &nn);
     free(c);
     free(arr);
     return 0;
@@ -317,9 +316,11 @@ harmonic_impedance1_alt (size_t ns, const _Complex double *s,
     incidence_alt(a, b, electrodes, num_electrodes, nodes, num_nodes);
     //yn[0] = 1.0/rsource; FIXME why did I comment this line?
     // solve for each frequency: YN*VN = IN
-    MKL_INT n = num_electrodes*2 + num_nodes;
-    MKL_INT ipiv[n]; //pivot indices
+    int n = num_electrodes*2 + num_nodes;
+    int ipiv[n]; //pivot indices
     int info;
+    int nrhs = 1;
+    int nn = (int) num_nodes;
     for (size_t i = 0; i < ns; i++) {
         //reset IN
         ie[0] = 1.0;
@@ -341,7 +342,7 @@ harmonic_impedance1_alt (size_t ns, const _Complex double *s,
                           s[i], mur1, kappa1[i], ref_l, ref_t, max_eval,
                           req_abs_error, req_rel_error, error_norm, INTG_DOUBLE);
         ynodal_eq(yn, a, b, zl, zt, num_electrodes, num_nodes);
-        info = LAPACKE_zgesv(LAPACK_ROW_MAJOR, num_nodes, 1, yn, num_nodes, ipiv, ie, 1);
+        zgesv_(&nn, &nrhs, yn, &nn, ipiv, ie, &nn, &info);
         // Check for the exact singularity
         if(info > 0) {
             printf("The diagonal element of the triangular factor of YN,\n");
