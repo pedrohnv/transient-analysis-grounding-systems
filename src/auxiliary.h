@@ -51,12 +51,12 @@ Computes the harmonic electromagnetic wave length in a lossy medium.
 @see Source code taken from https://github.com/ntessore/algo
 @param f frequency (Hz)
 @param sigma medium (real) conductivity (Ohm*m)
-@param eps medium electric permittivity
-@param mu medium magnetic permeability
+@param ep medium electric permittivity
+@param mur medium relative magnetic permeability
 @return lambda wave length (m)
 */
 double
-wave_length (double f, double sigma, double eps, double mu);
+wave_length (double f, double sigma, double ep, double mur);
 
 /** equal_points
 Check if two points are the same.
@@ -126,5 +126,13 @@ name mangling, Do something like the following to solve...
 #define zbesi_ zbesi
 #endif
 */
+
+/* Auxiliary routine: printing a matrix COLUMN MAJOR*/
+void
+print_matrix (char *desc, int m, int n, _Complex double *a, int lda);
+
+/* Auxiliary routine: printing a matrix ROW MAJOR*/
+void
+print_matrix_row (char *desc, int m, int n, _Complex double *a, int lda);
 
 #endif /* AUXILIARY_H_ */

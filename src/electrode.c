@@ -371,7 +371,7 @@ calculate_impedances (const Electrode *electrodes, size_t num_electrodes,
             intg = result[0] + I*result[1];
             zl[i*num_electrodes + k] = iwu_4pi*intg*cost;
             zt[i*num_electrodes + k] = one_4pik/(ls*lr)*intg;
-
+            
             zl[k*num_electrodes + i] = zl[i*num_electrodes + k];
             zt[k*num_electrodes + i] = zt[i*num_electrodes + k];
         }

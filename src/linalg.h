@@ -3,7 +3,9 @@
 All parameters' units are in the SI base units if omitted.
 
 Routines to build and solve the electrode system that depend on linear
-algebra libraries, e.g., Intel MKL or LAPACK.
+algebra libraries, e.g., LAPACK and BLAS.
+
+Every matrix is stored as a flat array in column major format.
 */
 #ifndef LINALG_H_
 #define LINALG_H_
@@ -12,82 +14,243 @@ algebra libraries, e.g., Intel MKL or LAPACK.
 #include <string.h>
 #include "electrode.h"
 
-// Imitance matrix WE building
-/** fill_incidence
-Fills the imitance matrix `we = [[ZL/2, -ZL/2, A], [ZT, ZT, B], [C, D, Yn]]`
+// BLAS routines ==========
+/**
+ZGEMM  performs one of the matrix-matrix operations
+C := alpha*op( A )*op( B ) + beta*C,
+where  op( X ) is one of
+op( X ) = X   or   op( X ) = X**T   or   op( X ) = X**H,
+alpha and beta are scalars, and A, B and C are matrices, with op( A )
+an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
+@see http://www.netlib.org/lapack/explore-html/
+*/
+extern void
+zgemm_ (char *transa, char *transb, int *m, int *n, int *k,
+        _Complex double *alpha, _Complex double *a, int *lda,
+        _Complex double *b, int *ldb, _Complex double *beta,
+        _Complex double *c, int *ldc);
+
+/**
+ZSYMM  performs one of the matrix-matrix operations
+C := alpha*A*B + beta*C,
+or
+C := alpha*B*A + beta*C,
+where  alpha and beta are scalars, A is a symmetric matrix and  B and
+C are m by n matrices.
+@see http://www.netlib.org/lapack/explore-html/
+*/
+extern void
+zsymm_ (char *side, char *uplo, int *m, int *n, _Complex double *alpha,
+        _Complex double *a, int *lda, _Complex double *b, int *ldb,
+        _Complex double *beta, _Complex double *c, int *ldc);
+
+// LAPACK routines =========
+/**
+ZSYSV computes the solution to a complex system of linear equations
+A * X = B,
+where A is an N-by-N symmetric matrix and X and B are N-by-NRHS
+matrices.
+The diagonal pivoting method is used to factor A as
+A = U * D * U**T,  if UPLO = 'U', or
+A = L * D * L**T,  if UPLO = 'L',
+where U (or L) is a product of permutation and unit upper (lower)
+triangular matrices, and D is symmetric and block diagonal with
+1-by-1 and 2-by-2 diagonal blocks.  The factored form of A is then
+used to solve the system of equations A * X = B.
+@see http://www.netlib.org/lapack/explore-html/
+*/
+extern void
+zsysv_ (char *uplo, int *n, int *nrhs, _Complex double *a, int *lda, int *ipiv,
+        _Complex double *b, int *ldb, _Complex double *work, int *lwork, int *info);
+
+/**
+ZGESV computes the solution to a complex system of linear equations
+A * X = B,
+where A is an N-by-N matrix and X and B are N-by-NRHS matrices.
+The LU decomposition with partial pivoting and row interchanges is
+used to factor A as
+A = P * L * U,
+where P is a permutation matrix, L is unit lower triangular, and U is
+upper triangular.  The factored form of A is then used to solve the
+system of equations A * X = B.
+@see http://www.netlib.org/lapack/explore-html/
+*/
+extern void
+zgesv_ (int *n, int *nrhs, _Complex double *a, int *lda, int* ipiv,
+        _Complex double *b, int *ldb, int* info);
+
+/**
+ZGETRF computes an LU factorization of a general M-by-N matrix A
+using partial pivoting with row interchanges.
+The factorization has the form
+A = P * L * U
+where P is a permutation matrix, L is lower triangular with unit
+diagonal elements (lower trapezoidal if m > n), and U is upper
+triangular (upper trapezoidal if m < n).
+This is the right-looking Level 3 BLAS version of the algorithm.
+@see http://www.netlib.org/lapack/explore-html/
+*/
+extern void
+zgetrf_ (int *m, int *n, _Complex double *a, int *lda, int *ipiv, int *info);
+
+/**
+ZGETRI computes the inverse of a matrix using the LU factorization
+computed by ZGETRF.
+This method inverts U and then computes inv(A) by solving the system
+inv(A)*L = inv(U) for inv(A).
+@see http://www.netlib.org/lapack/explore-html/
+*/
+extern void
+zgetri_ (int *n, _Complex double *a, int *lda, int *ipiv,
+         _Complex double *work, int *lwork, int *info);
+
+/**
+ZSYTRF computes the factorization of a complex symmetric matrix A
+using the Bunch-Kaufman diagonal pivoting method.  The form of the
+factorization is
+A = U*D*U**T  or  A = L*D*L**T
+where U (or L) is a product of permutation and unit upper (lower)
+triangular matrices, and D is symmetric and block diagonal with
+with 1-by-1 and 2-by-2 diagonal blocks.
+This is the blocked version of the algorithm, calling Level 3 BLAS.
+@see http://www.netlib.org/lapack/explore-html/
+*/
+extern void
+zsytrf_ (char *uplo, int *n, _Complex double *a, int *lda, int *ipiv,
+         _Complex double *work, int *lwork, int *info);
+
+/**
+ZSYTRI computes the inverse of a complex symmetric indefinite matrix
+A using the factorization A = U*D*U**T or A = L*D*L**T computed by
+ZSYTRF.
+@see http://www.netlib.org/lapack/explore-html/
+*/
+extern void
+zsytri_ (char *uplo, int *n, _Complex double *a, int *lda, int *ipiv,
+         _Complex double *work, int *info);
+
+// Immittance =================
+/** fill_incidence_imm
+Fills the immittance matrix `WE = [[Ye, C, D], [A, ZL/2, -ZL/2], [B, ZT, ZT]]`
 with the incidence matrices `A`, `B`, `C` and `D`. This function is separated from
 fill_impedance because `A, B, C, D` only depends on geometry, while `ZT` and `ZL`
 will vary with frequency.
-@param we imitance matrix as flat array of size
+@param we immittance matrix as flat array of size
 `(2*num_electrodes + num_nodes)^2`
 @param electrodes array of electrodes
 @param num_electrodes number of electrodes
 @param nodes array of nodes
 @param num_nodes number of nodes
 @return 0 on success
-@see fill_impedance
+@see fill_impedance_imm
+@see solve_immittance
 */
 int
-fill_incidence (_Complex double *we, const Electrode *electrodes,
-                size_t num_electrodes, const double nodes[][3], size_t num_nodes);
+fill_incidence_imm (_Complex double *we, const Electrode *electrodes,
+                    size_t num_electrodes, const double nodes[][3],
+                    size_t num_nodes);
 
-/** fill_impedance
-Fills the imitance matrix `we` = `[[ZL/2, -ZL/2, A], [ZT, ZT, B], [C, D, Yn]]`
+/** fill_impedance_imm
+Fills the immittance matrix `WE` = `[[Ye, C, D], [A, ZL/2, -ZL/2], [B, ZT, ZT]]`
 with the impedance matrices `ZT` and `ZL`, and the nodal admittance Yn.
-@param we imitance matrix as flat array of size
+@param we immittance matrix as flat array of size
 `(2*num_electrodes + num_nodes)^2`
-@param electrodes array of electrodes
 @param num_electrodes number of electrodes
 @param num_nodes number of nodes
 @param zt transversal impedance matrix as a flat array of size
 `num_electrodes^2`
 @param zl longitudinal impedance matrix as a flat array of size
 `num_electrodes^2`
-@param yn nodal admittance matrix as a flat array of size `num_nodes^2`
+@param ye "external" nodal admittance matrix as a flat array of size `num_nodes^2`
 @return 0 on success
-@see fill_incidence
+@see fill_incidence_we
+@see fill_incidence_yn
+@see solve_immittance
 */
 int
-fill_impedance (_Complex double *we, const Electrode *electrodes,
-                size_t num_electrodes, size_t num_nodes, const _Complex double *zl,
-                const _Complex double *zt, const _Complex double *yn);
+fill_impedance_imm (_Complex double *we, size_t num_electrodes, size_t num_nodes,
+                    const _Complex double *zl, const _Complex double *zt,
+                    const _Complex double *ye);
 
-/** incidence_alt
-Alternative approach using an equivalent Ynodal
-*/
-int
-incidence_alt (double *a, double *b, const Electrode *electrodes,
-               size_t num_electrodes, const double nodes[][3], size_t num_nodes);
-
-/** solve_electrodes
-Solves the system of equations that defines the electrode system.
-Uses Intel MKL LAPACKE_zgesv.
-@param we imitance matrix `[[ZL/2, -ZL/2, A], [ZT, ZT, B], [C, D, Yn]]`. The
-LU decomposition is done in-place on we
-@param ie RHS vector `[0, 0, ic]^T` where `ic` are injected currents in each node
+/** solve_immittance
+Solves the system of equations of the Global Immitance formulation.
+@param we global immittance matrix `[[Ye, C, D], [A, ZL/2, -ZL/2], [B, ZT, ZT]]`.
+The LU decomposition is done in-place.
+@param ie RHS vector `[ic, 0, 0]^T` where `ic` are injected currents in each node
 and 0 are null vectors of size `num_electrodes` each. The solution replaces
-this array in-place
+this array in-place becoming `[u, i1, i2]`. Where `u` is the nodal potentials
+and the transversal and longitudinal currents, `IT` and `IL` respectively,
+can then be calculated as
+        IT = i1 + i2
+        IL = (i1 - i2)/2
 @param num_electrodes number of electrodes
 @param num_nodes number of nodes
 @return 0 on sucess
-@see https://software.intel.com/en-us/mkl-developer-reference-c-gesv
+@see solve_admittance
 */
 int
-solve_electrodes (_Complex double *we, _Complex double *ie, size_t num_electrodes,
+solve_immittance (_Complex double *we, _Complex double *ie, size_t num_electrodes,
                   size_t num_nodes);
 
-/** ynodal_eq
-Finds the equivalent nodal admittance matrix of the electrode system.
-TODO put const qualifier to a, b and zl?
+// Admittance =================
+/** fill_incidence_adm
+Fills the nodal incidence matrices `α` and `β` used in the calculation of the nodal
+admittance matrix `Yn` = `α^T.YT.α + β^T.YL.β`
+with the impedance matrices `ZT` and `ZL`, and the nodal admittance Yn.
+@param a transversal incidence `α` of size `num_electrodes * num_nodes`
+@param b longitudinal incidence `β` of size `num_electrodes * num_nodes`
+@param electrodes array of electrodes
+@param num_electrodes number of electrodes
+@param nodes array of nodes
+@param num_nodes number of nodes
+@return 0 on success
+
 */
 int
-ynodal_eq (_Complex double *yn, const double *a, const double *b,
-           _Complex double *zl, _Complex double *zt, size_t num_electrodes,
-           size_t num_nodes);
+fill_incidence_adm (double *a, double *b, const Electrode *electrodes,
+                    size_t num_electrodes, const double nodes[][3],
+                    size_t num_nodes);
 
-/** harmonic_impedance1
+/** fill_impedance_adm
+Calculates the nodal admittance matrix `Yn` = `α^T.YT.α + β^T.YL.β`
+@param yn nodal admmitance matrix as flat array of size `num_nodes^2`
+@param a transversal incidence `α`
+@param b longitudinal incidence `β`
+@param zl longitudinal impedance matrix as a flat array of size
+`num_electrodes^2`
+@param zt transversal impedance matrix as a flat array of size
+`num_electrodes^2`
+@param num_electrodes number of electrodes
+@param num_nodes number of nodes
+@param ye "external" nodal admittance matrix as a flat array of size `num_nodes^2`
+@return 0 on success
+@see fill_incidence_we
+@see fill_incidence_yn
+@see solve_admittance
+*/
+int
+fill_impedance_adm (_Complex double *yn, const double *a, const double *b,
+                    _Complex double *zl, _Complex double *zt, size_t num_electrodes,
+                    size_t num_nodes, const _Complex double *ye);
+
+/** solve_admittance
+Solves the system of equations of the Nodal Admitance formulation.
+@param yn nodal admittance matrix `[[Ye, C, D], [A, ZL/2, -ZL/2], [B, ZT, ZT]]`. The
+LU decomposition is done in-place on we
+@param ic RHS vector of injected currents in each node. The solution replaces
+this array in-place.
+@param num_electrodes number of electrodes
+@param num_nodes number of nodes
+@return 0 on sucess
+@see solve_immittance
+*/
+int
+solve_admittance (_Complex double *yn, _Complex double *ic, size_t num_nodes);
+
+// Harmonic Impedance ==========
+/** zh_immittance
 Calculates the harmonic impedance of a copper electrode system in a
-two layer medium. Electrodes are considered to be in medium 1.
+single layer medium.
 No segmentation of the electrodes is done.
 Injection node is considered the first.
 @param ns number of frequencies
@@ -109,42 +272,11 @@ limit)
 @return 0 on success
 */
 int
-harmonic_impedance1 (size_t ns, const _Complex double *s,
-                     const _Complex double *kappa1, const _Complex double *kappa2,
-                     const _Complex double *gamma1, const Electrode *electrodes,
-                     const Electrode *images, size_t num_electrodes,
-                     const double nodes[][3], size_t num_nodes, size_t max_eval,
-                     double req_abs_error, double req_rel_error, int error_norm,
-                     double rsource, _Complex double *zh);
-
-int
-harmonic_impedance1_alt (size_t ns, const _Complex double *s,
-                         const _Complex double *kappa1,
-                         const _Complex double *kappa2,
-                         const _Complex double *gamma1,
-                         const Electrode *electrodes, const Electrode *images,
-                         size_t num_electrodes, const double nodes[][3],
-                         size_t num_nodes, size_t max_eval, double req_abs_error,
-                         double req_rel_error, int error_norm, double rsource,
-                         _Complex double *zh);
-
-// BLAS routines
-extern void
-zgemm_ (char *transa, char *transb, int *m, int *n, int *k,
-        _Complex double *alpha, _Complex double *a, int *lda,
-        _Complex double *b, int *ldb, _Complex double *beta,
-        _Complex double *c, int *ldc);
-
-// LAPACK routines
-extern void
-zgesv_ (int *n, int *nrhs, _Complex double *a, int *lda, int* ipiv,
-        _Complex double *b, int *ldb, int* info);
-
-extern void
-zgetrf_ (int *m, int *n, _Complex double *a, int *lda, int *ipiv, int *info);
-
-extern void
-zgetri_ (int *n, _Complex double *a, int *lda, int *ipiv,
-         _Complex double *work, int *lwork, int *info);
+zh_immittance (size_t ns, const _Complex double *s, const _Complex double *kappa1,
+               const _Complex double *kappa2, const _Complex double *gamma1,
+               const Electrode *electrodes, const Electrode *images,
+               size_t num_electrodes, const double nodes[][3], size_t num_nodes,
+               size_t max_eval, double req_abs_error, double req_rel_error,
+               int error_norm, double rsource, _Complex double *zh);
 
 #endif /* LINALG_H_ */

@@ -1,7 +1,8 @@
 CUBATUREPATH = cubature
 INCLUDE = -Isrc -I$(CUBATUREPATH)
-LINK = -L. -llapack -lm
-CFLAGS = -Wall -Werror -fno-exceptions -std=c11 -O3
+LINK = -L. -llapack -lblas -lm
+#CFLAGS = -Wall -Werror -fno-exceptions -std=c11 -O3
+CFLAGS = -Wall -fno-exceptions -std=c11 -g
 OBJECTS = electrode.o auxiliary.o hcubature.o
 CC = gcc # must be compliant to C Standard 99
 
@@ -27,10 +28,10 @@ linalg.o	:	src/linalg.c
 		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -c src/linalg.c $(LINK)
 
 libhem_electrode.so	:	$(OBJECTS)
-		$(CC) $(CFLAGS) -fPIC -shared $(INCLUDE) -o libhem_electrode.so $(OBJECTS) $(LINK) -Wl,--out-implib,libhem_electrode.lib
+		$(CC) $(CFLAGS) -fPIC -shared $(INCLUDE) -o libhem_electrode.so $(OBJECTS) $(LINK)
 
 libhem_linalg.so	:	linalg.o $(OBJECTS)
-		$(CC) $(CFLAGS) -fPIC -shared $(INCLUDE) -o libhem_linalg.so linalg.o $(OBJECTS) $(LINK) -Wl,--out-implib,libhem_linalg.lib
+		$(CC) $(CFLAGS) -fPIC -shared $(INCLUDE) -o libhem_linalg.so linalg.o $(OBJECTS) $(LINK)
 
 dynamic_library	:	libhem_electrode.so libhem_linalg.so
 		make cleanout
@@ -53,5 +54,5 @@ grcev51emc03	:	libhem_electrode.so libhem_linalg.so
 grcev12pwrd01	:	libhem_electrode.so libhem_linalg.so
 		$(CC) $(CFLAGS) $(INCLUDE) -o grcev12pwrd01.exe examples/grcev12pwrd01.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem_linalg
 
-condition_gs_layered	:	libhem_electrode.so libhem_linalg.so
-		$(CC) $(CFLAGS) $(INCLUDE) -o condition_gs_layered.exe examples/condition_gs_layered.c '-Wl,-rpath,$$ORIGIN' $(LINK) -lhem_linalg
+program	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o hp_hem.exe src/program.c $(OBJECTS) $(LINK)

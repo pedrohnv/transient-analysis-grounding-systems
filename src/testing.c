@@ -12,19 +12,6 @@ Functions for testing the code
 #include <assert.h>
 //#include <omp.h>
 
-/* Auxiliary routine: printing a matrix */
-void
-print_matrix (char *desc, MKL_INT m, MKL_INT n, _Complex double *a, MKL_INT lda)
-{
-    MKL_INT i, j;
-    printf( "\n %s\n", desc );
-    for( i = 0; i < m; i++ ) {
-        for( j = 0; j < n; j++ )
-            printf( " (%6.2f,%6.2f)", creal(a[i*lda+j]), cimag(a[i*lda+j]) );
-        printf( "\n" );
-    }
-}
-
 int
 we_building ()
 {
@@ -65,7 +52,6 @@ we_building ()
     populate_electrode(&(electrodes[4]), nodes[0], nodes[4], radius, zi);
     populate_electrode(&(electrodes[5]), nodes[3], nodes[4], radius, zi);
     _Complex double we[(2*ne + nn)*(2*ne + nn)];
-    fill_incidence(we, electrodes, ne, nodes, nn);
     _Complex double zl[ne*ne], zt[ne*ne], yn[nn*nn];
     for (size_t i = 0; i < (ne*ne); i++) {
         zl[i] = 3.0;
@@ -74,67 +60,41 @@ we_building ()
     for (size_t i = 0; i < (nn*nn); i++) {
         yn[i] = 4.0;
     }
-    fill_impedance(we, electrodes, ne, nn, zl, zt, yn);
+    fill_impedance_imm(we, ne, nn, zl, zt, yn);
+    fill_incidence_imm(we, electrodes, ne, nodes, nn);
     _Complex double we_target[] =
-        {1.5, 1.5, 1.5, 1.5, 1.5, 1.5, -1.5, -1.5, -1.5, -1.5, -1.5, -1.5,
-        -1., 1., 0., 0., 0., 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, -1.5, -1.5, -1.5,
-        -1.5, -1.5, -1.5, 0., -1., 1., 0., 0., 1.5, 1.5, 1.5, 1.5, 1.5, 1.5,
-        -1.5, -1.5, -1.5, -1.5, -1.5, -1.5, -1., 0., 0., 1., 0., 1.5, 1.5,
-        1.5, 1.5, 1.5, 1.5, -1.5, -1.5, -1.5, -1.5, -1.5, -1.5, 0., -1., 0.,
-        0., 1., 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, -1.5, -1.5, -1.5, -1.5, -1.5,
-        -1.5, -1., 0., 0., 0., 1., 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, -1.5, -1.5,
-        -1.5, -1.5, -1.5, -1.5, 0., 0., 0., -1., 1., 2, 2, 2, 2, 2, 2, 2, 2,
-        2, 2, 2, 2, -0.5, -0.5, 0., 0., 0., 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-        2, 0., -0.5, -0.5, 0., 0., 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, -0.5,
-        0., 0., -0.5, 0., 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0., -0.5, 0.,
-        0., -0.5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, -0.5, 0., 0., 0., -0.5,
-        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0., 0., 0., -0.5, -0.5, 1., 0.,
-        1., 0., 1., 0., 0., 0., 0., 0., 0., 0., 4., 4., 4., 4., 4., 0., 1.,
-        0., 1., 0., 0., 1., 0., 0., 0., 0., 0., 4., 4., 4., 4., 4., 0., 0.,
-        0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 4., 4., 4., 4., 4., 0., 0.,
-        0., 0., 0., 1., 0., 0., 1., 0., 0., 0., 4., 4., 4., 4., 4., 0., 0.,
-        0., 0., 0., 0., 0., 0., 0., 1., 1., 1., 4., 4., 4., 4., 4.};
+        {4.0, 4.0, 4.0, 4.0, 4.0, -1.0, 0.0, -1.0, 0.0, -1.0, 0.0, -0.5, 0.0, -0.5, 0.0,
+        -0.5, 0.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, -1.0, 0.0, -1.0, 0.0, 0.0, -0.5, -0.5,
+        0.0, -0.5, 0.0, 0.0, 4.0, 4.0, 4.0, 4.0, 4.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        -0.5, 0.0, 0.0, 0.0, 0.0, 4.0, 4.0, 4.0, 4.0, 4.0, 0.0, 0.0, 1.0, 0.0, 0.0, -1.0,
+        0.0, 0.0, -0.5, 0.0, 0.0, -0.5, 4.0, 4.0, 4.0, 4.0, 4.0, 0.0, 0.0, 0.0, 1.0, 1.0,
+        1.0, 0.0, 0.0, 0.0, -0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 0.0, 0.0, 1.5, 1.5, 1.5, 1.5,
+        1.5, 1.5, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.5, 1.5, 1.5,
+        1.5, 1.5, 1.5, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.5, 1.5,
+        1.5, 1.5, 1.5, 1.5, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.5,
+        1.5, 1.5, 1.5, 1.5, 1.5, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+        1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0, 0.0, 1.0,
+        0.0, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, -1.5, -1.5, -1.5, -1.5, -1.5, -1.5, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 0.0,
+        0.0, 1.0, 0.0, 0.0, -1.5, -1.5, -1.5, -1.5, -1.5, -1.5, 2.0, 2.0, 2.0, 2.0, 2.0,
+        2.0, 0.0, 0.0, 0.0, 1.0, 0.0, -1.5, -1.5, -1.5, -1.5, -1.5, -1.5, 2.0, 2.0, 2.0,
+        2.0, 2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.5, -1.5, -1.5, -1.5, -1.5, -1.5, 2.0,
+        2.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.5, -1.5, -1.5, -1.5, -1.5,
+        -1.5, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.5, -1.5, -1.5,
+        -1.5, -1.5, -1.5, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0,
+};
     //=====================================================
     assert(sizeof(we) == sizeof(we_target));
     // print WE ?
-    if ( 0 ) {
-        printf("WE\n");
-        for (size_t i = 0; i < (2*ne + nn); i++) {
-            for (size_t k = 0; k < (2*ne + nn); k++) {
-                printf("% .1f  ", creal(we[i*(2*ne + nn) + k]));
-            }
-            printf("\n");
-        }
-        printf("\nWE_target\n");
-        for (size_t i = 0; i < (2*ne + nn); i++) {
-            for (size_t k = 0; k < (2*ne + nn); k++) {
-                printf("% .1f  ", creal(we_target[i*(2*ne + nn) + k]));
-            }
-            printf("\n");
-        }
+    if ( 1 ) {
+        print_matrix("WE_target", (2*ne + nn) , (2*ne + nn), we_target, (2*ne + nn));
+        print_matrix("WE", (2*ne + nn) , (2*ne + nn), we, (2*ne + nn));
+
     }
-    //=====================================================
-    size_t a, b, c, d;
-    size_t jump = (2*ne + nn)*ne;
-    size_t jump_2 = 2*jump;
-    for (size_t e = 0; e < ne; e++) {
-        for (size_t n = 0; n < nn; n++) {
-            a = 2*ne*(e + 1) + e*nn + n;
-            b = jump + a;
-            c = jump_2 + n*(2*ne + nn) + e;
-            d = ne + c;
-            assert( creal(we_target[a]) == creal(we[a]) );
-            assert( creal(we_target[b]) == creal(we[b]) );
-            assert( creal(we_target[c]) == creal(we[c]) );
-            assert( creal(we_target[d]) == creal(we[d]) );
-        }
-    }
-    printf("we building: incidence matrices: passed\n");
-    //=====================================================
     for (size_t i = 0; i < (2*ne + nn)*(2*ne + nn); i++) {
         assert(we[i] == we_target[i]);
     }
-    printf("we building: impedance and admitance: passed\n");
+    printf("we building: passed\n");
     return 0;
 }
 
@@ -219,7 +179,7 @@ test_case (double rho, double length, double frac)
         rhs[i] = 0.0;
     }
     rhs[n2en1 - num_nodes] = 1.0;
-    fill_incidence(incidence, electrodes, num_electrodes, nodes, num_nodes);
+    fill_incidence_imm(incidence, electrodes, num_electrodes, nodes, num_nodes);
     _Complex double s;
     _Complex double rt, rl; // reflection coefficients
     rt = 1.0; // TODO calculate for each frequency
@@ -243,8 +203,8 @@ test_case (double rho, double length, double frac)
         impedances_images(
             electrodes, images, num_electrodes, zl, zt, k1, s, mur, c, rt, rl,
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
-        fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
-        solve_electrodes(we, ie, num_electrodes, num_nodes);
+        fill_impedance_imm(we, num_electrodes, num_nodes, zl, zt, yn);
+        solve_immittance(we, ie, num_electrodes, num_nodes);
         fprintf(ftest_case, "%f %f\n",
             creal(ie[n2en1 - num_nodes]), cimag(ie[n2en1 - num_nodes]));
     }
@@ -304,7 +264,7 @@ integration ()
         kappa = (sigma + s*er*EPS0); //soil complex conductivity
         k1 = csqrt(s*MU0*kappa); //soil propagation constant
         integral(sender, receiver, k1, 200, 1e-3, 1e-4,
-            ERROR_PAIRED, INTG_DOUBLE, result, error);
+                 ERROR_PAIRED, INTG_DOUBLE, result, error);
         fprintf(save_file, "%f %f\n", result[0], result[1]);
     }
     fclose(save_file);

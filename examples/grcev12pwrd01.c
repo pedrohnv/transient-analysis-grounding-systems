@@ -23,7 +23,7 @@ doi: 10.1109/61.568238
 int
 run_case (int gs, int num_electrodes, int num_nodes)
 {
-    size_t max_eval = 200;
+    size_t max_eval = 0;
     double req_abs_error = 1e-3;
     double req_rel_error = 1e-4;
     char file_name[50];
@@ -65,8 +65,8 @@ run_case (int gs, int num_electrodes, int num_nodes)
     _Complex double *ie_cp = (_Complex double*) calloc(ss1, sizeof(_Complex double));
     _Complex double *we = malloc(sizeof(_Complex double)*ss2);
     _Complex double *we_cp = malloc(sizeof(_Complex double)*ss2);
-    ie[ss1 - num_nodes] = 1.0;
-    fill_incidence(we, electrodes, num_electrodes, nodes, num_nodes);
+    ie[0] = 1.0;
+    fill_incidence_imm(we, electrodes, num_electrodes, nodes, num_nodes);
     // solve for each frequency: WE*VE = IE
     _Complex double s;
     _Complex double ref_l, ref_t;
@@ -89,7 +89,7 @@ run_case (int gs, int num_electrodes, int num_nodes)
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
                           s, 1.0, kappa, ref_l, ref_t, max_eval, req_abs_error,
                           req_rel_error, ERROR_PAIRED, INTG_DOUBLE);
-        fill_impedance(we, electrodes, num_electrodes, num_nodes, zl, zt, yn);
+        fill_impedance_imm(we, num_electrodes, num_nodes, zl, zt, yn);
         //The matrices are pivoted in-place. To recover them, copy
         for (size_t i = 0; i < ss2; i++) {
             we_cp[i] = we[i];
@@ -97,9 +97,9 @@ run_case (int gs, int num_electrodes, int num_nodes)
         for (size_t i = 0; i < ss1; i++) {
             ie_cp[i] = ie[i];
         }
-        solve_electrodes(we_cp, ie_cp, num_electrodes, num_nodes);
+        solve_immittance(we_cp, ie_cp, num_electrodes, num_nodes);
         fprintf(save_file, "%f %f\n",
-                creal(ie_cp[ss1 - num_nodes]), cimag(ie_cp[ss1 - num_nodes]));
+                creal(ie_cp[0]), cimag(ie_cp[0]));
     }
     fclose(save_file);
     free(electrodes);
