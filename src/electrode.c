@@ -73,6 +73,99 @@ electrodes_file (const char file_name[], Electrode *electrodes,
 }
 
 int
+electrode_grid (Electrode *electrodes, double nodes[][3], double radius,
+                double depth, _Complex double zi, int v1, double length1,
+                int l1, int v2, double length2, int l2)
+{
+    // TODO argument checking
+    double h = depth;
+    int num_electrodes = l1*v2*(v1 - 1) + l2*v1*(v2 - 1);
+    Electrode *edges = malloc(num_electrodes * sizeof(Electrode));
+    double len1 = length1/(v1 - 1);
+    double len2 = length2/(v2 - 1);
+    int n = 0;
+    for (int i = 0; i < v2; i++) {
+        for (int k = 0; k < v1; k++) {
+            nodes[n][0] = k*len1;
+            nodes[n][1] = i*len2;
+            nodes[n][2] = h;
+            n++;
+        }
+    }
+    double xx[v1];
+    linspace(0.0, length1, v1, xx);
+    double yy[v2];
+    linspace(0.0, length2, v2, yy);
+    int e = 0;
+    double start_point[3] = {0.0, 0.0, h};
+    double end_point[3] = {0.0, 0.0, h};
+    for (int k = 0; k < v2; k++) {
+        start_point[1] = yy[k];
+        end_point[1] = yy[k];
+        for (int i = 0; i < (v1 - 1); i++) {
+            start_point[0] = xx[i];
+            end_point[0] = xx[i+1];
+            populate_electrode(&(edges[e]), start_point, end_point, radius, zi);
+            e++;
+        }
+    }
+    for (int k = 0; k < v1; k++) {
+        start_point[0] = xx[k];
+        end_point[0] = xx[k];
+        for (int i = 0; i < (v2 - 1); i++) {
+            start_point[1] = yy[i];
+            end_point[1] = yy[i+1];
+            populate_electrode(&(edges[e]), start_point, end_point, radius, zi);
+            e++;
+        }
+    }
+    // Now divide the edges...
+    e = 0;
+    int s = 0;
+    double lx, ly;
+    for (int i = 0; i < v1*(v2 - 1); i++) {
+        lx = (edges[e].end_point[0] - edges[e].start_point[0])/l1;
+        ly = (edges[e].end_point[1] - edges[e].start_point[1])/l1;
+        for (int k = 0; k < l1; k++) {
+            start_point[0] = edges[e].start_point[0] + k*lx;
+            start_point[1] = edges[e].start_point[1] + k*ly;
+            end_point[0] = edges[e].start_point[0] + (k + 1)*lx;
+            end_point[1] = edges[e].start_point[1] + (k + 1)*ly;
+            populate_electrode(&(electrodes[s]), start_point, end_point, radius, zi);
+            s++;
+            if (k > 0) {
+                nodes[n][0] = start_point[0];
+                nodes[n][1] = start_point[1];
+                nodes[n][2] = h;
+                n++;
+            }
+        }
+        e++;
+    }
+    for (int i = 0; i < v2*(v1 - 1); i++) {
+        lx = (edges[e].end_point[0] - edges[e].start_point[0])/l2;
+        ly = (edges[e].end_point[1] - edges[e].start_point[1])/l2;
+        for (int k = 0; k < l2; k++) {
+            start_point[0] = edges[e].start_point[0] + k*lx;
+            start_point[1] = edges[e].start_point[1] + k*ly;
+            end_point[0] = edges[e].start_point[0] + (k + 1)*lx;
+            end_point[1] = edges[e].start_point[1] + (k + 1)*ly;
+            populate_electrode(&(electrodes[s]), start_point, end_point, radius, zi);
+            s++;
+            if (k > 0) {
+                nodes[n][0] = start_point[0];
+                nodes[n][1] = start_point[1];
+                nodes[n][2] = h;
+                n++;
+            }
+        }
+        e++;
+    }
+    free(edges);
+    return 0;
+}
+
+int
 nodes_file (const char file_name[], double nodes[][3], size_t num_nodes)
 {
     FILE *stream = fopen(file_name, "r");
@@ -371,7 +464,7 @@ calculate_impedances (const Electrode *electrodes, size_t num_electrodes,
             intg = result[0] + I*result[1];
             zl[i*num_electrodes + k] = iwu_4pi*intg*cost;
             zt[i*num_electrodes + k] = one_4pik/(ls*lr)*intg;
-            
+
             zl[k*num_electrodes + i] = zl[i*num_electrodes + k];
             zt[k*num_electrodes + i] = zt[i*num_electrodes + k];
         }

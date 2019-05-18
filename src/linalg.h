@@ -247,18 +247,18 @@ this array in-place.
 int
 solve_admittance (_Complex double *yn, _Complex double *ic, size_t num_nodes);
 
-// Harmonic Impedance ==========
 /** zh_immittance
-Calculates the harmonic impedance of a copper electrode system in a
-single layer medium.
-No segmentation of the electrodes is done.
-Injection node is considered the first.
+Calculates the harmonic impedance of a copper electrode system buried in a
+single layer medium. No segmentation of the electrodes is done.
+This calculation is done considering the current injected at every node,
+one at a time. Immitance formulation is used with double integral.
 @param ns number of frequencies
 @param s array of complex frequencies `c + I*w`
-@param kappa1 medium 1 complex conductivity `(sigma + I*w*eps)` in S/m
-@param kappa2 medium 2 complex conductivity `(sigma + I*w*eps)` in S/m
-@param gamma1 medium 1 propagation constant
+@param sigma medium conductivity in S/m
+@param epsr medium relative permittivity
+@param mur medium relative permeability
 @param electrodes array of electrodes
+@param images array of images
 @param num_electrodes number of electrodes
 @param nodes array of nodes
 @param num_nodes number of nodes
@@ -266,17 +266,51 @@ Injection node is considered the first.
 limit)
 @param reqAbsError the absolute error requested (0 to ignore)
 @param reqRelError the relative error requested (0 to ignore)
-@param error_norm (enumeration defined in cubature.h) error checking scheme
-@param rsource source internal resistence to consider.
-@param zh harmonic impedance array of size `ns`
+@param zh harmonic impedance matrix `num_nodes x ns` as a flat array
 @return 0 on success
 */
 int
-zh_immittance (size_t ns, const _Complex double *s, const _Complex double *kappa1,
-               const _Complex double *kappa2, const _Complex double *gamma1,
-               const Electrode *electrodes, const Electrode *images,
+zh_immittance (size_t ns, const _Complex double *s, double sigma, double epsr,
+               double mur, const Electrode *electrodes, const Electrode *images,
                size_t num_electrodes, const double nodes[][3], size_t num_nodes,
                size_t max_eval, double req_abs_error, double req_rel_error,
-               int error_norm, double rsource, _Complex double *zh);
+               _Complex double *zh);
+
+/** sim_immittance
+Calculates the node potentials and conductors' transversal and longitudinal
+currents of a copper electrode system buried in a single layer medium.
+No segmentation of the electrodes is done.
+This calculation is done considering the current injected at a single node `n`.
+Immitance formulation is used with double integral.
+@param ns number of frequencies
+@param s array of complex frequencies `c + I*w`
+@param sigma medium conductivity in S/m
+@param epsr medium relative permittivity
+@param mur medium relative permeability
+@param electrodes array of electrodes
+@param images array of images
+@param num_electrodes number of electrodes
+@param nodes array of nodes
+@param num_nodes number of nodes
+@param max_eval specifies a maximum number of function evaluations (0 for no
+limit)
+@param reqAbsError the absolute error requested (0 to ignore)
+@param reqRelError the relative error requested (0 to ignore)
+@param inj_node node number in which the current is injected
+@param inj_current array of size `ns` of injected currents for each `s`
+@param inj_adm array of size `ns` of the source admittance for each `s`
+@param u node potential matrix `num_nodes x ns` as a flat array
+@param il longitudinal currents matrix `num_electrodes x ns` as a flat array
+@param it transversal currents matrix `num_electrodes x ns` as a flat array
+@return 0 on success
+*/
+int
+sim_immittance (size_t ns, const _Complex double *s, double sigma, double epsr,
+                double mur, const Electrode *electrodes, const Electrode *images,
+                size_t num_electrodes, const double nodes[][3], size_t num_nodes,
+                size_t max_eval, double req_abs_error, double req_rel_error,
+                size_t inj_node, _Complex double *inj_current,
+                _Complex double *inj_adm, _Complex double *u, _Complex double *il,
+                _Complex double *it);
 
 #endif /* LINALG_H_ */

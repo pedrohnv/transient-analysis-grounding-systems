@@ -11,6 +11,7 @@ Constants, auxiliary functions and routines.
 #include <stdio.h>
 
 //constants
+#define VERSION "v0.6.0"
 #define PI 3.1415926535897932384626433832795029L
 #define TWO_PI 2*PI
 #define FOUR_PI 4*PI

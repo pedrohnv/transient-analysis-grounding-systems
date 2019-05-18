@@ -41,7 +41,7 @@ electrode
 `(start_point + end_point)/2`
 @param length electrode length `Norm(start_point - end_point)`
 @param radius electrode radius
-@param zi total internal impedance of the electrode (Ohm)
+@param zi internal impedance of the electrode (Ohm)
 */
 typedef struct {
     double start_point[3];
@@ -98,6 +98,36 @@ Any line number greater than `num_electrodes` will be ignored.
 int
 electrodes_file (const char file_name[], Electrode *electrodes,
                  size_t num_electrodes);
+
+/** electrode_grid
+Creates a (length1 x length2) grid that has (v1 x v2) vertices. Each edge
+is divided into l1 and l2 segments (row and column, respectively).
+To calculate the number of electrodes and nodes, use the following formulas:
+    num_electrodes = l1*v2*(v1 - 1) + l2*v1*(v2 - 1)
+    num_nodes = v1*v2 + v1*(v2 - 1)*(l2 - 1) + v2*(v1 - 1)*(l1 - 1)
+      1   .....   v1
+      o---o---o---o  1
+      |   |   |   |  .
+  L2  o---o---o---o  .
+      |   |   |   |  .
+      o---o---o---o  v2
+            L1
+@param electrodes array of Electrode of size num_electrodes that will be filled
+@param nodes array of size num_nodes that will be filled
+@param radius conductors radius
+@param depth grid burial depth (air-ground interface considered to be at z=0)
+@param zi constant internal impedance
+@param v1 number of vertice columns
+@param length1 total row length L1
+@param l1 number of divisions to do on each row edge
+@param v2 number of vertice rows
+@param length2 total column length L2
+@param l2 number of divisions to do on each column edge
+*/
+int
+electrode_grid (Electrode *electrodes, double nodes[][3], double radius,
+                double depth, _Complex double zi, int v1, double length1,
+                int l1, int v2, double length2, int l2);
 
 /** nodes_file
 Fill a nodes array from a file. Each node must be defined in a single line
