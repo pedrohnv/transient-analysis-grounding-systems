@@ -134,7 +134,9 @@ intg_param (size_t *max_eval, double *req_abs_error, double *req_rel_error)
     return 0;
 }
 
-void debug() {
+int
+debug ()
+{
     printf("DEBUG\n");
     double sigma = 1.0/1000;
     double epsr = 10.0;
@@ -153,10 +155,10 @@ void debug() {
     int num_electrodes = l1*v2*(v1 - 1) + l2*v1*(v2 - 1);
     int num_nodes = v1*v2 + v1*(v2 - 1)*(l2 - 1) + v2*(v1 - 1)*(l1 - 1);
     Electrode *electrodes = malloc(num_electrodes * sizeof(Electrode));
-    double nodes[num_nodes][3];
+    double *nodes = malloc(3 * num_nodes * sizeof(double));
     _Complex double zi = 0.0;
-    electrode_grid(electrodes, nodes, radius, depth, zi, v1, length1, l1, v2,
-                   length2, l2);
+    electrode_grid(electrodes, nodes, num_nodes, radius, depth, zi, v1, length1,
+                   l1, v2, length2, l2);
     Electrode *images = malloc(num_electrodes * sizeof(Electrode));
     for(size_t i = 0; i < num_electrodes; i++) {
         populate_electrode(&(images[i]), electrodes[i].start_point,
@@ -185,6 +187,91 @@ void debug() {
     free(s);
     free(zh);
     printf("END DEBUG\n");
+    return 0;
+}
+
+int
+zh_grid ()
+{
+    printf("\nSimulating a rectangular grounding grid with (v1 x v2) vertices.\n");
+    printf("The harmonic impedance will be calculated and output saved\n");
+    char file_name[50] = "gs_L1xL2.dat";
+    printf("to file '%s' where each line is a frequency point\n", file_name);
+    printf("and each column an injection node.\n");
+    printf("     1   .....   v1\n\n");
+    printf("     o---o---o---o  1\n");
+    printf("     |   |   |   |  .\n");
+    printf(" L2  o---o---o---o  .\n");
+    printf("     |   |   |   |  .\n");
+    printf("     o---o---o---o  v2\n");
+    printf("          L1\n");
+    double sigma, epsr, mur;
+    soil_param(&sigma, &epsr, &mur);
+    int nf;
+    printf("Enter the number of frequency points: ");
+    scanf("%i", &nf);
+    double *freq = malloc(nf * sizeof(double));
+    if (nf > 1) {
+        freq_param(nf, freq);
+    } else {
+        printf("Enter frequency [Hz]: ");
+        scanf("%lf", freq);
+    }
+    double radius, frac, length1, length2, depth;
+    int num_electrodes, num_nodes, v1, l1, v2, l2;
+    grid_param(&radius, &depth, &frac, &num_electrodes, &num_nodes,
+               &v1, &length1, &l1, &v2, &length2, &l2,
+               freq[nf-1], sigma, epsr, mur);
+    Electrode *electrodes = malloc(num_electrodes * sizeof(Electrode));
+    double *nodes = malloc(3 * num_nodes * sizeof(double));
+    _Complex double zi = 0.0;
+    electrode_grid(electrodes, nodes, num_nodes, radius, depth, zi, v1, length1,
+                   l1, v2, length2, l2);
+    Electrode *images = malloc(num_electrodes * sizeof(Electrode));
+    for(size_t i = 0; i < num_electrodes; i++) {
+        populate_electrode(&(images[i]), electrodes[i].start_point,
+                           electrodes[i].end_point, electrodes[i].radius,
+                           electrodes[i].zi);
+        images[i].start_point[2] = -images[i].start_point[2];
+        images[i].end_point[2] = -images[i].end_point[2];
+    }
+    size_t max_eval;
+    double req_abs_error, req_rel_error;
+    intg_param(&max_eval, &req_abs_error, &req_rel_error);
+    printf("Simulating...\n");
+    _Complex double *s = malloc(nf*sizeof(_Complex double));
+    for(size_t i = 0; i < nf; i++) {
+        s[i] = (_Complex double) I*TWO_PI*freq[i];
+    }
+    _Complex double *zh = malloc(num_nodes * nf * sizeof(_Complex double));
+    // TODO sort nodes
+    zh_immittance(nf, s, sigma, epsr, mur, electrodes, images, num_electrodes,
+                  nodes, num_nodes, max_eval, req_abs_error, req_rel_error, zh);
+    // TODO specialized calculation: identify 1/4 of the grid and inject
+    // currents only on them (symmetry)
+    // save results to file
+    sprintf(file_name, "gs_%.2fx%.2f.dat", (v1 - 1)*length1, (v2 - 1)*length2);
+    remove(file_name);
+    FILE *save_file = fopen(file_name, "w");
+    if (save_file == NULL) {
+        printf("Cannot open file %s\n",  file_name);
+        exit(1);
+    }
+    for (int i = 0; i < nf; i++) {
+        v1 = i*num_nodes;
+        for (int k = 0; k < (num_nodes - 1); k++) {
+            fprintf(save_file, "%f, ", cabs(zh[k + v1]));
+        }
+        fprintf(save_file, "%f\n", cabs(zh[(num_nodes - 1) + v1]));
+    }
+    fclose(save_file);
+    free(freq);
+    free(electrodes);
+    free(images);
+    free(s);
+    free(zh);
+    printf("Simulation ended.\n");
+    return 0;
 }
 
 int main (int argc, char *argv[])
@@ -194,52 +281,54 @@ int main (int argc, char *argv[])
     printf("https://github.com/pedrohnv/hp_hem\n");
     printf("Author: Pedro Henrique Nascimento Vieira\n");
     printf("pedrohnv@hotmail.com\n\n");
-    //debug();
-    if (argc == 4) {
-        // params, elec, out
+    if (argc == 5) {
+        // params, elec, ne, out
         printf("Sorry, not implemented yet.\n");
-    } else if (argc == 10) {
-        // nf, (1 | 2), fmin, fmax, rho, epsr, mur, elec, out
-        printf("Sorry, not implemented yet.\n");
-    } else {
-        printf("No correct input detected.\n");
-        printf("Expected 3 files: 'params.txt, electrodes.txt, output.dat'\n");
-        printf("or parameters list and 2 files:\n");
-        printf("'nf, (1 | 2), fmin, fmax, rho, epsr, mur, electrodes.txt, output.dat'\n");
-        printf("\nSimulating a rectangular grounding grid with (v1 x v2) vertices.\n");
-        printf("The harmonic impedance will be calculated and output saved\n");
-        char file_name[50] = "gs_L1xL2.dat";
-        printf("to file '%s' where each line is a frequency point\n", file_name);
-        printf("and each column an injection node.\n");
-        printf("     1   .....   v1\n\n");
-        printf("     o---o---o---o  1\n");
-        printf("     |   |   |   |  .\n");
-        printf(" L2  o---o---o---o  .\n");
-        printf("     |   |   |   |  .\n");
-        printf("     o---o---o---o  v2\n");
-        printf("          L1\n");
-        double sigma, epsr, mur;
-        soil_param(&sigma, &epsr, &mur);
-        int nf;
-        printf("Enter the number of frequency points: ");
-        scanf("%i", &nf);
-        double *freq = malloc(nf * sizeof(double));
-        if (nf > 1) {
-            freq_param(nf, freq);
+    } else if (argc == 11) {
+        // nf, (1 | 2), fmin, fmax, rho,
+        // epsr, mur, max_eval, abs_err, rel_err,
+        // ne, elec.txt, nn, nodes.txt, inj_node,
+        // out
+        int ns = atoi(argv[1]);
+        int spac = atoi(argv[2]);
+        double fmin = atof(argv[3]);
+        double fmax = atof(argv[4]);
+        double *freq = malloc(ns*sizeof(double));
+        if (spac == 1) {
+            linspace(fmin, fmax, ns, freq);
+        } else if (spac == 2) {
+            logspace(fmin, fmax, ns, freq);
         } else {
-            printf("Enter frequency [Hz]: ");
-            scanf("%lf", freq);
+            printf("Invalid frequency spacing argument: %i\n", spac);
+            printf("Aborting...\n");
+            exit(2);
         }
-        double radius, frac, length1, length2, depth;
-        int num_electrodes, num_nodes, v1, l1, v2, l2;
-        grid_param(&radius, &depth, &frac, &num_electrodes, &num_nodes,
-                   &v1, &length1, &l1, &v2, &length2, &l2,
-                   freq[nf-1], sigma, epsr, mur);
-        Electrode *electrodes = malloc(num_electrodes * sizeof(Electrode));
-        double nodes[num_nodes][3];
-        _Complex double zi = 0.0;
-        electrode_grid(electrodes, nodes, radius, depth, zi, v1, length1, l1,
-                       v2, length2, l2);
+        _Complex double *s = malloc(ns*sizeof(_Complex double));
+        for(size_t i = 0; i < ns; i++) {
+            s[i] = (_Complex double) I*TWO_PI*freq[i];
+        }
+        free(freq);
+        double sigma = 1.0/atof(argv[5]);
+        double epsr = atof(argv[6]);
+        double mur = atof(argv[7]);
+        size_t max_eval = atoi(argv[8]);
+        double req_abs_error = atof(argv[9]);
+        double req_rel_error = atof(argv[10]);
+        size_t num_electrodes = (size_t) atoi(argv[11]);
+        Electrode *electrodes = malloc(num_electrodes*sizeof(Electrode));
+        electrodes_file(argv[12], electrodes, num_electrodes);
+        size_t num_nodes = atoi(argv[13]);
+        double *nodes = malloc(3 * num_nodes * sizeof(double));
+        nodes_file(argv[14], nodes, num_nodes);
+        size_t inj_node = atoi(argv[15]);
+        _Complex double *inj_current = malloc(ns*sizeof(_Complex double));
+        for (size_t i = 0; i < ns; i++) inj_current[i] = 1.0;
+        char *out = argv[17];
+        FILE *save_file = fopen(out, "w");
+        if (save_file == NULL) {
+            printf("Cannot open file %s\n", out);
+            exit(1);
+        }
         Electrode *images = malloc(num_electrodes * sizeof(Electrode));
         for(size_t i = 0; i < num_electrodes; i++) {
             populate_electrode(&(images[i]), electrodes[i].start_point,
@@ -248,42 +337,22 @@ int main (int argc, char *argv[])
             images[i].start_point[2] = -images[i].start_point[2];
             images[i].end_point[2] = -images[i].end_point[2];
         }
-        size_t max_eval;
-        double req_abs_error, req_rel_error;
-        intg_param(&max_eval, &req_abs_error, &req_rel_error);
-        printf("Simulating...\n");
-        _Complex double *s = malloc(nf*sizeof(_Complex double));
-        for(size_t i = 0; i < nf; i++) {
-            s[i] = (_Complex double) freq[i];
-        }
-        _Complex double *zh = malloc(num_nodes * nf * sizeof(_Complex double));
-        // TODO sort nodes
-        zh_immittance(nf, s, sigma, epsr, mur, electrodes, images, num_electrodes,
-                      nodes, num_nodes, max_eval, req_abs_error, req_rel_error, zh);
-        // TODO specialized calculation: identify 1/4 of the grid and inject
-        // currents only on them (symmetry)
-        // save results to file
-        sprintf(file_name, "gs_%.2fx%.2f.dat", (v1 - 1)*length1, (v2 - 1)*length2);
-        remove(file_name);
-        FILE *save_file = fopen(file_name, "w");
-        if (save_file == NULL) {
-            printf("Cannot open file %s\n",  file_name);
-            exit(1);
-        }
-        for (int i = 0; i < nf; i++) {
-            v1 = i*num_nodes;
-            for (int k = 0; k < (num_nodes - 1); k++) {
-                fprintf(save_file, "%f, ", cabs(zh[k + v1]));
-            }
-            fprintf(save_file, "%f\n", cabs(zh[(num_nodes - 1) + v1]));
-        }
-        fclose(save_file);
-        free(freq);
+        _Complex double *u = malloc((ns * num_nodes) * sizeof(_Complex double));
+        _Complex double *il = malloc((ns * num_electrodes) * sizeof(_Complex double));
+        _Complex double *it = malloc((ns * num_electrodes) * sizeof(_Complex double));
+        _Complex double *inj_adm = calloc(ns, sizeof(_Complex double));
+        sim_immittance(ns, s, sigma, epsr, mur, electrodes, images,
+                       num_electrodes, nodes, num_nodes, max_eval, req_abs_error,
+                       req_rel_error, inj_node, inj_current, inj_adm, u, il, it);
         free(electrodes);
-        free(images);
-        free(s);
-        free(zh);
-        printf("Simulation ended.\n");
+        fclose(save_file);
+    } else {
+        printf("No correct input detected. argc = %i\n", argc);
+        printf("Expected 3 files: 'params.txt, electrodes.txt, output.dat'\n");
+        printf("or parameters list and 2 files:\n");
+        printf("'nf, (1 | 2), fmin, fmax, rho, epsr, mur, electrodes.txt, output.dat'\n");
+        //zh_grid();
+        debug();
     }
     return 0;
 }

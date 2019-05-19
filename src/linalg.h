@@ -147,8 +147,13 @@ will vary with frequency.
 */
 int
 fill_incidence_imm (_Complex double *we, const Electrode *electrodes,
-                    size_t num_electrodes, const double nodes[][3],
+                    size_t num_electrodes, const double *nodes,
                     size_t num_nodes);
+
+int
+fill_incidence_imm2 (_Complex double *we, const Electrode *electrodes,
+                     size_t num_electrodes, const double *nodes,
+                     size_t num_nodes);
 
 /** fill_impedance_imm
 Fills the immittance matrix `WE` = `[[Ye, C, D], [A, ZL/2, -ZL/2], [B, ZT, ZT]]`
@@ -208,7 +213,7 @@ with the impedance matrices `ZT` and `ZL`, and the nodal admittance Yn.
 */
 int
 fill_incidence_adm (double *a, double *b, const Electrode *electrodes,
-                    size_t num_electrodes, const double nodes[][3],
+                    size_t num_electrodes, const double *nodes,
                     size_t num_nodes);
 
 /** fill_impedance_adm
@@ -272,7 +277,7 @@ limit)
 int
 zh_immittance (size_t ns, const _Complex double *s, double sigma, double epsr,
                double mur, const Electrode *electrodes, const Electrode *images,
-               size_t num_electrodes, const double nodes[][3], size_t num_nodes,
+               size_t num_electrodes, const double *nodes, size_t num_nodes,
                size_t max_eval, double req_abs_error, double req_rel_error,
                _Complex double *zh);
 
@@ -307,10 +312,10 @@ limit)
 int
 sim_immittance (size_t ns, const _Complex double *s, double sigma, double epsr,
                 double mur, const Electrode *electrodes, const Electrode *images,
-                size_t num_electrodes, const double nodes[][3], size_t num_nodes,
+                size_t num_electrodes, const double *nodes, size_t num_nodes,
                 size_t max_eval, double req_abs_error, double req_rel_error,
-                size_t inj_node, _Complex double *inj_current,
-                _Complex double *inj_adm, _Complex double *u, _Complex double *il,
-                _Complex double *it);
+                size_t inj_node, const _Complex double *inj_current,
+                const _Complex double *inj_adm, _Complex double *u,
+                _Complex double *il, _Complex double *it);
 
 #endif /* LINALG_H_ */

@@ -66,7 +66,7 @@ Check if two points are the same.
 @return identity 0 if false, 1 if true
 */
 int
-equal_points (const double point_1[3], const double point_2[3]);
+equal_points (const double *point_1, const double *point_2);
 
 /** vector_norm
 Computes the Norm_2 (euclidian length) of the vector which starts at

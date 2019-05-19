@@ -113,7 +113,7 @@ To calculate the number of electrodes and nodes, use the following formulas:
       o---o---o---o  v2
             L1
 @param electrodes array of Electrode of size num_electrodes that will be filled
-@param nodes array of size num_nodes that will be filled
+@param nodes array of size num_nodes*3 that will be filled
 @param radius conductors radius
 @param depth grid burial depth (air-ground interface considered to be at z=0)
 @param zi constant internal impedance
@@ -125,9 +125,9 @@ To calculate the number of electrodes and nodes, use the following formulas:
 @param l2 number of divisions to do on each column edge
 */
 int
-electrode_grid (Electrode *electrodes, double nodes[][3], double radius,
-                double depth, _Complex double zi, int v1, double length1,
-                int l1, int v2, double length2, int l2);
+electrode_grid (Electrode *electrodes, double *nodes, size_t num_nodes,
+                double radius, double depth, _Complex double zi, int v1,
+                double length1, int l1, int v2, double length2, int l2);
 
 /** nodes_file
 Fill a nodes array from a file. Each node must be defined in a single line
@@ -140,13 +140,13 @@ Any line number greater than `num_nodes` will be ignored.
 @return number of missing arguments from last line read (as a negative integer)
 */
 int
-nodes_file (const char file_name[], double nodes[][3], size_t num_nodes);
+nodes_file (const char file_name[], double *nodes, size_t num_nodes);
 
 /** segment_electrode
 Segments an electrode (conductor) populating a passed array of electrodes and
 an array of nodes.
 @param electrodes pointer to an array of Electrode to be filled
-@param nodes array[`(num_segments + 1)`][`3`] to be filled by the new nodes
+@param nodes flat array `(num_segments + 1) x 3` to be filled by the new nodes
 that are created
 @param num_segments number of segments to do
 @param start_point electrode's start point
@@ -156,9 +156,15 @@ that are created
 @return 0 on success
 */
 int
-segment_electrode (Electrode *electrodes, double nodes[][3], size_t num_segments,
+segment_electrode (Electrode *electrodes, double *nodes, size_t num_segments,
                    const double *start_point, const double *end_point,
                    double radius, _Complex double unit_zi);
+
+/** nodes_from_elecs
+TODO test
+*/
+size_t
+nodes_from_elecs (double *nodes, Electrode *electrodes, size_t num_electrodes);
 
 /** integrand_double
 Calculates the integrand \f$ \frac{e^{-\gamma r}}{r} \f$ to be integrated

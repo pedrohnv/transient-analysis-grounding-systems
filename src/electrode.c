@@ -73,9 +73,9 @@ electrodes_file (const char file_name[], Electrode *electrodes,
 }
 
 int
-electrode_grid (Electrode *electrodes, double nodes[][3], double radius,
-                double depth, _Complex double zi, int v1, double length1,
-                int l1, int v2, double length2, int l2)
+electrode_grid (Electrode *electrodes, double *nodes, size_t num_nodes,
+                double radius, double depth, _Complex double zi, int v1,
+                double length1, int l1, int v2, double length2, int l2)
 {
     // TODO argument checking
     double h = depth;
@@ -86,9 +86,9 @@ electrode_grid (Electrode *electrodes, double nodes[][3], double radius,
     int n = 0;
     for (int i = 0; i < v2; i++) {
         for (int k = 0; k < v1; k++) {
-            nodes[n][0] = k*len1;
-            nodes[n][1] = i*len2;
-            nodes[n][2] = h;
+            nodes[n*3] = k*len1;
+            nodes[n*3 + 1] = i*len2;
+            nodes[n*3 + 2] = h;
             n++;
         }
     }
@@ -134,9 +134,9 @@ electrode_grid (Electrode *electrodes, double nodes[][3], double radius,
             populate_electrode(&(electrodes[s]), start_point, end_point, radius, zi);
             s++;
             if (k > 0) {
-                nodes[n][0] = start_point[0];
-                nodes[n][1] = start_point[1];
-                nodes[n][2] = h;
+                nodes[n*3] = start_point[0];
+                nodes[n*3 + 1] = start_point[1];
+                nodes[n*3 + 2] = h;
                 n++;
             }
         }
@@ -153,9 +153,9 @@ electrode_grid (Electrode *electrodes, double nodes[][3], double radius,
             populate_electrode(&(electrodes[s]), start_point, end_point, radius, zi);
             s++;
             if (k > 0) {
-                nodes[n][0] = start_point[0];
-                nodes[n][1] = start_point[1];
-                nodes[n][2] = h;
+                nodes[n*3] = start_point[0];
+                nodes[n*3 + 1] = start_point[1];
+                nodes[n*3 + 2] = h;
                 n++;
             }
         }
@@ -166,7 +166,7 @@ electrode_grid (Electrode *electrodes, double nodes[][3], double radius,
 }
 
 int
-nodes_file (const char file_name[], double nodes[][3], size_t num_nodes)
+nodes_file (const char file_name[], double *nodes, size_t num_nodes)
 {
     FILE *stream = fopen(file_name, "r");
     if (stream == NULL) {
@@ -175,8 +175,8 @@ nodes_file (const char file_name[], double nodes[][3], size_t num_nodes)
     }
     int success = 3;
     for (size_t i = 0; i < num_nodes; i++) {
-        success = fscanf(stream, "%lf %lf %lf", &nodes[i][0], &nodes[i][1],
-                         &nodes[i][2]);
+        success = fscanf(stream, "%lf %lf %lf", &nodes[i*3],
+                         &nodes[i*3 + 1], &nodes[i*3 + 2]);
         if (success != 3) {
             printf("error reading line %i of file %s\n", (int) (i+1), file_name);
             break;
@@ -187,7 +187,7 @@ nodes_file (const char file_name[], double nodes[][3], size_t num_nodes)
 }
 
 int
-segment_electrode (Electrode *electrodes, double nodes[][3], size_t num_segments,
+segment_electrode (Electrode *electrodes, double *nodes, size_t num_segments,
                    const double *start_point, const double *end_point,
                    double radius, _Complex double unit_zi)
 {
@@ -203,16 +203,64 @@ segment_electrode (Electrode *electrodes, double nodes[][3], size_t num_segments
     linspace(start_point[1], end_point[1], num_nodes, y);
     linspace(start_point[2], end_point[2], num_nodes, z);
     for (size_t i = 0; i < num_nodes; i++) {
-        nodes[i][0] = x[i];
-        nodes[i][1] = y[i];
-        nodes[i][2] = z[i];
+        nodes[i*3] = x[i];
+        nodes[i*3 + 1] = y[i];
+        nodes[i*3 + 2] = z[i];
     }
     double total_length = vector_norm(start_point, end_point);
     _Complex double zi = unit_zi*total_length/num_segments;
     for (size_t i = 0; i < num_segments; i++) {
-        populate_electrode(&(electrodes[i]), nodes[i], nodes[i + 1], radius, zi);
+        populate_electrode(&(electrodes[i]), (nodes + i*3), (nodes + i*3 + 3),
+                           radius, zi);
     }
     return 0;
+}
+
+size_t
+nodes_from_elecs (double *nodes, Electrode *electrodes, size_t num_electrodes)
+{
+    // Array of pointers hat will have the maximum number of nodes possible.
+    // Make them NULL and malloc for each new unique node.
+    // Later copy them to nodes
+    double **dummy_nodes = malloc(2*num_electrodes * sizeof(double[3]));
+    for (size_t i = 1; i < 2*num_electrodes; i++) {
+        dummy_nodes[i] = NULL;
+    }
+    size_t num_nodes = 0;
+    int node_present;
+    for (size_t i = 0; i < num_electrodes; i++) {
+        // start_point in nodes?
+        node_present = 0;
+        for (size_t k = 0; k < num_nodes; k++) {
+            if (equal_points(electrodes[i].start_point, dummy_nodes[k])) {
+                node_present = 1;
+                break;
+            }
+        }
+        if (!node_present) {
+            dummy_nodes[num_nodes] = electrodes[i].start_point;
+            num_nodes++;
+        }
+        // end_point in nodes?
+        node_present = 0;
+        for (size_t k = 0; k < num_nodes; k++) {
+            if (equal_points(electrodes[i].end_point, dummy_nodes[k])) {
+                node_present = 1;
+                break;
+            }
+        }
+        if (!node_present) {
+            dummy_nodes[num_nodes] = electrodes[i].end_point;
+            num_nodes++;
+        }
+    }
+    for (size_t i = 0; i < num_nodes; i++) {
+        for (size_t k = 0; k < 3; k++) {
+            nodes[i*3 + k] = dummy_nodes[i][k];
+        }
+    }
+    free(dummy_nodes);
+    return num_nodes;
 }
 
 int

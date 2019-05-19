@@ -41,10 +41,10 @@ wave_length (double f, double sigma, double ep, double mur)
 }
 
 int
-equal_points (const double point_1[3], const double point_2[3])
+equal_points (const double *point_1, const double *point_2)
 {
     for (int i = 0; i < 3; i++) {
-        if (fabs(point_1[i] - point_2[i]) > FLT_EPSILON) return 0;
+        if (fabs(*(point_1 + i) - *(point_2 + i)) > FLT_EPSILON) return 0;
     }
     return 1;
 }
@@ -53,11 +53,11 @@ double
 vector_norm (const double start_point[3], const double end_point[3])
 {
     double length = 0.0;
-	for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
         length += pow(start_point[i] - end_point[i], 2.0);
-	}
-	length = sqrt(length);
-	return length;
+    }
+    length = sqrt(length);
+    return length;
 }
 
 int
