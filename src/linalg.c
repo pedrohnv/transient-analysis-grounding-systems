@@ -161,7 +161,6 @@ solve_immittance (_Complex double *we, _Complex double *ie,
         printf("The diagonal element of the triangular factor of WE,\n");
         printf("U(%i,%i) is zero, so that WE is singular;\n", info, info);
         printf("the solution could not be computed.\n");
-        exit(info);
     }
     return info;
 }
@@ -302,7 +301,6 @@ solve_admittance (_Complex double *yn, _Complex double *ic, size_t num_nodes)
         printf("The diagonal element of the triangular factor of YN,\n");
         printf("U(%i,%i) is zero, so that YN is singular;\n", info, info);
         printf("the solution could not be computed.\n");
-        exit(info);
     }
     return info;
     return 0;
@@ -349,7 +347,7 @@ zh_immittance (size_t ns, const _Complex double *s, double sigma, double epsr,
                              mur, kappa, max_eval, req_abs_error, req_rel_error,
                              ERROR_PAIRED, INTG_DOUBLE);
         for (size_t k = 0; k < num_electrodes; k++) {
-            zi = internal_impedance(s[i], RHO_CU, electrodes[k].radius, 1.0);
+            zi = internal_impedance(s[i], RHO_CU, electrodes[k].radius, 1.0, &info);
             zl[k*num_electrodes + k] += zi*electrodes[k].length + electrodes[k].zi;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
@@ -362,7 +360,6 @@ zh_immittance (size_t ns, const _Complex double *s, double sigma, double epsr,
             printf("The diagonal element of the triangular factor of WE,\n");
             printf("U(%i,%i) is zero, so that WE is singular;\n", info, info);
             printf("the solution could not be computed.\n");
-            exit(info);
         }
         for (size_t k = 0; k < nrhs; k++) {
             zh[k + i*nrhs] = ie[k*ss1 + k];
@@ -387,6 +384,7 @@ sim_immittance (size_t ns, const _Complex double *s, double sigma, double epsr,
                 const _Complex double *inj_adm, _Complex double *u,
                 _Complex double *il, _Complex double *it)
 {
+    int ierr; //error code
     int ne2 = num_electrodes*num_electrodes;
     int nn2 = num_nodes*num_nodes;
     int ss1 = (2*num_electrodes + num_nodes);
@@ -415,7 +413,7 @@ sim_immittance (size_t ns, const _Complex double *s, double sigma, double epsr,
                              mur, kappa, max_eval, req_abs_error, req_rel_error,
                              ERROR_PAIRED, INTG_DOUBLE);
         for (size_t k = 0; k < num_electrodes; k++) {
-            zi = internal_impedance(s[i], RHO_CU, electrodes[k].radius, 1.0);
+            zi = internal_impedance(s[i], RHO_CU, electrodes[k].radius, 1.0, &ierr);
             zl[k*num_electrodes + k] += zi*electrodes[k].length + electrodes[k].zi;
         }
         impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,

@@ -351,8 +351,8 @@ int main (int argc, char *argv[])
         printf("Expected 3 files: 'params.txt, electrodes.txt, output.dat'\n");
         printf("or parameters list and 2 files:\n");
         printf("'nf, (1 | 2), fmin, fmax, rho, epsr, mur, electrodes.txt, output.dat'\n");
-        //zh_grid();
-        debug();
+        zh_grid();
+        //debug();
     }
     return 0;
 }

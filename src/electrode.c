@@ -40,7 +40,7 @@ electrodes_file (const char file_name[], Electrode *electrodes,
     FILE *stream = fopen(file_name, "r");
     if (stream == NULL) {
         printf("Cannot open file %s\n", file_name);
-        exit(1);
+        return -10;
     }
     double start_point[3], end_point[3];
     double radius, rezi, imzi;
@@ -171,7 +171,7 @@ nodes_file (const char file_name[], double *nodes, size_t num_nodes)
     FILE *stream = fopen(file_name, "r");
     if (stream == NULL) {
         printf("Cannot open file %s\n", file_name);
-        exit(1);
+        return -10;
     }
     int success = 3;
     for (size_t i = 0; i < num_nodes; i++) {
@@ -380,7 +380,8 @@ integral (const Electrode *sender, const Electrode *receiver,
 }
 
 _Complex double
-internal_impedance (_Complex double s, double rho, double radius, double mur)
+internal_impedance (_Complex double s, double rho, double radius, double mur,
+                    int *ierr)
 {
     /*_Complex double etapr = csqrt(s*mur*MU0/rho);
     _Complex double etapr_radius = etapr*radius;
@@ -391,24 +392,23 @@ internal_impedance (_Complex double s, double rho, double radius, double mur)
     int kode = 1;
     int n = 1;
     double cyr0, cyi0, cyr1, cyi1;
-    int nz, ierr;
-    zbesi_(&zr, &zi, &fnu0, &kode, &n, &cyr0, &cyi0, &nz, &ierr);
+    int nz;
+    zbesi_(&zr, &zi, &fnu0, &kode, &n, &cyr0, &cyi0, &nz, ierr);
     if (ierr != 0) {
         printf("in function 'internal_impedance'\n");
         printf("error in call to zbesi(fnu = 0)\n");
-        printf("error flag = %i\n", ierr);
-        exit(ierr);
+        printf("error flag = %i\n", *ierr);
+        return 0.0;
     }
-    zbesi_(&zr, &zi, &fnu1, &kode, &n, &cyr1, &cyi1, &nz, &ierr);
+    zbesi_(&zr, &zi, &fnu1, &kode, &n, &cyr1, &cyi1, &nz, ierr);
     if (ierr != 0) {
         printf("in function 'internal_impedance'\n");
         printf("error in call to zbesi(fnu = 1)\n");
-        printf("error flag = %i\n", ierr);
-        exit(ierr);
+        printf("error flag = %i\n", *ierr);
+        return 0.0;
     }
-    return (etapr*rho*(cyr0 + cyi0*I))/(TWO_PI*radius*(cyr1 + cyi1*I));
-    FIXME leave out for now...*/
-    return (0.0 + 0.0*I);
+    return (etapr*rho*(cyr0 + cyi0*I))/(TWO_PI*radius*(cyr1 + cyi1*I));*/
+    return 0.0; //FIXME slatec dependency
 }
 
 // Longitudinal impedance

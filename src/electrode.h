@@ -232,10 +232,12 @@ Calculates the internal impedance per unit length of cylindrical conductors.
 @param rho conductor resistivity
 @param radius conductor radius
 @param mur relative magnetic permeability of the conductor
-@return zin (Ohm/m)
+@param ierr zbesi error code
+@return zin (Ohm/m) or 0.0 if ierr != 0
 */
 _Complex double
-internal_impedance (_Complex double s, double rho, double radius, double mur);
+internal_impedance (_Complex double s, double rho, double radius, double mur,
+                    int *ierr);
 
 // Longitudinal impedance
 /** longitudinal_self
