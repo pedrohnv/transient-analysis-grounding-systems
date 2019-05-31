@@ -591,3 +591,207 @@ impedances_images (const Electrode *electrodes, const Electrode *images,
     }
     return 0;
 }
+
+// TODO integration of fields and potentials using the middle_point
+_Complex double
+electric_potential (const double *point, const Electrode *electrodes,
+                    size_t num_electrodes, const _Complex double *it,
+                    _Complex double gamma, _Complex double kappa,
+                    size_t max_eval, double req_abs_error, double req_rel_error,
+                    int error_norm)
+{
+    Electrode *fake_elec = malloc(sizeof(Electrode));
+    double result[2], error[2];
+    _Complex double pot = 0.0;
+    for (int i = 0; i < 3; i++) {
+        fake_elec->middle_point[i] = *(point + i);
+    }
+    for (size_t m = 0; m < num_electrodes; m++) {
+        integral(&(electrodes[m]), fake_elec, gamma, max_eval,
+                 req_abs_error, req_rel_error, error_norm,
+                 INTG_SINGLE, result, error);
+        pot += (result[0] + I*result[1])*it[m];
+    }
+    free(fake_elec);
+    return pot/(FOUR_PI*kappa);
+}
+
+int
+magnetic_potential (const double *point, const Electrode *electrodes,
+                    size_t num_electrodes, const _Complex double *il,
+                    _Complex double gamma, double mur, size_t max_eval,
+                    double req_abs_error, double req_rel_error,
+                    int error_norm, _Complex double *va)
+{
+    int failure = 0;
+    Electrode *fake_elec = malloc(sizeof(Electrode));
+    double result[2], error[2], dx, dy, dz;
+    _Complex double pot = 0.0;
+    for (int i = 0; i < 3; i++) {
+        fake_elec->middle_point[i] = *(point + i);
+        va[i] = 0.0;
+    }
+    for (size_t m = 0; m < num_electrodes; m++) {
+        if (cabs(il[m]) < DBL_EPSILON) continue;
+        dx = electrodes[m].end_point[0] - electrodes[m].start_point[0];
+        dy = electrodes[m].end_point[1] - electrodes[m].start_point[1];
+        dz = electrodes[m].end_point[2] - electrodes[m].start_point[2];
+        failure = integral(&(electrodes[m]), fake_elec, gamma, max_eval,
+                           req_abs_error, req_rel_error, error_norm,
+                           INTG_SINGLE, result, error);
+        pot = (result[0] + I*result[1])*il[m]/electrodes[m].length;
+        va[0] += pot*dx;
+        va[1] += pot*dy;
+        va[2] += pot*dz;
+    }
+    _Complex double u_4pi = mur*MU0/(FOUR_PI);
+    for (int i = 0; i < 3; i++) {
+        va[i] *= u_4pi;
+    }
+    free(fake_elec);
+    return failure;
+}
+
+int
+mag_pot_integrand (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
+                   double *fval)
+{
+    Mag_pot_data *p = (Mag_pot_data*) auxdata;
+    const double *point1 = p->point1;
+    const double *point2 = p->point2;
+    const Electrode *electrodes = p->electrodes;
+    size_t num_electrodes = p->num_electrodes;
+    const _Complex double *il = p->il;
+    _Complex double gamma = p->gamma;
+    double mur = p->mur;
+    size_t max_eval = p->max_eval;
+    double req_abs_error = p->req_abs_error;
+    double req_rel_error = p->req_rel_error;
+    int error_norm = p->error_norm;
+    double point[3];
+    double dx;
+    double norm_point12 = 0.0;
+    for (int i = 0; i < 3; i++) {
+        dx = point2[i] - point1[i];
+        point[i] = t[0]*dx + point1[i];
+        norm_point12 += pow(dx, 2.0);
+    }
+    if (norm_point12 < DBL_EPSILON) return 1;
+    norm_point12 = sqrt(norm_point12);
+    _Complex double va[3];
+    magnetic_potential(point, electrodes, num_electrodes, il, gamma, mur,
+                       max_eval, req_abs_error, req_rel_error, error_norm, va);
+    _Complex double va_cost = 0.0;
+    for (int i = 0; i < 3; i++) {
+        va_cost += va[i]*point[i];
+    }
+    va_cost = va_cost/norm_point12;
+    fval[0] = creal(va_cost);
+    fval[1] = cimag(va_cost);
+    return 0;
+}
+
+_Complex double
+voltage (const double *point1, const double *point2,
+         const Electrode *electrodes, size_t num_electrodes,
+         const _Complex double *il, const _Complex double *it,
+         _Complex double gamma, _Complex double s, double mur,
+         _Complex double kappa, size_t max_eval, double req_abs_error,
+         double req_rel_error, int error_norm)
+{
+    _Complex double u1, u2;
+    u1 = electric_potential(point1, electrodes, num_electrodes, it, gamma,
+                            kappa, max_eval, req_abs_error, req_rel_error,
+                            error_norm);
+    u2 = electric_potential(point2, electrodes, num_electrodes, it, gamma,
+                            kappa, max_eval, req_abs_error, req_rel_error,
+                            error_norm);
+    Mag_pot_data *auxdata = malloc(sizeof(Mag_pot_data));
+    auxdata->point1 = point1;
+    auxdata->point2 = point2;
+    auxdata->electrodes = electrodes;
+    auxdata->num_electrodes = num_electrodes;
+    auxdata->il = il;
+    auxdata->gamma = gamma;
+    auxdata->mur = mur;
+    auxdata->max_eval = max_eval;
+    auxdata->req_abs_error = req_abs_error;
+    auxdata->req_rel_error = req_rel_error;
+    auxdata->error_norm = error_norm;
+    double tmin[] = {0.0};
+    double tmax[] = {1.0};
+    unsigned fdim = 2;
+    double result[fdim], error[fdim];
+    hcubature(fdim, mag_pot_integrand, auxdata, 1, tmin, tmax, max_eval,
+              req_abs_error, req_rel_error, error_norm, result, error);
+    free(auxdata);
+    return (u2 - u1 - s*(result[0] + I*result[1]));
+    // TODO alternative: integrate electric_field directly
+}
+
+int
+elec_field_integrand (unsigned ndim, const double *t, void *auxdata,
+                      unsigned fdim, double *fval)
+{
+    Mag_pot_data *p = (Mag_pot_data*) auxdata;
+    const double *point = p->point1;
+    const Electrode *electrode = p->electrodes;
+    _Complex double gamma = p->gamma;
+    double r1, dx[3];
+    double r2 = 0.0;
+    for (size_t i = 0; i < 3; i++) {
+        r1 = t[0]*(electrode->end_point[i] - electrode->start_point[i])
+           + electrode->start_point[i];
+        dx[i] = point[i] - r1;
+        r2 += pow(dx[i], 2.0);
+    }
+    if (r2 < DBL_EPSILON) return 1;
+    r1 = sqrt(r2);
+    _Complex double efield = (1 + gamma*r1)*cexp(-gamma*r1)/(r2*r1);
+    _Complex double ex;
+    for (size_t i = 0; i < 3; i++) {
+        ex = efield*dx[i];
+        fval[2*i] = creal(ex);
+        fval[2*i + 1] = cimag(ex);
+    }
+    return 0;
+}
+
+int
+electric_field (const double *point, const Electrode *electrodes,
+                size_t num_electrodes, const _Complex double *il,
+                const _Complex double *it, _Complex double gamma,
+                _Complex double s, double mur, _Complex double kappa,
+                size_t max_eval, double req_abs_error, double req_rel_error,
+                int error_norm, _Complex double *ve)
+{
+    magnetic_potential(point, electrodes, num_electrodes, il, gamma, mur,
+                       max_eval, req_abs_error, req_rel_error, error_norm, ve);
+    for (int i = 0; i < 3; i++) {
+        ve[i] *= -s;
+    }
+    // do some hacking and use the Mag_pot_data to pass the variables to
+    // elec_field_integrand
+    Mag_pot_data *auxdata = malloc(sizeof(Mag_pot_data));
+    auxdata->point1 = point;
+    auxdata->gamma = gamma;
+    double tmin[] = {0.0};
+    double tmax[] = {1.0};
+    unsigned fdim = 6;
+    double result[fdim], error[fdim];
+    int failure = 0;
+    _Complex double it_4pikl2;
+    for (size_t m = 0; m < num_electrodes; m++) {
+        if (cabs(it[m]) < DBL_EPSILON) continue;
+        auxdata->electrodes = (electrodes + m);
+        failure = hcubature(fdim, elec_field_integrand, auxdata, 1, tmin, tmax,
+                            max_eval, req_abs_error, req_rel_error, error_norm,
+                            result, error);
+        it_4pikl2 = it[m]/(FOUR_PI*kappa);// /electrodes[m].length
+        for (size_t i = 0; i < 3; i++) {
+            ve[i] += (result[2*i] + I*result[2*i + 1])*it_4pikl2;
+        }
+    }
+    free(auxdata);
+    return failure;
+}

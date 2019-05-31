@@ -401,4 +401,151 @@ impedances_images (const Electrode *electrodes, const Electrode *images,
                    _Complex double ref_t, size_t max_eval, double req_abs_error,
                    double req_rel_error, int error_norm, int integration_type);
 
+/** electric_potential
+Calculates the scalar electric potential to remote earth at a point.
+@param point array `(x, y, z)`
+@param electrodes array of electrodes
+@param num_electrodes number of electrodes
+@param it transversal currents array
+@param gamma medium propagation constant
+@param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
+@param max_eval specifies a maximum number of function evaluations (0 for no
+limit)
+@param req_abs_error the absolute error requested (0 to ignore)
+@param req_rel_error the relative error requested (0 to ignore)
+@param error_norm (enumeration defined in cubature.h) error checking scheme
+return potential to remote earth
+*/
+_Complex double
+electric_potential (const double *point, const Electrode *electrodes,
+                    size_t num_electrodes, const _Complex double *it,
+                    _Complex double gamma, _Complex double kappa,
+                    size_t max_eval, double req_abs_error, double req_rel_error,
+                    int error_norm);
+
+/** magnetic_potential
+Calculates the magnetic vector potential.
+@param point array `(x, y, z)`
+@param electrodes array of electrodes
+@param num_electrodes number of electrodes
+@param il longitudinal currents array
+@param gamma medium propagation constant
+@param mur relative magnetic permeability of the medium
+@param max_eval specifies a maximum number of function evaluations (0 for no
+limit)
+@param req_abs_error the absolute error requested (0 to ignore)
+@param req_rel_error the relative error requested (0 to ignore)
+@param error_norm (enumeration defined in cubature.h) error checking scheme
+@param va pointer to array of size `3` in which the magnetic vector potential
+components `Ax`, `Ay` and `Az` will be stored on return.
+@return 0 on success
+*/
+int
+magnetic_potential (const double *point, const Electrode *electrodes,
+                    size_t num_electrodes, const _Complex double *il,
+                    _Complex double gamma, double mur, size_t max_eval,
+                    double req_abs_error, double req_rel_error,
+                    int error_norm, _Complex double *va);
+
+/** mag_pot_integrand
+interface to pass magnetic_potential as an integrand to Cubature when
+calculating the voltage along a path.
+@param ndim should be 1
+@param t integration variable (electrode percentage 0 to 1)
+@param auxdata pointer to Mag_pot_data struct
+@param fdim should be 2: Re(A.dl) + Im(A.dl)
+@param fval where the results are stored
+return 0 on success
+*/
+int
+mag_pot_integrand (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
+                   double *fval);
+
+/** Mag_pot_data
+Structure to pass all needed arguments by magnetic_potential to mag_pot_integral.
+@see magnetic_potential
+*/
+typedef struct {
+    const double *point1;
+    const double *point2;
+    const Electrode *electrodes;
+    size_t num_electrodes;
+    const _Complex double *il;
+    _Complex double gamma;
+    double mur;
+    size_t max_eval;
+    double req_abs_error;
+    double req_rel_error;
+    int error_norm;
+} Mag_pot_data;
+
+/** voltage
+Calculates the voltage along a straight line from point1 to point2.
+@param point1 array `(x, y, z)` start point
+@param point2 array `(x, y, z)` end point
+@param electrodes array of electrodes
+@param num_electrodes number of electrodes
+@param il longitudinal currents array
+@param gamma medium propagation constant
+@param s complex angular frequency `c + I*w` (rad/s)
+@param mur relative magnetic permeability of the medium
+@param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
+@param max_eval specifies a maximum number of function evaluations (0 for no
+limit)
+@param req_abs_error the absolute error requested (0 to ignore)
+@param req_rel_error the relative error requested (0 to ignore)
+@param error_norm (enumeration defined in cubature.h) error checking scheme
+@return 0 on success
+*/
+_Complex double
+voltage (const double *point1, const double *point2,
+         const Electrode *electrodes, size_t num_electrodes,
+         const _Complex double *il, const _Complex double *it,
+         _Complex double gamma, _Complex double s, double mur,
+         _Complex double kappa, size_t max_eval, double req_abs_error,
+         double req_rel_error, int error_norm);
+
+/** elec_field_integrand
+Integrand to calculate the electric field caused by a differential
+transversal current dIt.
+@param ndim should be 1
+@param t integration variable (electrode percentage 0 to 1)
+@param auxdata pointer to Mag_pot_data struct
+@param fdim should be 6 (Real and Imag.): Ex, Ey, Ez
+@param fval where the results are stored
+return 0 on success
+*/
+int
+elec_field_integrand (unsigned ndim, const double *t, void *auxdata,
+                      unsigned fdim, double *fval);
+
+/**
+Calculates the electric field at a point.
+    \f$ \vec E = -∇u - s \vec A \f$
+@param point array `(x, y, z)`
+@param electrodes array of electrodes
+@param num_electrodes number of electrodes
+@param il longitudinal currents array
+@param it transversal currents array
+@param gamma medium propagation constant
+@param s complex angular frequency `c + I*w` (rad/s)
+@param mur relative magnetic permeability of the medium
+@param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
+@param max_eval specifies a maximum number of function evaluations (0 for no
+limit)
+@param req_abs_error the absolute error requested (0 to ignore)
+@param req_rel_error the relative error requested (0 to ignore)
+@param error_norm (enumeration defined in cubature.h) error checking scheme
+@param ve pointer to array of size `3` in which the electric field
+components `Ex`, `Ey` and `Ez` will be stored on return.
+@return 0 on success
+*/
+int
+electric_field (const double *point, const Electrode *electrodes,
+                size_t num_electrodes, const _Complex double *il,
+                const _Complex double *it, _Complex double gamma,
+                _Complex double s, double mur, _Complex double kappa,
+                size_t max_eval, double req_abs_error, double req_rel_error,
+                int error_norm, _Complex double *ve);
+
 #endif /* ELECTRODE_H_ */
