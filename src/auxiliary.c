@@ -44,7 +44,7 @@ int
 equal_points (const double *point_1, const double *point_2)
 {
     for (int i = 0; i < 3; i++) {
-        if (fabs(*(point_1 + i) - *(point_2 + i)) > FLT_EPSILON) return 0;
+        if (fabs(*(point_1 + i) - *(point_2 + i)) > DBL_EPSILON) return 0;
     }
     return 1;
 }

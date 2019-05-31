@@ -19,7 +19,7 @@ TODO insert condition to check if sender == receiver?
 //default integration options ===============================================
 /** Integration_type
 Type of integration and simplification thereof to be done.
-@param NONE integration has closed form solution \f e^{-\gamma \bar r}}{\bar r} L_s L_r \f
+@param NONE integration has closed form solution \f$ e^{-\gamma \bar r}}{\bar r} L_s L_r \f$
 @param INTG_DOUBLE \f$ \int_0^{L_s} \int_0^{L_r} \frac{e^{-\gamma r}}{r} dl_r dl_s \f$
 @param INTG_EXP_LOGNF \f$ \int_0^{L_r} e^{-\gamma \bar r} Log(N_f) dl_r \f$
 @param INTG_LOGNF \f$ e^{-\gamma \bar r} \int_0^{L_r} Log(N_f) dl_r \f$
@@ -29,7 +29,8 @@ Integration_type {
     INTG_NONE = 1,
     INTG_DOUBLE,
     INTG_EXP_LOGNF,
-    INTG_LOGNF
+    INTG_LOGNF,
+    INTG_SINGLE
 };
 
 /** Electrode
@@ -53,7 +54,7 @@ typedef struct {
 } Electrode;
 
 /** Integration_data
-Structure to make the integration ot the "potential" between two electrodes.
+Structure to make the integration of the "potential" between two electrodes.
 @param sender electrode that generates the excitation
 @param receiver electrode that is excitated
 @param gamma complex propagation constant of the medium
@@ -182,6 +183,24 @@ using Cubature.
 */
 int
 integrand_double (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
+                  double *fval);
+
+/** integrand_single
+Calculates the integrand \f$ \frac{e^{-\gamma r}}{r} \f$ to be integrated
+using Cubature; but the point on the receiver electrode is fixed at its middle.
+@param ndim must be = 1
+@param t array of electrodes length's percentage (0 to 1)
+@param auxdata Integration_data
+@param fdim must be = 2
+@param fval pointer to where the result is stored
+@return 0 on success
+@see Integration_type
+@see Integration_data
+@see integral
+@see https://github.com/stevengj/cubature
+*/
+int
+integrand_single (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
                   double *fval);
 
 /** exp_logNf
@@ -336,7 +355,7 @@ limit)
 @param req_rel_error the relative error requested (0 to ignore)
 @param error_norm (enumeration defined in cubature.h) error checking scheme
 @param integration_type type of integration to be done.
-@return 0 on sucess
+@return 0 on success
 @see integral
 @see Integration_type
 @see https://github.com/stevengj/cubature
@@ -369,7 +388,7 @@ limit)
 @param req_rel_error the relative error requested (0 to ignore)
 @param error_norm (enumeration defined in cubature.h) error checking scheme
 @param integration_type type of integration to be done.
-@return 0 on sucess
+@return 0 on success
 @see integral
 @see Integration_type
 @see https://github.com/stevengj/cubature

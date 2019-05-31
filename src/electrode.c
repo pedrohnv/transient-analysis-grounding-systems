@@ -219,7 +219,7 @@ segment_electrode (Electrode *electrodes, double *nodes, size_t num_segments,
 size_t
 nodes_from_elecs (double *nodes, Electrode *electrodes, size_t num_electrodes)
 {
-    // Array of pointers hat will have the maximum number of nodes possible.
+    // Array of pointers that will have the maximum number of nodes possible.
     // Make them NULL and malloc for each new unique node.
     // Later copy them to nodes
     double **dummy_nodes = malloc(2*num_electrodes * sizeof(double[3]));
@@ -273,15 +273,37 @@ integrand_double (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
     _Complex double gamma = p->gamma;
     double point_r, point_s, r = 0.0;
     for (size_t i = 0; i < 3; i++) {
-        point_r = t[0]*(receiver->end_point[i] - receiver->start_point[i]);
-        point_r += receiver->start_point[i];
-
-        point_s = t[1]*(sender->end_point[i] - sender->start_point[i]);
-        point_s += sender->start_point[i];
-
+        point_r = t[0]*(receiver->end_point[i] - receiver->start_point[i])
+                + receiver->start_point[i];
+        point_s = t[1]*(sender->end_point[i] - sender->start_point[i])
+                + sender->start_point[i];
         r += pow(point_r - point_s, 2.0);
     }
     r = sqrt(r);
+    if (r < DBL_EPSILON) return 1;
+    _Complex double exp_gr = cexp(-gamma*r);
+    fval[0] = creal(exp_gr)/r;
+    fval[1] = cimag(exp_gr)/r;
+    return 0;
+}
+
+int
+integrand_single (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
+                  double *fval)
+{
+    Integration_data *p = (Integration_data*) auxdata;
+    const Electrode *sender = p->sender;
+    const Electrode *receiver = p->receiver;
+    _Complex double gamma = p->gamma;
+    double point_s;
+    double r = 0.0;
+    for (size_t i = 0; i < 3; i++) {
+        point_s = t[0]*(sender->end_point[i] - sender->start_point[i])
+                + sender->start_point[i];
+        r += pow(receiver->middle_point[i] - point_s, 2.0);
+    }
+    r = sqrt(r);
+    if (r < DBL_EPSILON) return 1;
     _Complex double exp_gr = cexp(-gamma*r);
     fval[0] = creal(exp_gr)/r;
     fval[1] = cimag(exp_gr)/r;
@@ -300,8 +322,8 @@ exp_logNf (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
     r2 = 0.0;
     eta = 0.0;
     for (size_t i = 0; i < 3; i++) {
-        point_r = t[0]*(receiver->end_point[i] - receiver->start_point[i]);
-        point_r += receiver->start_point[i];
+        point_r = t[0]*(receiver->end_point[i] - receiver->start_point[i])
+                + receiver->start_point[i];
         r1 += pow(point_r - sender->start_point[i], 2.0);
         r2 += pow(point_r - sender->end_point[i], 2.0);
         eta += pow(point_r - sender->middle_point[i], 2.0);
@@ -353,6 +375,13 @@ integral (const Electrode *sender, const Electrode *receiver,
             result[0] = result[0] * receiver->length * sender->length;
             result[1] = result[1] * receiver->length * sender->length;
             break;
+        case INTG_SINGLE:
+            failure = hcubature(2, integrand_single, auxdata, 1, tmin, tmax,
+                                max_eval, req_abs_error, req_rel_error,
+                                error_norm, result, error);
+            result[0] = result[0] * sender->length;
+            result[1] = result[1] * sender->length;
+            break;
         case INTG_EXP_LOGNF:
             auxdata->simplified = 0;
             failure = hcubature(2, exp_logNf, auxdata, 1, tmin, tmax, max_eval,
@@ -363,7 +392,7 @@ integral (const Electrode *sender, const Electrode *receiver,
             break;
         case INTG_LOGNF:
             auxdata->simplified = 1;
-            failure = hcubature(1, exp_logNf, auxdata, 1, tmin, tmax, max_eval,
+            failure = hcubature(2, exp_logNf, auxdata, 1, tmin, tmax, max_eval,
                                 req_abs_error, req_rel_error, error_norm,
                                 result, error);
             rbar = vector_norm(sender->middle_point, receiver->middle_point);
@@ -436,10 +465,10 @@ longitudinal_mutual (const Electrode *sender, const Electrode *receiver,
         k2 = (receiver->end_point[i] - receiver->start_point[i]);
         cost += k1*k2;
     }
-    cost = abs(cost/(sender->length * receiver->length));
-    if (fabs(cost - 0.0) < DBL_EPSILON) {
+    if (cost < DBL_EPSILON) {
         return 0.0;
     } else {
+        cost = abs(cost/(sender->length * receiver->length));
         integral(sender, receiver, gamma, max_eval, req_abs_error,
                  req_rel_error, error_norm, integration_type, result, error);
         _Complex double intg = result[0] + I*result[1];
@@ -504,17 +533,17 @@ calculate_impedances (const Electrode *electrodes, size_t num_electrodes,
                 k2 = (electrodes[k].end_point[m] - electrodes[k].start_point[m]);
                 cost += k1[m]*k2;
             }
-            cost = abs(cost/(ls*lr));
             failure = integral(&(electrodes[i]), &(electrodes[k]), gamma,
                                max_eval, req_abs_error, req_rel_error,
                                error_norm, integration_type, result, error);
             if (failure) return failure;
             intg = result[0] + I*result[1];
-            zl[i*num_electrodes + k] = iwu_4pi*intg*cost;
             zt[i*num_electrodes + k] = one_4pik/(ls*lr)*intg;
-
-            zl[k*num_electrodes + i] = zl[i*num_electrodes + k];
             zt[k*num_electrodes + i] = zt[i*num_electrodes + k];
+            if (cost < DBL_EPSILON) continue;
+            cost = abs(cost/(ls*lr));
+            zl[i*num_electrodes + k] = iwu_4pi*intg*cost;
+            zl[k*num_electrodes + i] = zl[i*num_electrodes + k];
         }
     }
     return 0;
@@ -547,17 +576,17 @@ impedances_images (const Electrode *electrodes, const Electrode *images,
                 k2 = (images[k].end_point[m] - images[k].start_point[m]);
                 cost += k1[m]*k2;
             }
-            cost = abs(cost/(ls*lr));
             failure = integral(&(electrodes[i]), &(images[k]), gamma, max_eval,
                                req_abs_error, req_rel_error, error_norm,
                                integration_type, result, error);
             if (failure) return failure;
             intg = result[0] + I*result[1];
-            zl[i*num_electrodes + k] += ref_l*iwu_4pi*intg*cost;
             zt[i*num_electrodes + k] += ref_t*one_4pik/(ls*lr)*intg;
-
-            zl[k*num_electrodes + i] = zl[i*num_electrodes + k];
             zt[k*num_electrodes + i] = zt[i*num_electrodes + k];
+            if (cost < DBL_EPSILON) continue;
+            cost = abs(cost/(ls*lr));
+            zl[i*num_electrodes + k] += ref_l*iwu_4pi*intg*cost;
+            zl[k*num_electrodes + i] = zl[i*num_electrodes + k];
         }
     }
     return 0;
