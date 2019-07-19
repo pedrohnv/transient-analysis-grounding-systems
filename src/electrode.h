@@ -27,10 +27,10 @@ Type of integration and simplification thereof to be done.
 enum
 Integration_type {
     INTG_NONE = 1,
-    INTG_DOUBLE,
-    INTG_EXP_LOGNF,
-    INTG_LOGNF,
-    INTG_SINGLE
+    INTG_DOUBLE = 2,
+    INTG_SINGLE = 3,
+    INTG_EXP_LOGNF = 4,
+    INTG_LOGNF = 5
 };
 
 /** Electrode
