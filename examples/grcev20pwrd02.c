@@ -45,7 +45,7 @@ run_case_adm (double length, double rho, char file_name[])
     double lambda = wave_length(freq[nf - 1], sigma, er*EPS0, 1.0); //smallest
     size_t num_electrodes = ceil( length/(lambda/6.0) ) ;
     size_t num_nodes = num_electrodes + 1;
-    double nodes[num_nodes][3];
+    double *nodes = malloc(3*num_nodes*sizeof(double));
     Electrode *electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     // the internal impedance is added "outside" later
     segment_electrode(electrodes, nodes, num_electrodes, start_point,
@@ -53,7 +53,7 @@ run_case_adm (double length, double rho, char file_name[])
     // create images
     start_point[2] = h;
     end_point[2] = h + length;
-    double nodes_images[num_nodes][3];
+    double *nodes_images = malloc(3*num_nodes*sizeof(double));
     //Electrode images[num_electrodes];
     Electrode *images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     segment_electrode(images, nodes_images, num_electrodes, start_point,
@@ -72,6 +72,7 @@ run_case_adm (double length, double rho, char file_name[])
     double *b = malloc((num_electrodes*num_nodes)*sizeof(double));
     fill_incidence_adm(a, b, electrodes, num_electrodes, nodes, num_nodes);
     // solve for each frequency: WE*VE = IE
+    int err;
     for (size_t i = 0; i < nf; i++) {
         s = I*TWO_PI*freq[i];
         ie[0] = 1.0;
@@ -87,7 +88,7 @@ run_case_adm (double length, double rho, char file_name[])
         calculate_impedances(electrodes, num_electrodes, zl, zt, gamma, s, 1.0,
                              kappa, max_eval, req_abs_error, req_rel_error,
                              ERROR_PAIRED, INTG_DOUBLE);
-        zinternal = internal_impedance(s, rho_c, r, 1.0)*electrodes[0].length;
+        zinternal = internal_impedance(s, rho_c, r, 1.0, &err)*electrodes[0].length;
         for (size_t k = 0; k < num_electrodes; k++) {
             zl[k*num_electrodes + k] += zinternal;
         }
@@ -107,6 +108,8 @@ run_case_adm (double length, double rho, char file_name[])
     free(ie);
     free(a);
     free(b);
+    free(nodes);
+    free(nodes_images);
     return 0;
 }
 
@@ -139,7 +142,7 @@ run_case_imm (double length, double rho, char file_name[])
     double lambda = wave_length(freq[nf - 1], sigma, er*EPS0, 1.0); //smallest
     size_t num_electrodes = ceil( length/(lambda/6.0) ) ;
     size_t num_nodes = num_electrodes + 1;
-    double nodes[num_nodes][3];
+    double *nodes = malloc(3*num_nodes*sizeof(double));
     Electrode *electrodes = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     // the internal impedance is added "outside" later
     segment_electrode(electrodes, nodes, num_electrodes, start_point,
@@ -147,7 +150,7 @@ run_case_imm (double length, double rho, char file_name[])
     // create images
     start_point[2] = h;
     end_point[2] = h + length;
-    double nodes_images[num_nodes][3];
+    double *nodes_images = malloc(3*num_nodes*sizeof(double));
     //Electrode images[num_electrodes];
     Electrode *images = (Electrode*) malloc(sizeof(Electrode)*num_electrodes);
     segment_electrode(images, nodes_images, num_electrodes, start_point,
@@ -168,6 +171,7 @@ run_case_imm (double length, double rho, char file_name[])
     _Complex double *we_cp = malloc(ss2*sizeof(_Complex double));
     fill_incidence_imm(we, electrodes, num_electrodes, nodes, num_nodes);
     // solve for each frequency: WE*VE = IE
+    int err;
     ie[0] = 1.0;
     for (size_t i = 0; i < nf; i++) {
         s = I*TWO_PI*freq[i];
@@ -180,7 +184,7 @@ run_case_imm (double length, double rho, char file_name[])
         calculate_impedances(electrodes, num_electrodes, zl, zt, gamma, s, 1.0,
                              kappa, max_eval, req_abs_error, req_rel_error,
                              ERROR_PAIRED, INTG_DOUBLE);
-        zinternal = internal_impedance(s, rho_c, r, 1.0)*electrodes[0].length;
+        zinternal = internal_impedance(s, rho_c, r, 1.0, &err)*electrodes[0].length;
         for (size_t k = 0; k < num_electrodes; k++) {
             zl[k*num_electrodes + k] += zinternal;
         }
@@ -208,6 +212,8 @@ run_case_imm (double length, double rho, char file_name[])
     free(ie_cp);
     free(we);
     free(we_cp);
+    free(nodes);
+    free(nodes_images);
     return 0;
 }
 

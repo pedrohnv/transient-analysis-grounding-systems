@@ -25,32 +25,32 @@ we_building ()
     size_t ne = 6;
     Electrode electrodes[ne];
     size_t nn = 5;
-    double nodes[nn][3];
-    nodes[0][0] = 0.0;
-    nodes[0][1] = 0.0;
-    nodes[0][2] = 0.0;
+    double nodes[nn*3];
+    nodes[0*3 + 0] = 0.0;
+    nodes[0*3 + 1] = 0.0;
+    nodes[0*3 + 2] = 0.0;
 
-    nodes[1][0] = 1.0;
-    nodes[1][1] = 0.0;
-    nodes[1][2] = 0.0;
+    nodes[1*3 + 0] = 1.0;
+    nodes[1*3 + 1] = 0.0;
+    nodes[1*3 + 2] = 0.0;
 
-    nodes[2][0] = 2.0;
-    nodes[2][1] = 0.0;
-    nodes[2][2] = 0.0;
+    nodes[2*3 + 0] = 2.0;
+    nodes[2*3 + 1] = 0.0;
+    nodes[2*3 + 2] = 0.0;
 
-    nodes[3][0] = 0.0;
-    nodes[3][1] = 1.0;
-    nodes[3][2] = 0.0;
+    nodes[3*3 + 0] = 0.0;
+    nodes[3*3 + 1] = 1.0;
+    nodes[3*3 + 2] = 0.0;
 
-    nodes[4][0] = 1.0;
-    nodes[4][1] = 1.0;
-    nodes[4][2] = 0.0;
-    populate_electrode(&(electrodes[0]), nodes[0], nodes[1], radius, zi);
-    populate_electrode(&(electrodes[1]), nodes[1], nodes[2], radius, zi);
-    populate_electrode(&(electrodes[2]), nodes[0], nodes[3], radius, zi);
-    populate_electrode(&(electrodes[3]), nodes[1], nodes[4], radius, zi);
-    populate_electrode(&(electrodes[4]), nodes[0], nodes[4], radius, zi);
-    populate_electrode(&(electrodes[5]), nodes[3], nodes[4], radius, zi);
+    nodes[4*3 + 0] = 1.0;
+    nodes[4*3 + 1] = 1.0;
+    nodes[4*3 + 2] = 0.0;
+    populate_electrode(&(electrodes[0]), nodes, nodes+1*3, radius, zi);
+    populate_electrode(&(electrodes[1]), nodes+1*3, nodes+2*3, radius, zi);
+    populate_electrode(&(electrodes[2]), nodes, nodes+3*3, radius, zi);
+    populate_electrode(&(electrodes[3]), nodes+1*3, nodes+4*3, radius, zi);
+    populate_electrode(&(electrodes[4]), nodes, nodes+4*3, radius, zi);
+    populate_electrode(&(electrodes[5]), nodes+3*3, nodes+4*3, radius, zi);
     _Complex double we[(2*ne + nn)*(2*ne + nn)];
     _Complex double zl[ne*ne], zt[ne*ne], yn[nn*nn];
     for (size_t i = 0; i < (ne*ne); i++) {
@@ -86,7 +86,7 @@ we_building ()
     //=====================================================
     assert(sizeof(we) == sizeof(we_target));
     // print WE ?
-    if ( 1 ) {
+    if ( 0 ) {
         print_matrix("WE_target", (2*ne + nn) , (2*ne + nn), we_target, (2*ne + nn));
         print_matrix("WE", (2*ne + nn) , (2*ne + nn), we, (2*ne + nn));
 
@@ -149,13 +149,13 @@ test_case (double rho, double length, double frac)
     n2en2 = n2en1*n2en1;
     _Complex double k1, c, zl[ne2], zt[ne2], yn[nn2];
     // segment electrode
-    double nodes[num_nodes][3], nodes_image[2][3];
+    double nodes[num_nodes*3], nodes_image[2*3];
     double segment[num_nodes];
     linspace(-h, -h-length, num_nodes, segment);
     for (size_t i = 0; i < num_nodes; i++) {
-        nodes[i][0] = 0.0;
-        nodes[i][1] = 0.0;
-        nodes[i][2] = segment[i];
+        nodes[i*3 + 0] = 0.0;
+        nodes[i*3 + 1] = 0.0;
+        nodes[i*3 + 2] = segment[i];
     }
     for (size_t i = 0; i < nn2; i++) {
         yn[i] = 0.0;
@@ -164,15 +164,15 @@ test_case (double rho, double length, double frac)
     Electrode images[num_electrodes];
     for (size_t i = 0; i < num_electrodes; i++) {
         populate_electrode(
-            &(electrodes[i]), nodes[i], nodes[i + 1], radius, zi);
-        nodes_image[0][0] = nodes[i][0];
-        nodes_image[0][1] = nodes[i][1];
-        nodes_image[0][2] = -nodes[i][2];
-        nodes_image[1][0] = nodes[i + 1][0];
-        nodes_image[1][1] = nodes[i + 1][1];
-        nodes_image[1][2] = -nodes[i + 1][2];
+            &(electrodes[i]), nodes+i*3, nodes+(i + 1)*3, radius, zi);
+        nodes_image[0*3 + 0] = nodes[i*3 + 0];
+        nodes_image[0*3 + 1] = nodes[i*3 + 1];
+        nodes_image[0*3 + 2] = -nodes[i*3 + 2];
+        nodes_image[1*3 + 0] = nodes[(i + 1)*3 + 0];
+        nodes_image[1*3 + 1] = nodes[(i + 1)*3 + 1];
+        nodes_image[1*3 + 2] = -nodes[(i + 1)*3 + 2];
         populate_electrode(
-            &(images[i]), nodes_image[0], nodes_image[1], radius, zi);
+            &(images[i]), nodes_image, nodes_image+3, radius, zi);
     }
     _Complex double rhs[n2en1], incidence[n2en2], we[n2en2], ie[n2en1];
     for (size_t i = 0; i < n2en1; i++) {
@@ -186,13 +186,14 @@ test_case (double rho, double length, double frac)
     rl = 1.0;
     _Complex double zinternal;
     double l = electrodes[0].length;
+    int err;
     // solve for each frequency
     for (size_t i = 0; i < nf; i++) {
         //printf("\nf = %.2f Hz\n", freq[i]);
         s = I*TWO_PI*freq[i];
         memcpy(ie, rhs, sizeof(ie));
         memcpy(we, incidence, sizeof(we));
-        zinternal = internal_impedance(s, rho_c, radius, mur)*l;
+        zinternal = internal_impedance(s, rho_c, radius, mur, &err)*l;
         for (size_t k = 0; k < num_electrodes; k++) {
             electrodes[k].zi = zinternal;
         }
@@ -205,8 +206,8 @@ test_case (double rho, double length, double frac)
             200, 1e-3, 1e-4, ERROR_PAIRED, INTG_DOUBLE);
         fill_impedance_imm(we, num_electrodes, num_nodes, zl, zt, yn);
         solve_immittance(we, ie, num_electrodes, num_nodes);
-        fprintf(ftest_case, "%f %f\n",
-            creal(ie[n2en1 - num_nodes]), cimag(ie[n2en1 - num_nodes]));
+        fprintf(ftest_case, "%f %f\n", creal(ie[n2en1 - num_nodes]),
+                                       cimag(ie[n2en1 - num_nodes]));
     }
     //print_matrix( "\nWE", n2en1, n2en1, we, n2en1 );
     //print_matrix( "\nZL", num_electrodes, num_electrodes, zl, num_electrodes );
@@ -221,7 +222,8 @@ zi_bessel ()
     _Complex double s = I*377;
     double rho = 1.9e-6;
     double radius = 7e-3;
-    _Complex double zi = internal_impedance(s, rho, radius, 1.0);
+    int err;
+    _Complex double zi = internal_impedance(s, rho, radius, 1.0, &err);
     assert(abs(creal(zi) - 0.0123426) < 1e-6);
     assert(abs(cimag(zi) - 0.00001885) < 1e-6);
     printf("Internal impedance: passed\n");

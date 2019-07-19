@@ -131,7 +131,7 @@ zsytri_ (char *uplo, int *n, _Complex double *a, int *lda, int *ipiv,
 
 // Immittance =================
 /** fill_incidence_imm
-Fills the immittance matrix `WE = [[Ye, C, D], [A, ZL/2, -ZL/2], [B, ZT, ZT]]`
+Fills the immittance matrix `WE = [[Ye, C, -D], [A, ZL/2, -ZL/2], [B, ZT, ZT]]`
 with the incidence matrices `A`, `B`, `C` and `D`. This function is separated from
 fill_impedance because `A, B, C, D` only depends on geometry, while `ZT` and `ZL`
 will vary with frequency.
@@ -149,11 +149,6 @@ int
 fill_incidence_imm (_Complex double *we, const Electrode *electrodes,
                     size_t num_electrodes, const double *nodes,
                     size_t num_nodes);
-
-int
-fill_incidence_imm2 (_Complex double *we, const Electrode *electrodes,
-                     size_t num_electrodes, const double *nodes,
-                     size_t num_nodes);
 
 /** fill_impedance_imm
 Fills the immittance matrix `WE` = `[[Ye, C, D], [A, ZL/2, -ZL/2], [B, ZT, ZT]]`
@@ -217,10 +212,10 @@ fill_incidence_adm (double *a, double *b, const Electrode *electrodes,
                     size_t num_nodes);
 
 /** fill_impedance_adm
-Calculates the nodal admittance matrix `Yn` = `α^T.YT.α + β^T.YL.β`
+Calculates the nodal admittance matrix `Yn = α^T.YL.α + β^T.YT.β`
 @param yn nodal admmitance matrix as flat array of size `num_nodes^2`
-@param a transversal incidence `α`
-@param b longitudinal incidence `β`
+@param a longitudinal incidence `α`
+@param b transversal incidence `β`
 @param zl longitudinal impedance matrix as a flat array of size
 `num_electrodes^2`
 @param zt transversal impedance matrix as a flat array of size
@@ -229,8 +224,7 @@ Calculates the nodal admittance matrix `Yn` = `α^T.YT.α + β^T.YL.β`
 @param num_nodes number of nodes
 @param ye "external" nodal admittance matrix as a flat array of size `num_nodes^2`
 @return 0 on success
-@see fill_incidence_we
-@see fill_incidence_yn
+@see fill_incidence_imm
 @see solve_admittance
 */
 int
@@ -240,13 +234,14 @@ fill_impedance_adm (_Complex double *yn, const double *a, const double *b,
 
 /** solve_admittance
 Solves the system of equations of the Nodal Admitance formulation.
-@param yn nodal admittance matrix `[[Ye, C, D], [A, ZL/2, -ZL/2], [B, ZT, ZT]]`. The
-LU decomposition is done in-place on we
+@param yn nodal admittance matrix `Yn = α^T.YL.α + β^T.YT.β`. The
+LU decomposition is done in-place on yn.
 @param ic RHS vector of injected currents in each node. The solution replaces
 this array in-place.
 @param num_electrodes number of electrodes
 @param num_nodes number of nodes
 @return 0 on sucess
+@see fill_incidence_adm
 @see solve_immittance
 */
 int

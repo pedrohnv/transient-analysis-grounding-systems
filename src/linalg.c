@@ -63,64 +63,6 @@ fill_incidence_imm (_Complex double *we, const Electrode *electrodes,
 }
 
 int
-fill_incidence_imm2 (_Complex double *we, const Electrode *electrodes,
-                    size_t num_electrodes, const double *nodes,
-                    size_t num_nodes)
-{
-    int condition, node_is_start, node_is_end, a, b, c, d, no_incidence;
-    size_t ld = (2*num_electrodes + num_nodes);
-    //TODO use a more efficient search or fill-up method if possible
-    double point[3];
-    for (size_t n = 0; n < num_nodes; n++) {
-        for (size_t i = 0; i < 3; i++) {
-            point[i] = nodes[i + n*3]; // column major
-        }
-        no_incidence = 1;
-        for (size_t e = 0; e < num_electrodes; e++) {
-            node_is_start = equal_points(electrodes[e].start_point, point);
-            node_is_end = 0;
-            /* it is assumed that start_point and end_point of an electrode
-            are never equal */
-            condition = 0;
-            if (node_is_start) {
-                condition = 1;
-            } else {
-                node_is_end = equal_points(electrodes[e].end_point, point);
-                if (node_is_end) condition = 2;
-            }
-            //================================================
-            a = (e + num_nodes) + ld*n;
-            b = (e + num_nodes + num_electrodes) + ld*n;
-            c = n + ld*(e + num_nodes);
-            d = n + ld*(e + num_nodes + num_electrodes);
-            if (condition == 1) {
-                we[a] = -1.0; //A
-                we[b] = -0.5; //B
-                we[c] = 1.0; //C
-                we[d] = 0.0; //D
-            } else if (condition == 2) {
-                we[a] = 1.0; //A
-                we[b] = -0.5; //B
-                we[c] = 0.0; //C
-                we[d] = 1.0; //D
-            } else {
-                we[a] = 0.0; //A
-                we[b] = 0.0; //B
-                we[c] = 0.0; //C
-                we[d] = 0.0; //D
-            }
-            //================================================
-            if (condition > 0) no_incidence = 0; //false
-        }
-        if (no_incidence) {
-            printf("No electrode is connected to node[%i]\n", (int) n);
-            return 1;
-        }
-    }
-    return 0;
-}
-
-int
 fill_impedance_imm (_Complex double *we, size_t num_electrodes, size_t num_nodes,
                     const _Complex double *zl, const _Complex double *zt,
                     const _Complex double *ye)
@@ -176,7 +118,7 @@ fill_incidence_adm (double *a, double *b, const Electrode *electrodes,
     for (size_t n = 0; n < num_nodes; n++) {
         no_incidence = 1;
         for (size_t e = 0; e < num_electrodes; e++) {
-            node_is_start = equal_points(electrodes[e].start_point, nodes + n);
+            node_is_start = equal_points(electrodes[e].start_point, nodes + n*3);
             node_is_end = 0;
             /* it is assumed that start_point and end_point of an electrode
             are never equal */
@@ -184,20 +126,20 @@ fill_incidence_adm (double *a, double *b, const Electrode *electrodes,
             if (node_is_start) {
                 condition = 1;
             } else {
-                node_is_end = equal_points(electrodes[e].end_point, nodes + n);
+                node_is_end = equal_points(electrodes[e].end_point, nodes + n*3);
                 if (node_is_end) condition = 2;
             }
             //================================================
             pos = num_nodes*e + n;
             if (condition == 1) {
-                a[pos] = 0.5; //A
-                b[pos] = 1.0; //B
+                a[pos] = 1.0;
+                b[pos] = 0.5;
             } else if (condition == 2) {
-                a[pos] = 0.5; //A
-                b[pos] = -1.0; //B
+                a[pos] = -1.0;
+                b[pos] = 0.5;
             } else {
-                a[pos] = 0.0; //A
-                b[pos] = 0.0; //B
+                a[pos] = 0.0;
+                b[pos] = 0.0;
             }
             //================================================
             if (condition > 0) no_incidence = 0; //false
@@ -218,7 +160,7 @@ fill_impedance_adm (_Complex double *yn, const double *a, const double *b,
     int ne = (int) num_electrodes;
     int nn = (int) num_nodes;
     _Complex double *arr = malloc((ne*nn)*sizeof(_Complex double));
-    // yn = aT*(zt^-1)*a + bT*(zl^-1)*b
+    // yn = aT*(zl^-1)*a + bT*(zt^-1)*b
     int *ipiv = malloc(ne * sizeof(int));
     int info;
     /*
@@ -250,24 +192,24 @@ fill_impedance_adm (_Complex double *yn, const double *a, const double *b,
     _Complex double alpha = 1.0;
     _Complex double beta = 0.0;
     _Complex double *c = malloc((num_electrodes*num_nodes)*sizeof(_Complex double));
-    // c = yt*a
+    // c = yl*a
     for (size_t i = 0; i < num_electrodes*num_nodes; i++) {
         arr[i] = (_Complex double) a[i];
     }
     char notrans = 'N';
     char trans = 'T';
     //char side = 'U';
-    zgemm_(&notrans, &notrans, &ne, &nn, &ne, &alpha, zt, &ne, arr, &nn,
+    zgemm_(&notrans, &notrans, &ne, &nn, &ne, &alpha, zl, &ne, arr, &nn,
             &beta, c, &nn);
     //zsymm_(&side, &uplo, &ne, &nn, &alpha, zt, &ne, arr, &nn, &beta, c, &nn);
     // yn = aT*c
     zgemm_(&trans, &notrans, &nn, &nn, &ne, &alpha, arr, &nn, c, &nn, &beta,
            yn, &nn);
-    // c = yl*b
+    // c = yt*b
     for (size_t i = 0; i < num_electrodes*num_nodes; i++) {
         arr[i] = (_Complex double) b[i];
     }
-    zgemm_(&notrans, &notrans, &ne, &nn, &ne, &alpha, zl, &nn, arr, &nn,
+    zgemm_(&notrans, &notrans, &ne, &nn, &ne, &alpha, zt, &nn, arr, &nn,
             &beta, c, &nn);
     //zsymm_(&side, &uplo, &ne, &nn, &alpha, zl, &ne, arr, &nn, &beta, c, &nn);
     // yn = bT*c + yn
