@@ -70,4 +70,36 @@ number_nodes (const Grid grid);
 int
 electrode_grid (const Grid grid, Electrode* electrodes, double* nodes);
 
+/** Calculates the impedance matrices for a regular grid, based on [1].
+To add the effect of images, call this function separately with 'images'
+parameter as true. It will be considered that the medium interface is at \f$ z = 0 \f$.
+
+[1] VIEIRA, Pedro H. N. et al. Symmetry exploitation to reduce impedance
+evaluations in grounding grids. International Journal of Electrical Power &
+Energy Systems, v. 123, p. 106268, 2020.
+
+@param grid structure
+@param zl longitudinal impedance matrix \f$ Z_L \f$ as a flat array of size \f$ m^2 \f$
+@param zt transversal impedance matrix \f$ Z_T \f$ as a flat array of size \f$ m^2 \f$
+@param gamma medium propagation constant
+    \f$ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} \f$
+@param s complex angular frequency \f$ c + j\omega \f$ in [rad/s]
+@param mur relative magnetic permeability of the medium \f$ \mu_r \f$
+@param kappa medium complex conductivity \f$ \sigma + j\omega\varepsilon \f$ in [S/m]
+@param max_eval specifies a maximum number of function evaluations (0 for no limit)
+@param req_abs_error the absolute error requested (0 to ignore)
+@param req_rel_error the relative error requested (0 to ignore)
+@param integration_type type of integration to be done.
+@param images calculating impedances with images?
+@return 0 on success
+@see integral
+@see Integration_type
+@see https://github.com/stevengj/cubature
+*/
+int
+impedances_grid (_Complex double* zl, _Complex double* zt, const Grid grid,
+                 _Complex double gamma, _Complex double s, double mur,
+                 _Complex double kappa, size_t max_eval, double req_abs_error,
+                 double req_rel_error, int integration_type, bool images);
+
 #endif /* GRID_H_ */
