@@ -1,0 +1,642 @@
+\subsection{src/electrode.h File Reference}
+\label{electrode_8h}\index{src/electrode.h@{src/electrode.h}}
+{\ttfamily \#include $<$complex.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+\subsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \textbf{ Electrode}
+\item 
+struct \textbf{ Integration\+\_\+data}
+\item 
+struct \textbf{ Field\+\_\+integrand\+\_\+data}
+\end{DoxyCompactItemize}
+\subsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \textbf{ Integration\+\_\+type} \{ \textbf{ I\+N\+T\+G\+\_\+\+N\+O\+NE} = 1, 
+\textbf{ I\+N\+T\+G\+\_\+\+D\+O\+U\+B\+LE} = 2, 
+\textbf{ I\+N\+T\+G\+\_\+\+S\+I\+N\+G\+LE} = 3, 
+\textbf{ I\+N\+T\+G\+\_\+\+M\+H\+EM} = 4
+ \}
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \textbf{ populate\+\_\+electrode} (\textbf{ Electrode} $\ast$electrode, const double start\+\_\+point[3], const double end\+\_\+point[3], double radius)
+\item 
+bool \textbf{ equal\+\_\+electrodes} (const \textbf{ Electrode} $\ast$sender, const \textbf{ Electrode} $\ast$receiver)
+\item 
+int \textbf{ electrodes\+\_\+file} (const char file\+\_\+name[$\,$], \textbf{ Electrode} $\ast$electrodes, size\+\_\+t num\+\_\+electrodes)
+\item 
+int \textbf{ nodes\+\_\+file} (const char file\+\_\+name[$\,$], double $\ast$nodes, size\+\_\+t num\+\_\+nodes)
+\item 
+int \textbf{ segment\+\_\+electrode} (\textbf{ Electrode} $\ast$electrodes, double $\ast$nodes, size\+\_\+t num\+\_\+segments, const double $\ast$start\+\_\+point, const double $\ast$end\+\_\+point, double radius)
+\item 
+size\+\_\+t \textbf{ nodes\+\_\+from\+\_\+elecs} (double $\ast$nodes, \textbf{ Electrode} $\ast$electrodes, size\+\_\+t num\+\_\+electrodes)
+\item 
+int \textbf{ integrand\+\_\+double} (unsigned ndim, const double $\ast$t, void $\ast$auxdata, unsigned fdim, double $\ast$fval)
+\item 
+int \textbf{ integrand\+\_\+single} (unsigned ndim, const double $\ast$t, void $\ast$auxdata, unsigned fdim, double $\ast$fval)
+\item 
+int \textbf{ log\+Nf} (unsigned ndim, const double $\ast$t, void $\ast$auxdata, unsigned fdim, double $\ast$fval)
+\item 
+\+\_\+\+Complex double \textbf{ self\+\_\+integral} (const \textbf{ Electrode} $\ast$sender)
+\item 
+int \textbf{ integral} (const \textbf{ Electrode} $\ast$sender, const \textbf{ Electrode} $\ast$receiver, \+\_\+\+Complex double gamma, size\+\_\+t max\+\_\+eval, double req\+\_\+abs\+\_\+error, double req\+\_\+rel\+\_\+error, int integration\+\_\+type, double result[2], double error[2])
+\item 
+int \textbf{ calculate\+\_\+impedances} (\+\_\+\+Complex double $\ast$zl, \+\_\+\+Complex double $\ast$zt, const \textbf{ Electrode} $\ast$electrodes, size\+\_\+t num\+\_\+electrodes, \+\_\+\+Complex double gamma, \+\_\+\+Complex double s, double mur, \+\_\+\+Complex double kappa, size\+\_\+t max\+\_\+eval, double req\+\_\+abs\+\_\+error, double req\+\_\+rel\+\_\+error, int integration\+\_\+type)
+\item 
+int \textbf{ impedances\+\_\+images} (\+\_\+\+Complex double $\ast$zl, \+\_\+\+Complex double $\ast$zt, const \textbf{ Electrode} $\ast$electrodes, const \textbf{ Electrode} $\ast$images, size\+\_\+t num\+\_\+electrodes, \+\_\+\+Complex double gamma, \+\_\+\+Complex double s, double mur, \+\_\+\+Complex double kappa, \+\_\+\+Complex double ref\+\_\+l, \+\_\+\+Complex double ref\+\_\+t, size\+\_\+t max\+\_\+eval, double req\+\_\+abs\+\_\+error, double req\+\_\+rel\+\_\+error, int integration\+\_\+type)
+\item 
+\+\_\+\+Complex double \textbf{ electric\+\_\+potential} (const double $\ast$point, const \textbf{ Electrode} $\ast$electrodes, size\+\_\+t num\+\_\+electrodes, const \+\_\+\+Complex double $\ast$it, \+\_\+\+Complex double gamma, \+\_\+\+Complex double kappa, size\+\_\+t max\+\_\+eval, double req\+\_\+abs\+\_\+error, double req\+\_\+rel\+\_\+error)
+\item 
+int \textbf{ magnetic\+\_\+potential} (const double $\ast$point, const \textbf{ Electrode} $\ast$electrodes, size\+\_\+t num\+\_\+electrodes, const \+\_\+\+Complex double $\ast$il, \+\_\+\+Complex double gamma, double mur, size\+\_\+t max\+\_\+eval, double req\+\_\+abs\+\_\+error, double req\+\_\+rel\+\_\+error, \+\_\+\+Complex double $\ast$va)
+\item 
+int \textbf{ elec\+\_\+field\+\_\+integrand} (unsigned ndim, const double $\ast$t, void $\ast$auxdata, unsigned fdim, double $\ast$fval)
+\item 
+int \textbf{ electric\+\_\+field} (const double $\ast$point, const \textbf{ Electrode} $\ast$electrodes, size\+\_\+t num\+\_\+electrodes, const \+\_\+\+Complex double $\ast$il, const \+\_\+\+Complex double $\ast$it, \+\_\+\+Complex double gamma, \+\_\+\+Complex double s, double mur, \+\_\+\+Complex double kappa, size\+\_\+t max\+\_\+eval, double req\+\_\+abs\+\_\+error, double req\+\_\+rel\+\_\+error, \+\_\+\+Complex double $\ast$ve)
+\item 
+int \textbf{ v\+\_\+mag\+\_\+pot\+\_\+integrand} (unsigned ndim, const double $\ast$t, void $\ast$auxdata, unsigned fdim, double $\ast$fval)
+\item 
+\+\_\+\+Complex double \textbf{ voltage} (const double $\ast$point1, const double $\ast$point2, const \textbf{ Electrode} $\ast$electrodes, size\+\_\+t num\+\_\+electrodes, const \+\_\+\+Complex double $\ast$il, const \+\_\+\+Complex double $\ast$it, \+\_\+\+Complex double gamma, \+\_\+\+Complex double s, double mur, \+\_\+\+Complex double kappa, size\+\_\+t max\+\_\+eval, double req\+\_\+abs\+\_\+error, double req\+\_\+rel\+\_\+error)
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Enumeration Type Documentation}
+\mbox{\label{electrode_8h_aecb2139825ccfa31212af58a4bf3e332}} 
+\index{electrode.h@{electrode.h}!Integration\_type@{Integration\_type}}
+\index{Integration\_type@{Integration\_type}!electrode.h@{electrode.h}}
+\paragraph{Integration\_type}
+{\footnotesize\ttfamily enum \textbf{ Integration\+\_\+type}}
+
+Type of integration and simplification thereof to be done. \begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{INTG\_NONE@{INTG\_NONE}!electrode.h@{electrode.h}}\index{electrode.h@{electrode.h}!INTG\_NONE@{INTG\_NONE}}}\mbox{\label{electrode_8h_aecb2139825ccfa31212af58a4bf3e332affda0dc2407491333a8f2a072fbf6ce8}} 
+I\+N\+T\+G\+\_\+\+N\+O\+NE&No integration, returns the geometric distance between middle points \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{INTG\_DOUBLE@{INTG\_DOUBLE}!electrode.h@{electrode.h}}\index{electrode.h@{electrode.h}!INTG\_DOUBLE@{INTG\_DOUBLE}}}\mbox{\label{electrode_8h_aecb2139825ccfa31212af58a4bf3e332a34d031b57d31e15fb790bc07a3fa6ea8}} 
+I\+N\+T\+G\+\_\+\+D\+O\+U\+B\+LE&Traditional integral along both electrodes $ \int_0^{L_i} \int_0^{L_k} \frac{e^{-\gamma r}}{r} d\ell_k \, d\ell_i $ \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{INTG\_SINGLE@{INTG\_SINGLE}!electrode.h@{electrode.h}}\index{electrode.h@{electrode.h}!INTG\_SINGLE@{INTG\_SINGLE}}}\mbox{\label{electrode_8h_aecb2139825ccfa31212af58a4bf3e332ac6f0b5483e9adb0ff7d31f70662f8e33}} 
+I\+N\+T\+G\+\_\+\+S\+I\+N\+G\+LE&Traditional integral along sender electrodes $ \int_0^{L_k} \frac{e^{-\gamma r}}{r} d\ell_k $ \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{INTG\_MHEM@{INTG\_MHEM}!electrode.h@{electrode.h}}\index{electrode.h@{electrode.h}!INTG\_MHEM@{INTG\_MHEM}}}\mbox{\label{electrode_8h_aecb2139825ccfa31212af58a4bf3e332af5a2aa71e2c457b32d9b74028649b710}} 
+I\+N\+T\+G\+\_\+\+M\+H\+EM&Modified H\+EM integral $ \int_0^{L_k} \log_e \left( \frac{R_1 + R_2 + L_i}{R_1 + R_2 - L_i} \right) d\ell_k $ \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+Definition at line 18 of file electrode.\+h.
+
+
+
+\subsubsection{Function Documentation}
+\mbox{\label{electrode_8h_ac44d45ba12b6cde36552c35543ea76f9}} 
+\index{electrode.h@{electrode.h}!calculate\_impedances@{calculate\_impedances}}
+\index{calculate\_impedances@{calculate\_impedances}!electrode.h@{electrode.h}}
+\paragraph{calculate\_impedances()}
+{\footnotesize\ttfamily int calculate\+\_\+impedances (\begin{DoxyParamCaption}\item[{\+\_\+\+Complex double $\ast$}]{zl,  }\item[{\+\_\+\+Complex double $\ast$}]{zt,  }\item[{const \textbf{ Electrode} $\ast$}]{electrodes,  }\item[{size\+\_\+t}]{num\+\_\+electrodes,  }\item[{\+\_\+\+Complex double}]{gamma,  }\item[{\+\_\+\+Complex double}]{s,  }\item[{double}]{mur,  }\item[{\+\_\+\+Complex double}]{kappa,  }\item[{size\+\_\+t}]{max\+\_\+eval,  }\item[{double}]{req\+\_\+abs\+\_\+error,  }\item[{double}]{req\+\_\+rel\+\_\+error,  }\item[{int}]{integration\+\_\+type }\end{DoxyParamCaption})}
+
+Calculates the impedance matrices $ Z_L, Z_T $. As they are symmetric, only their lower half is stored (set). If pointer zl = zt, then the resulting matrix will be filled with zt.~\newline
+If integration\+\_\+type == I\+N\+T\+G\+\_\+\+M\+H\+EM or integration\+\_\+type == I\+N\+T\+G\+\_\+\+N\+O\+NE, then parameters gamma, s, mur and kappa are ignored such that $ \frac{j\omega\mu}{4\pi} = \frac{1}{4\pi\,(\sigma + j\omega\varepsilon)} = 1 $. 
+\begin{DoxyParams}{Parameters}
+{\em zl} & longitudinal impedance matrix $ Z_L $ as a flat array of size $ m^2 $ \\
+\hline
+{\em zt} & transversal impedance matrix $ Z_T $ as a flat array of size $ m^2 $ \\
+\hline
+{\em electrodes} & array of electrodes \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes $ m $ \\
+\hline
+{\em gamma} & medium propagation constant $ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} $ \\
+\hline
+{\em s} & complex angular frequency $ s = c + j\omega $ in [rad/s] \\
+\hline
+{\em mur} & relative magnetic permeability of the medium $ \mu_r $ \\
+\hline
+{\em kappa} & medium complex conductivity $ \sigma + j\omega\varepsilon $ in [S/m] \\
+\hline
+{\em max\+\_\+eval} & specifies a maximum number of function evaluations (0 for no limit) \\
+\hline
+{\em req\+\_\+abs\+\_\+error} & the absolute error requested (0 to ignore) \\
+\hline
+{\em req\+\_\+rel\+\_\+error} & the relative error requested (0 to ignore) \\
+\hline
+{\em integration\+\_\+type} & type of integration to be done. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{integral}{p.}{electrode_8h_a072716a5fa55cd12f4f93e4681507f7c} 
+
+\doxyref{Integration\+\_\+type}{p.}{electrode_8h_aecb2139825ccfa31212af58a4bf3e332} 
+
+{\texttt{ https\+://github.\+com/stevengj/cubature}} 
+\end{DoxySeeAlso}
+\mbox{\label{electrode_8h_a43cb603a20973c375b4ee86c1ef94fc4}} 
+\index{electrode.h@{electrode.h}!elec\_field\_integrand@{elec\_field\_integrand}}
+\index{elec\_field\_integrand@{elec\_field\_integrand}!electrode.h@{electrode.h}}
+\paragraph{elec\_field\_integrand()}
+{\footnotesize\ttfamily int elec\+\_\+field\+\_\+integrand (\begin{DoxyParamCaption}\item[{unsigned}]{ndim,  }\item[{const double $\ast$}]{t,  }\item[{void $\ast$}]{auxdata,  }\item[{unsigned}]{fdim,  }\item[{double $\ast$}]{fval }\end{DoxyParamCaption})}
+
+Integrand to calculate the electric field caused by a differential transversal current $ dI_T $. 
+\begin{DoxyParams}{Parameters}
+{\em ndim} & should be 1 \\
+\hline
+{\em t} & integration variable (electrode percentage 0 to 1) \\
+\hline
+{\em auxdata} & pointer to \doxyref{Field\+\_\+integrand\+\_\+data}{p.}{structField__integrand__data} structure \\
+\hline
+{\em fdim} & should be 6 (Real and Imag.)\+: $ (\Re(E_x), \Im(E_x), \Re(E_y), \Im(E_y), \Re(E_z), \Im(E_z)) $ \\
+\hline
+{\em fval} & where the results are stored $ (\Re(E_x), \Im(E_x), \Re(E_y), \Im(E_y), \Re(E_z), \Im(E_z)) $ return 0 on success \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See also}
+{\texttt{ https\+://github.\+com/stevengj/cubature}} 
+
+\doxyref{electric\+\_\+field}{p.}{electrode_8h_abeec8ae220be4e6a3bf7e33f9180a2ac} 
+\end{DoxySeeAlso}
+\mbox{\label{electrode_8h_abeec8ae220be4e6a3bf7e33f9180a2ac}} 
+\index{electrode.h@{electrode.h}!electric\_field@{electric\_field}}
+\index{electric\_field@{electric\_field}!electrode.h@{electrode.h}}
+\paragraph{electric\_field()}
+{\footnotesize\ttfamily int electric\+\_\+field (\begin{DoxyParamCaption}\item[{const double $\ast$}]{point,  }\item[{const \textbf{ Electrode} $\ast$}]{electrodes,  }\item[{size\+\_\+t}]{num\+\_\+electrodes,  }\item[{const \+\_\+\+Complex double $\ast$}]{il,  }\item[{const \+\_\+\+Complex double $\ast$}]{it,  }\item[{\+\_\+\+Complex double}]{gamma,  }\item[{\+\_\+\+Complex double}]{s,  }\item[{double}]{mur,  }\item[{\+\_\+\+Complex double}]{kappa,  }\item[{size\+\_\+t}]{max\+\_\+eval,  }\item[{double}]{req\+\_\+abs\+\_\+error,  }\item[{double}]{req\+\_\+rel\+\_\+error,  }\item[{\+\_\+\+Complex double $\ast$}]{ve }\end{DoxyParamCaption})}
+
+Calculates the electric field at a point. $ \vec E = -\nabla u - s \vec A $ 
+\begin{DoxyParams}{Parameters}
+{\em point} & array $ (x, y, z) $ \\
+\hline
+{\em electrodes} & array of electrodes \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes $ m $ \\
+\hline
+{\em il} & longitudinal currents array $ I_L $ \\
+\hline
+{\em it} & transversal currents array $ I_T $ \\
+\hline
+{\em gamma} & medium propagation constant $ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} $ \\
+\hline
+{\em s} & complex angular frequency $ s = c + j\omega $ in [rad/s] \\
+\hline
+{\em mur} & relative magnetic permeability of the medium $ \mu_r $ \\
+\hline
+{\em kappa} & medium complex conductivity $ \sigma + j\omega\varepsilon $ in [S/m] \\
+\hline
+{\em max\+\_\+eval} & specifies a maximum number of function evaluations (0 for no limit) \\
+\hline
+{\em req\+\_\+abs\+\_\+error} & the absolute error requested (0 to ignore) \\
+\hline
+{\em req\+\_\+rel\+\_\+error} & the relative error requested (0 to ignore) \\
+\hline
+{\em ve} & pointer to array of size 3 in which the electric field components $ (E_x, E_y, E_z) $ will be add to on return. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{elec\+\_\+field\+\_\+integrand}{p.}{electrode_8h_a43cb603a20973c375b4ee86c1ef94fc4} 
+\end{DoxySeeAlso}
+\mbox{\label{electrode_8h_aa7b34a8c16858be7e33843b5976f3225}} 
+\index{electrode.h@{electrode.h}!electric\_potential@{electric\_potential}}
+\index{electric\_potential@{electric\_potential}!electrode.h@{electrode.h}}
+\paragraph{electric\_potential()}
+{\footnotesize\ttfamily \+\_\+\+Complex double electric\+\_\+potential (\begin{DoxyParamCaption}\item[{const double $\ast$}]{point,  }\item[{const \textbf{ Electrode} $\ast$}]{electrodes,  }\item[{size\+\_\+t}]{num\+\_\+electrodes,  }\item[{const \+\_\+\+Complex double $\ast$}]{it,  }\item[{\+\_\+\+Complex double}]{gamma,  }\item[{\+\_\+\+Complex double}]{kappa,  }\item[{size\+\_\+t}]{max\+\_\+eval,  }\item[{double}]{req\+\_\+abs\+\_\+error,  }\item[{double}]{req\+\_\+rel\+\_\+error }\end{DoxyParamCaption})}
+
+Calculates the scalar electric potential $ u $ to remote earth at a point. 
+\begin{DoxyParams}{Parameters}
+{\em point} & array $(x, y, z)$ \\
+\hline
+{\em electrodes} & array of electrodes \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes $ m $ \\
+\hline
+{\em it} & transversal currents array $ I_T $ \\
+\hline
+{\em gamma} & medium propagation constant $ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} $ \\
+\hline
+{\em kappa} & medium complex conductivity $ \sigma + j\omega\varepsilon $ in [S/m] \\
+\hline
+{\em max\+\_\+eval} & specifies a maximum number of function evaluations (0 for no limit) \\
+\hline
+{\em req\+\_\+abs\+\_\+error} & the absolute error requested (0 to ignore) \\
+\hline
+{\em req\+\_\+rel\+\_\+error} & the relative error requested (0 to ignore) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+potential $ u $ to remote earth 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+{\texttt{ https\+://github.\+com/stevengj/cubature}} 
+\end{DoxySeeAlso}
+\mbox{\label{electrode_8h_ac8db9646f46ca9404a5390e8f9ee2323}} 
+\index{electrode.h@{electrode.h}!electrodes\_file@{electrodes\_file}}
+\index{electrodes\_file@{electrodes\_file}!electrode.h@{electrode.h}}
+\paragraph{electrodes\_file()}
+{\footnotesize\ttfamily int electrodes\+\_\+file (\begin{DoxyParamCaption}\item[{const char}]{file\+\_\+name[$\,$],  }\item[{\textbf{ Electrode} $\ast$}]{electrodes,  }\item[{size\+\_\+t}]{num\+\_\+electrodes }\end{DoxyParamCaption})}
+
+Populates an \doxyref{Electrode}{p.}{structElectrode} array from a C\+SV file. Each \doxyref{Electrode}{p.}{structElectrode} must be defined in a single line with parameters\+: \char`\"{}x0, y0, z0, x1, y1, z1, radius\char`\"{}. 
+\begin{DoxyParams}{Parameters}
+{\em file\+\_\+name} & path to the file \\
+\hline
+{\em electrodes} & pointer to an array of \doxyref{Electrode}{p.}{structElectrode} to be filled \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes to read (number of lines in file). Any line number greater than num\+\_\+electrodes will be ignored. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+error == 0 on success ~\newline
+ error $<$ 0\+: number of missing arguments from last line read (as a negative integer) ~\newline
+ error $>$ 0\+: bad input 
+\end{DoxyReturn}
+\mbox{\label{electrode_8h_a710d0b47a7c51779235436dd8a560c26}} 
+\index{electrode.h@{electrode.h}!equal\_electrodes@{equal\_electrodes}}
+\index{equal\_electrodes@{equal\_electrodes}!electrode.h@{electrode.h}}
+\paragraph{equal\_electrodes()}
+{\footnotesize\ttfamily bool equal\+\_\+electrodes (\begin{DoxyParamCaption}\item[{const \textbf{ Electrode} $\ast$}]{sender,  }\item[{const \textbf{ Electrode} $\ast$}]{receiver }\end{DoxyParamCaption})}
+
+Compares two electrodes for equality\+: have the same radius and coincide the starts and end points (independent of direction). 
+\begin{DoxyParams}{Parameters}
+{\em sender} & \doxyref{Electrode}{p.}{structElectrode} \\
+\hline
+{\em receiver} & \doxyref{Electrode}{p.}{structElectrode} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true or false 
+\end{DoxyReturn}
+\mbox{\label{electrode_8h_a1bcd88048bd573df3a5d8e44a9730d51}} 
+\index{electrode.h@{electrode.h}!impedances\_images@{impedances\_images}}
+\index{impedances\_images@{impedances\_images}!electrode.h@{electrode.h}}
+\paragraph{impedances\_images()}
+{\footnotesize\ttfamily int impedances\+\_\+images (\begin{DoxyParamCaption}\item[{\+\_\+\+Complex double $\ast$}]{zl,  }\item[{\+\_\+\+Complex double $\ast$}]{zt,  }\item[{const \textbf{ Electrode} $\ast$}]{electrodes,  }\item[{const \textbf{ Electrode} $\ast$}]{images,  }\item[{size\+\_\+t}]{num\+\_\+electrodes,  }\item[{\+\_\+\+Complex double}]{gamma,  }\item[{\+\_\+\+Complex double}]{s,  }\item[{double}]{mur,  }\item[{\+\_\+\+Complex double}]{kappa,  }\item[{\+\_\+\+Complex double}]{ref\+\_\+l,  }\item[{\+\_\+\+Complex double}]{ref\+\_\+t,  }\item[{size\+\_\+t}]{max\+\_\+eval,  }\item[{double}]{req\+\_\+abs\+\_\+error,  }\item[{double}]{req\+\_\+rel\+\_\+error,  }\item[{int}]{integration\+\_\+type }\end{DoxyParamCaption})}
+
+Add the images\textquotesingle{} effect to the impedance matrices $ Z_L $ and $ Z_T $. As they are symmetric, only their lower half is stored (set). If pointer zl = zt, then the resulting matrix will be filled with zt.~\newline
+If integration\+\_\+type == I\+N\+T\+G\+\_\+\+M\+H\+EM or integration\+\_\+type == I\+N\+T\+G\+\_\+\+N\+O\+NE, then parameters gamma, s, mur, kappa, ref\+\_\+l and ref\+\_\+t are ignored such that $ \Gamma_L \frac{j\omega\mu}{4\pi} = \Gamma_T \frac{1}{4\pi\,(\sigma + j\omega\varepsilon)} = 1 $. 
+\begin{DoxyParams}{Parameters}
+{\em zl} & longitudinal impedance matrix $ Z_L $ as a flat array of size $ m^2 $ \\
+\hline
+{\em zt} & transversal impedance matrix $ Z_T $ as a flat array of size $ m^2 $ \\
+\hline
+{\em electrodes} & array of electrodes \\
+\hline
+{\em images} & array of electrodes \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes $ m $ \\
+\hline
+{\em gamma} & medium propagation constant $ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} $ \\
+\hline
+{\em s} & complex angular frequency $ s = c + j\omega $ in [rad/s] \\
+\hline
+{\em mur} & relative magnetic permeability of the medium $ \mu_r $ \\
+\hline
+{\em kappa} & medium complex conductivity $ \sigma + j\omega\varepsilon $ in [S/m] \\
+\hline
+{\em ref\+\_\+l} & longitudinal current reflection coefficient $ \Gamma_L $ \\
+\hline
+{\em ref\+\_\+t} & transversal current reflection coefficient $ \Gamma_T $ \\
+\hline
+{\em max\+\_\+eval} & specifies a maximum number of function evaluations (0 for no limit) \\
+\hline
+{\em req\+\_\+abs\+\_\+error} & the absolute error requested (0 to ignore) \\
+\hline
+{\em req\+\_\+rel\+\_\+error} & the relative error requested (0 to ignore) \\
+\hline
+{\em integration\+\_\+type} & type of integration to be done. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{integral}{p.}{electrode_8h_a072716a5fa55cd12f4f93e4681507f7c} 
+
+\doxyref{Integration\+\_\+type}{p.}{electrode_8h_aecb2139825ccfa31212af58a4bf3e332} 
+
+{\texttt{ https\+://github.\+com/stevengj/cubature}} 
+\end{DoxySeeAlso}
+\mbox{\label{electrode_8h_a072716a5fa55cd12f4f93e4681507f7c}} 
+\index{electrode.h@{electrode.h}!integral@{integral}}
+\index{integral@{integral}!electrode.h@{electrode.h}}
+\paragraph{integral()}
+{\footnotesize\ttfamily int integral (\begin{DoxyParamCaption}\item[{const \textbf{ Electrode} $\ast$}]{sender,  }\item[{const \textbf{ Electrode} $\ast$}]{receiver,  }\item[{\+\_\+\+Complex double}]{gamma,  }\item[{size\+\_\+t}]{max\+\_\+eval,  }\item[{double}]{req\+\_\+abs\+\_\+error,  }\item[{double}]{req\+\_\+rel\+\_\+error,  }\item[{int}]{integration\+\_\+type,  }\item[{double}]{result[2],  }\item[{double}]{error[2] }\end{DoxyParamCaption})}
+
+Calculates the integral along the sender and receiver using Cubature. Note that the integration stops when either max\+\_\+eval or req\+\_\+abs\+\_\+error or req\+\_\+rel\+\_\+error is reached. 
+\begin{DoxyParams}{Parameters}
+{\em sender} & Current carrying \doxyref{Electrode}{p.}{structElectrode} that generates the excitation. \\
+\hline
+{\em receiver} & Potential receiving \doxyref{Electrode}{p.}{structElectrode} that receives the excitation. \\
+\hline
+{\em gamma} & medium propagation constant $ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} $ \\
+\hline
+{\em max\+\_\+eval} & specifies a maximum number of function evaluations (0 for no limit) \\
+\hline
+{\em req\+\_\+abs\+\_\+error} & the absolute error requested (0 to ignore) \\
+\hline
+{\em req\+\_\+rel\+\_\+error} & the relative error requested (0 to ignore) \\
+\hline
+{\em integration\+\_\+type} & type of integration to be done. \\
+\hline
+{\em result} & array[2] where to store the integral result (real and imaginary parts) \\
+\hline
+{\em error} & array[2] where to store the integral error (real and imaginary parts) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success ~\newline
+ -\/10 if integration\+\_\+type is unrecognized. 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{Integration\+\_\+type}{p.}{electrode_8h_aecb2139825ccfa31212af58a4bf3e332} 
+
+{\texttt{ https\+://github.\+com/stevengj/cubature}} 
+\end{DoxySeeAlso}
+\mbox{\label{electrode_8h_a964ec345a17a82dc6034beaf9c4ebe61}} 
+\index{electrode.h@{electrode.h}!integrand\_double@{integrand\_double}}
+\index{integrand\_double@{integrand\_double}!electrode.h@{electrode.h}}
+\paragraph{integrand\_double()}
+{\footnotesize\ttfamily int integrand\+\_\+double (\begin{DoxyParamCaption}\item[{unsigned}]{ndim,  }\item[{const double $\ast$}]{t,  }\item[{void $\ast$}]{auxdata,  }\item[{unsigned}]{fdim,  }\item[{double $\ast$}]{fval }\end{DoxyParamCaption})}
+
+Calculates the integrand $ \frac{e^{-\gamma r}}{r} $ to be integrated using Cubature. 
+\begin{DoxyParams}{Parameters}
+{\em ndim} & must be = 2 \\
+\hline
+{\em t} & array of size 2 of the electrodes\textquotesingle{} length as a percentage (0 to 1) \\
+\hline
+{\em auxdata} & \doxyref{Integration\+\_\+data}{p.}{structIntegration__data} with electrodes and propagation constant \\
+\hline
+{\em fdim} & must be = 2 \\
+\hline
+{\em fval} & pointer to where the result is stored \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{Integration\+\_\+type}{p.}{electrode_8h_aecb2139825ccfa31212af58a4bf3e332} 
+
+\doxyref{Integration\+\_\+data}{p.}{structIntegration__data} 
+
+\doxyref{integral}{p.}{electrode_8h_a072716a5fa55cd12f4f93e4681507f7c} 
+
+{\texttt{ https\+://github.\+com/stevengj/cubature}} 
+\end{DoxySeeAlso}
+\mbox{\label{electrode_8h_ab2b1bb27f30e6ddb8e3d47985368258e}} 
+\index{electrode.h@{electrode.h}!integrand\_single@{integrand\_single}}
+\index{integrand\_single@{integrand\_single}!electrode.h@{electrode.h}}
+\paragraph{integrand\_single()}
+{\footnotesize\ttfamily int integrand\+\_\+single (\begin{DoxyParamCaption}\item[{unsigned}]{ndim,  }\item[{const double $\ast$}]{t,  }\item[{void $\ast$}]{auxdata,  }\item[{unsigned}]{fdim,  }\item[{double $\ast$}]{fval }\end{DoxyParamCaption})}
+
+Calculates the integrand $ \frac{e^{-\gamma r}}{r} $ to be integrated using Cubature; but the point on the receiver electrode is fixed at its middle. 
+\begin{DoxyParams}{Parameters}
+{\em ndim} & must be = 1 \\
+\hline
+{\em t} & array of size 1 of the sender electrode\textquotesingle{}s length as a percentage (0 to 1) \\
+\hline
+{\em auxdata} & \doxyref{Integration\+\_\+data}{p.}{structIntegration__data} with electrodes and propagation constant \\
+\hline
+{\em fdim} & must be = 2 \\
+\hline
+{\em fval} & pointer to where the result is stored \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{Integration\+\_\+type}{p.}{electrode_8h_aecb2139825ccfa31212af58a4bf3e332} 
+
+\doxyref{Integration\+\_\+data}{p.}{structIntegration__data} 
+
+\doxyref{integral}{p.}{electrode_8h_a072716a5fa55cd12f4f93e4681507f7c} 
+
+{\texttt{ https\+://github.\+com/stevengj/cubature}} 
+\end{DoxySeeAlso}
+\mbox{\label{electrode_8h_a2c47d76d0c4714508e861d4376848c21}} 
+\index{electrode.h@{electrode.h}!logNf@{logNf}}
+\index{logNf@{logNf}!electrode.h@{electrode.h}}
+\paragraph{logNf()}
+{\footnotesize\ttfamily int log\+Nf (\begin{DoxyParamCaption}\item[{unsigned}]{ndim,  }\item[{const double $\ast$}]{t,  }\item[{void $\ast$}]{auxdata,  }\item[{unsigned}]{fdim,  }\item[{double $\ast$}]{fval }\end{DoxyParamCaption})}
+
+Calculates the m\+H\+EM integrand $ \int_0^{L_k} \log_e \left( \frac{R_1 + R_2 + L_i}{R_1 + R_2 - L_i} \right) d\ell_k $ to be used in Cubature integration. 
+\begin{DoxyParams}{Parameters}
+{\em ndim} & must be = 1 \\
+\hline
+{\em t} & array of size 1 with receiver\textquotesingle{}s length percentage (0 to 1) \\
+\hline
+{\em auxdata} & \doxyref{Integration\+\_\+data}{p.}{structIntegration__data} with electrodes and propagation constant \\
+\hline
+{\em fdim} & must be = 2 \\
+\hline
+{\em fval} & pointer to where the result is stored \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{Integration\+\_\+type}{p.}{electrode_8h_aecb2139825ccfa31212af58a4bf3e332} 
+
+\doxyref{Integration\+\_\+data}{p.}{structIntegration__data} 
+
+\doxyref{integral}{p.}{electrode_8h_a072716a5fa55cd12f4f93e4681507f7c} 
+
+{\texttt{ https\+://github.\+com/stevengj/cubature}} 
+\end{DoxySeeAlso}
+\mbox{\label{electrode_8h_a1c8c0a10a6ecd104500405f7fe5a3e0f}} 
+\index{electrode.h@{electrode.h}!magnetic\_potential@{magnetic\_potential}}
+\index{magnetic\_potential@{magnetic\_potential}!electrode.h@{electrode.h}}
+\paragraph{magnetic\_potential()}
+{\footnotesize\ttfamily int magnetic\+\_\+potential (\begin{DoxyParamCaption}\item[{const double $\ast$}]{point,  }\item[{const \textbf{ Electrode} $\ast$}]{electrodes,  }\item[{size\+\_\+t}]{num\+\_\+electrodes,  }\item[{const \+\_\+\+Complex double $\ast$}]{il,  }\item[{\+\_\+\+Complex double}]{gamma,  }\item[{double}]{mur,  }\item[{size\+\_\+t}]{max\+\_\+eval,  }\item[{double}]{req\+\_\+abs\+\_\+error,  }\item[{double}]{req\+\_\+rel\+\_\+error,  }\item[{\+\_\+\+Complex double $\ast$}]{va }\end{DoxyParamCaption})}
+
+Calculates the magnetic vector potential $ \vec A $. 
+\begin{DoxyParams}{Parameters}
+{\em point} & array $(x, y, z)$ \\
+\hline
+{\em electrodes} & array of electrodes \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes $ m $ \\
+\hline
+{\em il} & longitudinal currents array $ I_L $ \\
+\hline
+{\em gamma} & medium propagation constant $ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} $ \\
+\hline
+{\em mur} & relative magnetic permeability of the medium $ \mu_r $ \\
+\hline
+{\em max\+\_\+eval} & specifies a maximum number of function evaluations (0 for no limit) \\
+\hline
+{\em req\+\_\+abs\+\_\+error} & the absolute error requested (0 to ignore) \\
+\hline
+{\em req\+\_\+rel\+\_\+error} & the relative error requested (0 to ignore) \\
+\hline
+{\em va} & pointer to array of size 3 in which the magnetic vector potential components $ (A_x,A_y,A_z) $ will be stored on return. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+{\texttt{ https\+://github.\+com/stevengj/cubature}} 
+\end{DoxySeeAlso}
+\mbox{\label{electrode_8h_a37c1d235c9659a03fa1594a3db24683d}} 
+\index{electrode.h@{electrode.h}!nodes\_file@{nodes\_file}}
+\index{nodes\_file@{nodes\_file}!electrode.h@{electrode.h}}
+\paragraph{nodes\_file()}
+{\footnotesize\ttfamily int nodes\+\_\+file (\begin{DoxyParamCaption}\item[{const char}]{file\+\_\+name[$\,$],  }\item[{double $\ast$}]{nodes,  }\item[{size\+\_\+t}]{num\+\_\+nodes }\end{DoxyParamCaption})}
+
+Fill a nodes array from a C\+SV file. Each node must be defined in a single line with parameters\+: \char`\"{}x, y, z\char`\"{}. 
+\begin{DoxyParams}{Parameters}
+{\em file\+\_\+name} & path to the file \\
+\hline
+{\em nodes} & array of double[3] to be filled \\
+\hline
+{\em num\+\_\+nodes} & number of nodes to read (number of lines in file). Any line number greater than num\+\_\+nodes will be ignored. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+error == 0 on success ~\newline
+ error $<$ 0\+: number of missing arguments from last line read (as a negative integer) ~\newline
+ error $>$ 0\+: bad input 
+\end{DoxyReturn}
+\mbox{\label{electrode_8h_a8295c95bc564f92136d1fb13e6a8e665}} 
+\index{electrode.h@{electrode.h}!nodes\_from\_elecs@{nodes\_from\_elecs}}
+\index{nodes\_from\_elecs@{nodes\_from\_elecs}!electrode.h@{electrode.h}}
+\paragraph{nodes\_from\_elecs()}
+{\footnotesize\ttfamily size\+\_\+t nodes\+\_\+from\+\_\+elecs (\begin{DoxyParamCaption}\item[{double $\ast$}]{nodes,  }\item[{\textbf{ Electrode} $\ast$}]{electrodes,  }\item[{size\+\_\+t}]{num\+\_\+electrodes }\end{DoxyParamCaption})}
+
+D\+ON\textquotesingle{}T U\+SE T\+H\+IS F\+U\+N\+C\+T\+I\+O\+NS, IT\textquotesingle{}S B\+U\+G\+G\+ED.
+
+Given an array of electrodes, populates the nodes array with all the unique nodes. 
+\begin{DoxyParams}{Parameters}
+{\em nodes} & flat array of size $n \ge 3(m + 1)$ to be filled with the unique nodes. \\
+\hline
+{\em electrodes} & array of electrodes \\
+\hline
+{\em num\+\_\+electrodes} & number \$m\$ of electrodes \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+number of unique nodes $n_u$; can be used to realloc the nodes array 
+\end{DoxyReturn}
+\mbox{\label{electrode_8h_a68fd7de853a61f452c68c637e1f2916f}} 
+\index{electrode.h@{electrode.h}!populate\_electrode@{populate\_electrode}}
+\index{populate\_electrode@{populate\_electrode}!electrode.h@{electrode.h}}
+\paragraph{populate\_electrode()}
+{\footnotesize\ttfamily int populate\+\_\+electrode (\begin{DoxyParamCaption}\item[{\textbf{ Electrode} $\ast$}]{electrode,  }\item[{const double}]{start\+\_\+point[3],  }\item[{const double}]{end\+\_\+point[3],  }\item[{double}]{radius }\end{DoxyParamCaption})}
+
+Populates an \doxyref{Electrode}{p.}{structElectrode} structure. 
+\begin{DoxyParams}{Parameters}
+{\em pointer} & to an allocated memory \\
+\hline
+{\em start\+\_\+point} & Array $(x,y,z)_0$ that defines the starting point of the electrode \\
+\hline
+{\em start\+\_\+point} & Array $(x,y,z)_0$ that defines the ending point of the electrode \\
+\hline
+{\em radius} & electrode radius The \doxyref{Electrode}{p.}{structElectrode} radius \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\mbox{\label{electrode_8h_af5cd9b5c6b2e1187cd0e0652efb00675}} 
+\index{electrode.h@{electrode.h}!segment\_electrode@{segment\_electrode}}
+\index{segment\_electrode@{segment\_electrode}!electrode.h@{electrode.h}}
+\paragraph{segment\_electrode()}
+{\footnotesize\ttfamily int segment\+\_\+electrode (\begin{DoxyParamCaption}\item[{\textbf{ Electrode} $\ast$}]{electrodes,  }\item[{double $\ast$}]{nodes,  }\item[{size\+\_\+t}]{num\+\_\+segments,  }\item[{const double $\ast$}]{start\+\_\+point,  }\item[{const double $\ast$}]{end\+\_\+point,  }\item[{double}]{radius }\end{DoxyParamCaption})}
+
+Segments an electrode populating a passed array of electrodes and an array of nodes. 
+\begin{DoxyParams}{Parameters}
+{\em electrodes} & pointer to an array of \doxyref{Electrode}{p.}{structElectrode} to be filled \\
+\hline
+{\em nodes} & flat array $3 (n + 1)$ to be filled by the new nodes that are created \\
+\hline
+{\em num\+\_\+segments} & number $ n $ of segments to create \\
+\hline
+{\em start\+\_\+point} & electrode\textquotesingle{}s start point \\
+\hline
+{\em end\+\_\+point} & electrode\textquotesingle{}s end point \\
+\hline
+{\em radius} & electrode\textquotesingle{}s radius \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\mbox{\label{electrode_8h_a0f451bc4e3be842b3d361816f6cefdcf}} 
+\index{electrode.h@{electrode.h}!self\_integral@{self\_integral}}
+\index{self\_integral@{self\_integral}!electrode.h@{electrode.h}}
+\paragraph{self\_integral()}
+{\footnotesize\ttfamily \+\_\+\+Complex double self\+\_\+integral (\begin{DoxyParamCaption}\item[{const \textbf{ Electrode} $\ast$}]{sender }\end{DoxyParamCaption})}
+
+Calculates the m\+H\+EM closed form solution of the integral when the sender and receiver segments are the same (self impedance). $ 2 L_k \left[ \log_e \left( \frac{\sqrt{1 + (b/L_k)^2} + 1}{b/L_k} \right) - \sqrt{1 + \left(\frac{b}{L_k}\right)^2} + \frac{b}{L_k} \right] $ \mbox{\label{electrode_8h_a853c8705d01f3560737d6d5afc7f9570}} 
+\index{electrode.h@{electrode.h}!v\_mag\_pot\_integrand@{v\_mag\_pot\_integrand}}
+\index{v\_mag\_pot\_integrand@{v\_mag\_pot\_integrand}!electrode.h@{electrode.h}}
+\paragraph{v\_mag\_pot\_integrand()}
+{\footnotesize\ttfamily int v\+\_\+mag\+\_\+pot\+\_\+integrand (\begin{DoxyParamCaption}\item[{unsigned}]{ndim,  }\item[{const double $\ast$}]{t,  }\item[{void $\ast$}]{auxdata,  }\item[{unsigned}]{fdim,  }\item[{double $\ast$}]{fval }\end{DoxyParamCaption})}
+
+Interface to pass magnetic\+\_\+potential as an integrand to Cubature when calculating the voltage along a path. 
+\begin{DoxyParams}{Parameters}
+{\em ndim} & should be 1 \\
+\hline
+{\em t} & integration variable (electrode percentage 0 to 1) \\
+\hline
+{\em auxdata} & pointer to \doxyref{Field\+\_\+integrand\+\_\+data}{p.}{structField__integrand__data} structure \\
+\hline
+{\em fdim} & should be 2\+: $ \Re(\vec A \cdot d\vec\ell) + \Im(\vec A \cdot d\vec\ell) $ \\
+\hline
+{\em fval} & where the results are stored (array of size 2) return 0 on success \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See also}
+{\texttt{ https\+://github.\+com/stevengj/cubature}} 
+\end{DoxySeeAlso}
+\mbox{\label{electrode_8h_a80f09f05ad4c0febab78c9be0ee213ae}} 
+\index{electrode.h@{electrode.h}!voltage@{voltage}}
+\index{voltage@{voltage}!electrode.h@{electrode.h}}
+\paragraph{voltage()}
+{\footnotesize\ttfamily \+\_\+\+Complex double voltage (\begin{DoxyParamCaption}\item[{const double $\ast$}]{point1,  }\item[{const double $\ast$}]{point2,  }\item[{const \textbf{ Electrode} $\ast$}]{electrodes,  }\item[{size\+\_\+t}]{num\+\_\+electrodes,  }\item[{const \+\_\+\+Complex double $\ast$}]{il,  }\item[{const \+\_\+\+Complex double $\ast$}]{it,  }\item[{\+\_\+\+Complex double}]{gamma,  }\item[{\+\_\+\+Complex double}]{s,  }\item[{double}]{mur,  }\item[{\+\_\+\+Complex double}]{kappa,  }\item[{size\+\_\+t}]{max\+\_\+eval,  }\item[{double}]{req\+\_\+abs\+\_\+error,  }\item[{double}]{req\+\_\+rel\+\_\+error }\end{DoxyParamCaption})}
+
+Calculates the voltage $ \Delta U_{12} $ along a straight line from $ \vec p_1 $ to $ \vec p_2 $.~\newline
+ $ \Delta U_{12} = \int_{\vec p_1}^{\vec p_2} \left( -\nabla u - s \vec A \right) d\vec\ell $ 
+\begin{DoxyParams}{Parameters}
+{\em point1} & Line integral start point $ \vec p_1 = (x,y,z)_1 $ \\
+\hline
+{\em point2} & Line integral start point $ \vec p_2 = (x,y,z)_2 $ \\
+\hline
+{\em electrodes} & array of electrodes \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes $ m $ \\
+\hline
+{\em il} & longitudinal currents array $ I_L $ \\
+\hline
+{\em gamma} & medium propagation constant $ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} $ \\
+\hline
+{\em s} & complex angular frequency $ s = c + j\omega $ in [rad/s] \\
+\hline
+{\em mur} & relative magnetic permeability of the medium $ \mu_r $ \\
+\hline
+{\em kappa} & medium complex conductivity $ \sigma + j\omega\varepsilon $ in [S/m] \\
+\hline
+{\em max\+\_\+eval} & specifies a maximum number of function evaluations (0 for no limit) \\
+\hline
+{\em req\+\_\+abs\+\_\+error} & the absolute error requested (0 to ignore) \\
+\hline
+{\em req\+\_\+rel\+\_\+error} & the relative error requested (0 to ignore) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the voltage along the line 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+{\texttt{ https\+://github.\+com/stevengj/cubature}} 
+\end{DoxySeeAlso}

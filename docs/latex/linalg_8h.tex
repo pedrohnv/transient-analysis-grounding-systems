@@ -1,0 +1,260 @@
+\subsection{src/linalg.h File Reference}
+\label{linalg_8h}\index{src/linalg.h@{src/linalg.h}}
+{\ttfamily \#include $<$complex.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}electrode.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}blas.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}lapack.\+h\char`\"{}}\newline
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \textbf{ fill\+\_\+incidence\+\_\+imm} (\+\_\+\+Complex double $\ast$wg, const \textbf{ Electrode} $\ast$electrodes, size\+\_\+t num\+\_\+electrodes, const double $\ast$nodes, size\+\_\+t num\+\_\+nodes)
+\item 
+int \textbf{ fill\+\_\+impedance\+\_\+imm} (\+\_\+\+Complex double $\ast$wg, const \+\_\+\+Complex double $\ast$zl, const \+\_\+\+Complex double $\ast$zt, size\+\_\+t num\+\_\+electrodes, size\+\_\+t num\+\_\+nodes)
+\item 
+int \textbf{ solve\+\_\+immittance} (\+\_\+\+Complex double $\ast$wg, \+\_\+\+Complex double $\ast$ie, size\+\_\+t num\+\_\+electrodes, size\+\_\+t num\+\_\+nodes)
+\item 
+int \textbf{ fill\+\_\+incidence\+\_\+adm} (\+\_\+\+Complex double $\ast$a, \+\_\+\+Complex double $\ast$b, const \textbf{ Electrode} $\ast$electrodes, size\+\_\+t num\+\_\+electrodes, const double $\ast$nodes, size\+\_\+t num\+\_\+nodes)
+\item 
+int \textbf{ fill\+\_\+impedance\+\_\+adm} (\+\_\+\+Complex double $\ast$yn, \+\_\+\+Complex double $\ast$zl, \+\_\+\+Complex double $\ast$zt, \+\_\+\+Complex double $\ast$a, \+\_\+\+Complex double $\ast$b, size\+\_\+t num\+\_\+electrodes, size\+\_\+t num\+\_\+nodes)
+\item 
+int \textbf{ calculate\+\_\+yla\+\_\+ytb} (\+\_\+\+Complex double $\ast$yla, \+\_\+\+Complex double $\ast$ytb, \+\_\+\+Complex double $\ast$zl, \+\_\+\+Complex double $\ast$zt, \+\_\+\+Complex double $\ast$a, \+\_\+\+Complex double $\ast$b, size\+\_\+t num\+\_\+electrodes, size\+\_\+t num\+\_\+nodes)
+\item 
+int \textbf{ fill\+\_\+impedance\+\_\+adm2} (\+\_\+\+Complex double $\ast$yn, \+\_\+\+Complex double $\ast$yla, \+\_\+\+Complex double $\ast$ytb, \+\_\+\+Complex double $\ast$a, \+\_\+\+Complex double $\ast$b, size\+\_\+t num\+\_\+electrodes, size\+\_\+t num\+\_\+nodes)
+\item 
+int \textbf{ solve\+\_\+admittance} (\+\_\+\+Complex double $\ast$yn, \+\_\+\+Complex double $\ast$ic, size\+\_\+t num\+\_\+nodes)
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Function Documentation}
+\mbox{\label{linalg_8h_a7d630e8972ff9082b4ec50cfbe414b25}} 
+\index{linalg.h@{linalg.h}!calculate\_yla\_ytb@{calculate\_yla\_ytb}}
+\index{calculate\_yla\_ytb@{calculate\_yla\_ytb}!linalg.h@{linalg.h}}
+\paragraph{calculate\_yla\_ytb()}
+{\footnotesize\ttfamily int calculate\+\_\+yla\+\_\+ytb (\begin{DoxyParamCaption}\item[{\+\_\+\+Complex double $\ast$}]{yla,  }\item[{\+\_\+\+Complex double $\ast$}]{ytb,  }\item[{\+\_\+\+Complex double $\ast$}]{zl,  }\item[{\+\_\+\+Complex double $\ast$}]{zt,  }\item[{\+\_\+\+Complex double $\ast$}]{a,  }\item[{\+\_\+\+Complex double $\ast$}]{b,  }\item[{size\+\_\+t}]{num\+\_\+electrodes,  }\item[{size\+\_\+t}]{num\+\_\+nodes }\end{DoxyParamCaption})}
+
+Calculates the modified longitudinal and transversal admittances $ Z_L^{-1} A $ and $ Z_T^{-1} B $. $ Z_L $ and $ Z_T $ are replaced by their inverses in the process. Useful when they are needed to calculate the currents $ I_L = Z_L^{-1} A U $ and $ I_T = Z_T^{-1} B U $. 
+\begin{DoxyParams}{Parameters}
+{\em yla} & modified longitudinal admittance $ Z_L^{-1} A $ of size $ m \times n $ \\
+\hline
+{\em ytb} & modified transversal admittance $ Z_T^{-1} B $ of size $ m \times n $ \\
+\hline
+{\em a} & longitudinal incidence matrix $ A $ as flat array of size $ m \times n $ in C\+O\+L\+U\+MN M\+A\+J\+OR ordering \\
+\hline
+{\em b} & transversal incidence matrix $ B $ as flat array of size $ m \times n $ in C\+O\+L\+U\+MN M\+A\+J\+OR ordering \\
+\hline
+{\em zl} & longitudinal impedance matrix $ Z_L $ as a flat array of size $ m^2 $ \\
+\hline
+{\em zt} & transversal impedance matrix $ Z_T $ as a flat array of size $ m^2 $ \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes $ m $ \\
+\hline
+{\em num\+\_\+nodes} & number of nodes $ n $ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{fill\+\_\+impedance\+\_\+adm2}{p.}{linalg_8h_a54c57fe27396e5a6c83997f8b5a361aa} 
+\end{DoxySeeAlso}
+\mbox{\label{linalg_8h_a5f5891e33ac5409304e03a98e1dc8e2c}} 
+\index{linalg.h@{linalg.h}!fill\_impedance\_adm@{fill\_impedance\_adm}}
+\index{fill\_impedance\_adm@{fill\_impedance\_adm}!linalg.h@{linalg.h}}
+\paragraph{fill\_impedance\_adm()}
+{\footnotesize\ttfamily int fill\+\_\+impedance\+\_\+adm (\begin{DoxyParamCaption}\item[{\+\_\+\+Complex double $\ast$}]{yn,  }\item[{\+\_\+\+Complex double $\ast$}]{zl,  }\item[{\+\_\+\+Complex double $\ast$}]{zt,  }\item[{\+\_\+\+Complex double $\ast$}]{a,  }\item[{\+\_\+\+Complex double $\ast$}]{b,  }\item[{size\+\_\+t}]{num\+\_\+electrodes,  }\item[{size\+\_\+t}]{num\+\_\+nodes }\end{DoxyParamCaption})}
+
+Calculates the nodal admittance matrix $ Y_N = A^T Z_L^{-1} A + B^T Z_T^{-1} B $. As it is symmetric, only its lower half is stored (set). 
+\begin{DoxyParams}{Parameters}
+{\em yn} & nodal admmitance matrix $ Y_N $ as flat array of size $ n^2 $ \\
+\hline
+{\em a} & longitudinal incidence matrix $ A $ as flat array of size $ m \times n $ in C\+O\+L\+U\+MN M\+A\+J\+OR ordering \\
+\hline
+{\em b} & transversal incidence matrix $ B $ as flat array of size $ m \times n $ in C\+O\+L\+U\+MN M\+A\+J\+OR ordering \\
+\hline
+{\em zl} & longitudinal impedance matrix $ Z_L $ as a flat array of size $ m^2 $ \\
+\hline
+{\em zt} & transversal impedance matrix $ Z_T $ as a flat array of size $ m^2 $ \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes $ m $ \\
+\hline
+{\em num\+\_\+nodes} & number of nodes $ n $ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{fill\+\_\+impedance\+\_\+adm2}{p.}{linalg_8h_a54c57fe27396e5a6c83997f8b5a361aa} 
+
+\doxyref{solve\+\_\+admittance}{p.}{linalg_8h_a746119827db62bc550d181d4f2eb3f56} 
+\end{DoxySeeAlso}
+\mbox{\label{linalg_8h_a54c57fe27396e5a6c83997f8b5a361aa}} 
+\index{linalg.h@{linalg.h}!fill\_impedance\_adm2@{fill\_impedance\_adm2}}
+\index{fill\_impedance\_adm2@{fill\_impedance\_adm2}!linalg.h@{linalg.h}}
+\paragraph{fill\_impedance\_adm2()}
+{\footnotesize\ttfamily int fill\+\_\+impedance\+\_\+adm2 (\begin{DoxyParamCaption}\item[{\+\_\+\+Complex double $\ast$}]{yn,  }\item[{\+\_\+\+Complex double $\ast$}]{yla,  }\item[{\+\_\+\+Complex double $\ast$}]{ytb,  }\item[{\+\_\+\+Complex double $\ast$}]{a,  }\item[{\+\_\+\+Complex double $\ast$}]{b,  }\item[{size\+\_\+t}]{num\+\_\+electrodes,  }\item[{size\+\_\+t}]{num\+\_\+nodes }\end{DoxyParamCaption})}
+
+Calculates the nodal admittance matrix $ Y_N = A^T Z_L^{-1} A + B^T Z_T^{-1} B $, were $ Z_L^{-1} A $ and $ Z_T^{-1} B $ are already calculated. Those matrices are preserved. Useful when they must be calculated to find the currents $ I_L = Z_L^{-1} A U $ and $ I_T = Z_T^{-1} B U $. 
+\begin{DoxyParams}{Parameters}
+{\em yn} & nodal admmitance matrix $ Y_N $ as flat array of size $ n^2 $ \\
+\hline
+{\em a} & longitudinal incidence matrix $ A $ as flat array of size $ m \times n $ in C\+O\+L\+U\+MN M\+A\+J\+OR ordering \\
+\hline
+{\em b} & transversal incidence matrix $ B $ as flat array of size $ m \times n $ in C\+O\+L\+U\+MN M\+A\+J\+OR ordering \\
+\hline
+{\em yla} & modified longitudinal admittance $ Z_L^{-1} A $ \\
+\hline
+{\em ytb} & modified transversal admittance $ Z_T^{-1} B $ \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes $ m $ \\
+\hline
+{\em num\+\_\+nodes} & number of nodes $ n $ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{fill\+\_\+impedance\+\_\+adm}{p.}{linalg_8h_a5f5891e33ac5409304e03a98e1dc8e2c} 
+
+calculate\+\_\+yla\+\_\+ylb 
+
+\doxyref{solve\+\_\+admittance}{p.}{linalg_8h_a746119827db62bc550d181d4f2eb3f56} 
+\end{DoxySeeAlso}
+\mbox{\label{linalg_8h_a33642c7003a4cd4b48bff3fc9d3dc62d}} 
+\index{linalg.h@{linalg.h}!fill\_impedance\_imm@{fill\_impedance\_imm}}
+\index{fill\_impedance\_imm@{fill\_impedance\_imm}!linalg.h@{linalg.h}}
+\paragraph{fill\_impedance\_imm()}
+{\footnotesize\ttfamily int fill\+\_\+impedance\+\_\+imm (\begin{DoxyParamCaption}\item[{\+\_\+\+Complex double $\ast$}]{wg,  }\item[{const \+\_\+\+Complex double $\ast$}]{zl,  }\item[{const \+\_\+\+Complex double $\ast$}]{zt,  }\item[{size\+\_\+t}]{num\+\_\+electrodes,  }\item[{size\+\_\+t}]{num\+\_\+nodes }\end{DoxyParamCaption})}
+
+Fills the Global Immittance matrix $ W_G = \begin{bmatrix} Y_E & A^T & B^T \\ A & -Z_L & 0 \\ B & 0 & -Z_T \end{bmatrix} $ with the impedance matrices $ Z_L,Z_T $. As it is symmetric, only its lower half is stored (set). 
+\begin{DoxyParams}{Parameters}
+{\em wg} & Global Immittance matrix as flat array of size $ (2m + n)^2 $ \\
+\hline
+{\em zl} & longitudinal impedance matrix $ Z_L $ as a flat array of size $ m^2 $ \\
+\hline
+{\em zt} & transversal impedance matrix $ Z_T $ as a flat array of size $ m^2 $ \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes $ m $ \\
+\hline
+{\em num\+\_\+nodes} & number of nodes $ n $ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{fill\+\_\+incidence\+\_\+imm}{p.}{linalg_8h_a78e16120d4f849f427f158b09d902e7b} 
+
+\doxyref{solve\+\_\+immittance}{p.}{linalg_8h_ad75ae4d39f97a3698d203ee8d21ce8a7} 
+\end{DoxySeeAlso}
+\mbox{\label{linalg_8h_aaa9c946ae5a9869ab887d16c3a53663a}} 
+\index{linalg.h@{linalg.h}!fill\_incidence\_adm@{fill\_incidence\_adm}}
+\index{fill\_incidence\_adm@{fill\_incidence\_adm}!linalg.h@{linalg.h}}
+\paragraph{fill\_incidence\_adm()}
+{\footnotesize\ttfamily int fill\+\_\+incidence\+\_\+adm (\begin{DoxyParamCaption}\item[{\+\_\+\+Complex double $\ast$}]{a,  }\item[{\+\_\+\+Complex double $\ast$}]{b,  }\item[{const \textbf{ Electrode} $\ast$}]{electrodes,  }\item[{size\+\_\+t}]{num\+\_\+electrodes,  }\item[{const double $\ast$}]{nodes,  }\item[{size\+\_\+t}]{num\+\_\+nodes }\end{DoxyParamCaption})}
+
+Fills the nodal incidence matrices $ A $ and $ B $ used in the calculation of the nodal admittance matrix $ Y_N = A^T Z_L^{-1} A + B^T Z_T^{-1} B $.~\newline
+Note that $ B = |A|/2 $ and if it is desired to save memory, A and B can be set to be the same pointer and, in that case, it is guaranteed that the end result will be $ A $. In other words\+: when only $ A $ is desired, $ B $ can point to $ A, (B := A)$, saving memory space. Then call the function as\+: {\ttfamily fill\+\_\+incidence\+\_\+adm(a, a, electrodes, m, nodes, n);} so that $ a:=A $. 
+\begin{DoxyParams}{Parameters}
+{\em a} & longitudinal incidence matrix $ A $ as flat array of size $ m \times n $ in C\+O\+L\+U\+MN M\+A\+J\+OR ordering \\
+\hline
+{\em b} & transversal incidence matrix $ B $ as flat array of size $ m \times n $ in C\+O\+L\+U\+MN M\+A\+J\+OR ordering \\
+\hline
+{\em electrodes} & array of electrodes \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes $ m $ \\
+\hline
+{\em nodes} & array of nodes \\
+\hline
+{\em num\+\_\+nodes} & number of nodes $ n $ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{fill\+\_\+impedance\+\_\+adm}{p.}{linalg_8h_a5f5891e33ac5409304e03a98e1dc8e2c} 
+
+\doxyref{fill\+\_\+impedance\+\_\+adm2}{p.}{linalg_8h_a54c57fe27396e5a6c83997f8b5a361aa} 
+\end{DoxySeeAlso}
+\mbox{\label{linalg_8h_a78e16120d4f849f427f158b09d902e7b}} 
+\index{linalg.h@{linalg.h}!fill\_incidence\_imm@{fill\_incidence\_imm}}
+\index{fill\_incidence\_imm@{fill\_incidence\_imm}!linalg.h@{linalg.h}}
+\paragraph{fill\_incidence\_imm()}
+{\footnotesize\ttfamily int fill\+\_\+incidence\+\_\+imm (\begin{DoxyParamCaption}\item[{\+\_\+\+Complex double $\ast$}]{wg,  }\item[{const \textbf{ Electrode} $\ast$}]{electrodes,  }\item[{size\+\_\+t}]{num\+\_\+electrodes,  }\item[{const double $\ast$}]{nodes,  }\item[{size\+\_\+t}]{num\+\_\+nodes }\end{DoxyParamCaption})}
+
+Fills the Global Immittance matrix $ W_G = \begin{bmatrix} Y_E & A^T & B^T \\ A & -Z_L & 0 \\ B & 0 & -Z_T \end{bmatrix} $ with the incidence matrices $ A,B $. This function is separated from fill\+\_\+impedance because $ A,B $ depend only on geometry, while $ Z_L,Z_T $ will vary with frequency. It is expected that $ W_G $ was zero-\/ed before calling this function (or allocated through calloc). As $ W_G $ is symmetric, only its lower half is stored (set). 
+\begin{DoxyParams}{Parameters}
+{\em wg} & Global Immittance matrix $ W_G $ as flat array of size $ (2m + n)^2 $ \\
+\hline
+{\em electrodes} & array of electrodes \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes $ m $ \\
+\hline
+{\em nodes} & array of nodes \\
+\hline
+{\em num\+\_\+nodes} & number of nodes $ n $ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{fill\+\_\+impedance\+\_\+imm}{p.}{linalg_8h_a33642c7003a4cd4b48bff3fc9d3dc62d} 
+
+\doxyref{solve\+\_\+immittance}{p.}{linalg_8h_ad75ae4d39f97a3698d203ee8d21ce8a7} 
+\end{DoxySeeAlso}
+\mbox{\label{linalg_8h_a746119827db62bc550d181d4f2eb3f56}} 
+\index{linalg.h@{linalg.h}!solve\_admittance@{solve\_admittance}}
+\index{solve\_admittance@{solve\_admittance}!linalg.h@{linalg.h}}
+\paragraph{solve\_admittance()}
+{\footnotesize\ttfamily int solve\+\_\+admittance (\begin{DoxyParamCaption}\item[{\+\_\+\+Complex double $\ast$}]{yn,  }\item[{\+\_\+\+Complex double $\ast$}]{ic,  }\item[{size\+\_\+t}]{num\+\_\+nodes }\end{DoxyParamCaption})}
+
+Solves the system of equations of the Nodal Admitance formulation $ Y_N U = I_E $. It is recommended to use the raw L\+A\+P\+A\+CK routines instead of this function. That way, the same system can be used to solve multiple right hand sides (injection vectors), the optimal workspace can be queried just once when solving for multiple frequencies. See the source code of this function to have an idea. 
+\begin{DoxyParams}{Parameters}
+{\em yn} & nodal admittance matrix $ Y_N = A^T Z_L^{-1} A + B^T Z_T^{-1} B $, assumed to be symmetric with lower half stored. The LU decomposition is done in-\/place. \\
+\hline
+{\em ie} & R\+HS vector of injected currents in each node. The solution replaces this array in-\/place. \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes $ m $ \\
+\hline
+{\em num\+\_\+nodes} & number of nodes $ n $ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on sucess 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{fill\+\_\+incidence\+\_\+adm}{p.}{linalg_8h_aaa9c946ae5a9869ab887d16c3a53663a} 
+
+\doxyref{fill\+\_\+impedance\+\_\+adm}{p.}{linalg_8h_a5f5891e33ac5409304e03a98e1dc8e2c} 
+
+\doxyref{fill\+\_\+impedance\+\_\+adm2}{p.}{linalg_8h_a54c57fe27396e5a6c83997f8b5a361aa} 
+\end{DoxySeeAlso}
+\mbox{\label{linalg_8h_ad75ae4d39f97a3698d203ee8d21ce8a7}} 
+\index{linalg.h@{linalg.h}!solve\_immittance@{solve\_immittance}}
+\index{solve\_immittance@{solve\_immittance}!linalg.h@{linalg.h}}
+\paragraph{solve\_immittance()}
+{\footnotesize\ttfamily int solve\+\_\+immittance (\begin{DoxyParamCaption}\item[{\+\_\+\+Complex double $\ast$}]{wg,  }\item[{\+\_\+\+Complex double $\ast$}]{ie,  }\item[{size\+\_\+t}]{num\+\_\+electrodes,  }\item[{size\+\_\+t}]{num\+\_\+nodes }\end{DoxyParamCaption})}
+
+Solves the system of equations of the Global Immitance formulation. 
+\begin{DoxyParams}{Parameters}
+{\em wg} & global immittance matrix $ W_G $, assumed to be symmetric with lower half stored. The LU decomposition is done in-\/place. \\
+\hline
+{\em ie} & R\+HS vector $[I_E, 0, 0]^T$ where $ I_E $ are injected currents in each node and 0 are null vectors of size $ m $ each. The solution replaces this array in-\/place becoming $ [U, I_L, I_T] $. Where $ U $ is the nodal potentials and $ I_L $ and $ I_T $ the longitudinal and transversal currents, respectively. It is recommended to use the raw L\+A\+P\+A\+CK routines instead of this function. That way, the same system can be used to solve multiple right hand sides (injection vectors), the optimal workspace can be queried just once when solving for multiple frequencies. See the source code of this function to have an idea. \\
+\hline
+{\em num\+\_\+electrodes} & number of electrodes $ m $ \\
+\hline
+{\em num\+\_\+nodes} & number of nodes $ n $ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on sucess 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{fill\+\_\+incidence\+\_\+imm}{p.}{linalg_8h_a78e16120d4f849f427f158b09d902e7b} 
+
+\doxyref{fill\+\_\+impedance\+\_\+imm}{p.}{linalg_8h_a33642c7003a4cd4b48bff3fc9d3dc62d} 
+\end{DoxySeeAlso}

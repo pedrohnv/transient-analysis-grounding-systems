@@ -1,0 +1,619 @@
+\subsection{src/auxiliary.h File Reference}
+\label{auxiliary_8h}\index{src/auxiliary.h@{src/auxiliary.h}}
+{\ttfamily \#include $<$complex.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include $<$fftw3.\+h$>$}\newline
+\subsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \textbf{ PI}~3.\+1415926535897932384626433832795029L
+\item 
+\#define \textbf{ T\+W\+O\+\_\+\+PI}~(2.\+0 $\ast$ \textbf{ PI})
+\item 
+\#define \textbf{ F\+O\+U\+R\+\_\+\+PI}~(4.\+0 $\ast$ \textbf{ PI})
+\item 
+\#define \textbf{ M\+U0}~1.\+256637061435917e-\/6
+\item 
+\#define \textbf{ E\+P\+S0}~8.\+854187817620e-\/12
+\item 
+\#define \textbf{ R\+H\+O\+\_\+\+CU}~1.\+689e-\/8
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+double $\ast$ \textbf{ linspace} (double a, double b, size\+\_\+t n, double u[$\,$])
+\item 
+double $\ast$ \textbf{ logspace} (double a, double b, size\+\_\+t n, double u[$\,$])
+\item 
+double \textbf{ wave\+\_\+length} (double f, double sigma, double ep, double mur)
+\item 
+int \textbf{ alipio\+\_\+soil} (\+\_\+\+Complex double $\ast$sigma, \+\_\+\+Complex double $\ast$epsr, double sigma0, \+\_\+\+Complex double s, double h, double g, double eps\+\_\+ratio)
+\item 
+int \textbf{ smith\+\_\+longmire\+\_\+soil} (\+\_\+\+Complex double $\ast$sigma, \+\_\+\+Complex double $\ast$epsr, double sigma0, \+\_\+\+Complex double s, double erinf)
+\item 
+bool \textbf{ equal\+\_\+points} (const double $\ast$point\+\_\+1, const double $\ast$point\+\_\+2)
+\item 
+bool \textbf{ equal\+\_\+points\+\_\+tol} (const double $\ast$point\+\_\+1, const double $\ast$point\+\_\+2, double tol)
+\item 
+double \textbf{ vector\+\_\+length} (const double start\+\_\+point[3], const double end\+\_\+point[3])
+\item 
+double \textbf{ snrm2\+\_\+} (int $\ast$n, double $\ast$x, int $\ast$incx)
+\item 
+int \textbf{ complex\+\_\+matrix\+\_\+file} (size\+\_\+t m, size\+\_\+t n, const \+\_\+\+Complex double $\ast$a, int lda, F\+I\+LE $\ast$fp)
+\item 
+int \textbf{ double\+\_\+matrix\+\_\+file} (size\+\_\+t m, size\+\_\+t n, const double $\ast$a, int lda, F\+I\+LE $\ast$fp)
+\item 
+int \textbf{ zbesi\+\_\+} (double $\ast$zr, double $\ast$zi, double $\ast$fnu, int $\ast$kode, int $\ast$n, double $\ast$cyr, double $\ast$cyi, int $\ast$nz, int $\ast$ierr)
+\item 
+void \textbf{ print\+\_\+matrix} (char $\ast$desc, int m, int n, const \+\_\+\+Complex double $\ast$a, int lda)
+\item 
+void \textbf{ print\+\_\+matrix\+\_\+row} (char $\ast$desc, int m, int n, const \+\_\+\+Complex double $\ast$a, int lda)
+\item 
+int \textbf{ matrix\+\_\+copy} (const \+\_\+\+Complex double $\ast$source, \+\_\+\+Complex double $\ast$target, size\+\_\+t lds, size\+\_\+t ldt, size\+\_\+t nline, size\+\_\+t ncol)
+\item 
+int \textbf{ transpose\+\_\+copy} (const \+\_\+\+Complex double $\ast$source, \+\_\+\+Complex double $\ast$target, size\+\_\+t lds, size\+\_\+t ldt, size\+\_\+t nline, size\+\_\+t ncol)
+\item 
+int \textbf{ pc\+\_\+copy} (const \+\_\+\+Complex double $\ast$source, \+\_\+\+Complex double $\ast$target, size\+\_\+t lds, size\+\_\+t ldt, size\+\_\+t nline, size\+\_\+t ncol)
+\item 
+int \textbf{ pl\+\_\+copy} (const \+\_\+\+Complex double $\ast$source, \+\_\+\+Complex double $\ast$target, size\+\_\+t lds, size\+\_\+t ldt, size\+\_\+t nline, size\+\_\+t ncol)
+\item 
+int \textbf{ pcl\+\_\+copy} (const \+\_\+\+Complex double $\ast$source, \+\_\+\+Complex double $\ast$target, size\+\_\+t lds, size\+\_\+t ldt, size\+\_\+t nline, size\+\_\+t ncol)
+\item 
+int \textbf{ inv\+\_\+laplace\+\_\+trans} (double $\ast$f, \+\_\+\+Complex double $\ast$g, \+\_\+\+Complex double $\ast$s, double tmax, size\+\_\+t nt, int filter)
+\item 
+double \textbf{ heidler} (double t, double imax, double tau1, double tau2, int n)
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Macro Definition Documentation}
+\mbox{\label{auxiliary_8h_a2267b8f93e54658dfcb8f01e5f1ed9dc}} 
+\index{auxiliary.h@{auxiliary.h}!EPS0@{EPS0}}
+\index{EPS0@{EPS0}!auxiliary.h@{auxiliary.h}}
+\paragraph{EPS0}
+{\footnotesize\ttfamily \#define E\+P\+S0~8.\+854187817620e-\/12}
+
+Vacuum permittivity $ \varepsilon_0 $ 
+
+Definition at line 25 of file auxiliary.\+h.
+
+\mbox{\label{auxiliary_8h_ac6b39b7a27b735f3a62be33f38041985}} 
+\index{auxiliary.h@{auxiliary.h}!FOUR\_PI@{FOUR\_PI}}
+\index{FOUR\_PI@{FOUR\_PI}!auxiliary.h@{auxiliary.h}}
+\paragraph{FOUR\_PI}
+{\footnotesize\ttfamily \#define F\+O\+U\+R\+\_\+\+PI~(4.\+0 $\ast$ \textbf{ PI})}
+
+math constant $ 4\pi $ 
+
+Definition at line 21 of file auxiliary.\+h.
+
+\mbox{\label{auxiliary_8h_a0fa11f33bdb89b468b60f19395381cc4}} 
+\index{auxiliary.h@{auxiliary.h}!MU0@{MU0}}
+\index{MU0@{MU0}!auxiliary.h@{auxiliary.h}}
+\paragraph{MU0}
+{\footnotesize\ttfamily \#define M\+U0~1.\+256637061435917e-\/6}
+
+Vacuum permeability $ \mu_0 $ 
+
+Definition at line 23 of file auxiliary.\+h.
+
+\mbox{\label{auxiliary_8h_a598a3330b3c21701223ee0ca14316eca}} 
+\index{auxiliary.h@{auxiliary.h}!PI@{PI}}
+\index{PI@{PI}!auxiliary.h@{auxiliary.h}}
+\paragraph{PI}
+{\footnotesize\ttfamily \#define PI~3.\+1415926535897932384626433832795029L}
+
+High Performance Hybrid Electromagnetic Model calculations in C.
+
+All parameters\textquotesingle{} units are in the SI base if omitted.
+
+Constants, auxiliary functions and routines.\+math constant $ \pi $ 
+
+Definition at line 17 of file auxiliary.\+h.
+
+\mbox{\label{auxiliary_8h_afb5801576461a56fab63da58b9ded3b8}} 
+\index{auxiliary.h@{auxiliary.h}!RHO\_CU@{RHO\_CU}}
+\index{RHO\_CU@{RHO\_CU}!auxiliary.h@{auxiliary.h}}
+\paragraph{RHO\_CU}
+{\footnotesize\ttfamily \#define R\+H\+O\+\_\+\+CU~1.\+689e-\/8}
+
+Copper resistivity $ \rho_{cu} $ 
+
+Definition at line 27 of file auxiliary.\+h.
+
+\mbox{\label{auxiliary_8h_a3b947f4b635461030ff2d87833e5049e}} 
+\index{auxiliary.h@{auxiliary.h}!TWO\_PI@{TWO\_PI}}
+\index{TWO\_PI@{TWO\_PI}!auxiliary.h@{auxiliary.h}}
+\paragraph{TWO\_PI}
+{\footnotesize\ttfamily \#define T\+W\+O\+\_\+\+PI~(2.\+0 $\ast$ \textbf{ PI})}
+
+math constant $ 2\pi $ 
+
+Definition at line 19 of file auxiliary.\+h.
+
+
+
+\subsubsection{Function Documentation}
+\mbox{\label{auxiliary_8h_afc2cf13fe766c7f1d2c2f03cdeac1208}} 
+\index{auxiliary.h@{auxiliary.h}!alipio\_soil@{alipio\_soil}}
+\index{alipio\_soil@{alipio\_soil}!auxiliary.h@{auxiliary.h}}
+\paragraph{alipio\_soil()}
+{\footnotesize\ttfamily int alipio\+\_\+soil (\begin{DoxyParamCaption}\item[{\+\_\+\+Complex double $\ast$}]{sigma,  }\item[{\+\_\+\+Complex double $\ast$}]{epsr,  }\item[{double}]{sigma0,  }\item[{\+\_\+\+Complex double}]{s,  }\item[{double}]{h,  }\item[{double}]{g,  }\item[{double}]{eps\+\_\+ratio }\end{DoxyParamCaption})}
+
+Calculates the soil parameters $ \sigma(s) $ and $ \varepsilon_r(s) $ based on the Alipio-\/\+Visacro model [1].
+
+$ \sigma = \sigma_0 + \sigma_0 \times h(\sigma_0)\left( \frac{s}{\text{1 MHz}} \right)^g $
+
+$ \varepsilon_r = \frac{\varepsilon_\infty\text{'}}{\varepsilon_0} + \frac{\tan(\pi g / 2) \times 10^{-3}}{2\pi\varepsilon_0(\text{1 MHz})^g} \sigma_0 \times h(\sigma_0) s^{g - 1} $
+
+Recommended values of $ h(\sigma_0) $, $ g $ and $ \varepsilon_\infty\text{'} / \varepsilon_0 $ are given in Fig. 8 of [1]\+:
+
+\tabulinesep=1mm
+\begin{longtabu}spread 0pt [c]{*{4}{|X[-1]}|}
+\hline
+\cellcolor{\tableheadbgcolor}\textbf{ Results }&\cellcolor{\tableheadbgcolor}\textbf{ $ h(\sigma_0) $ }&\cellcolor{\tableheadbgcolor}\textbf{ $ g $ }&\cellcolor{\tableheadbgcolor}\textbf{ $ \varepsilon_\infty\text{'} / \varepsilon_0 $ }\\\cline{1-4}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\cellcolor{\tableheadbgcolor}\textbf{ Results }&\cellcolor{\tableheadbgcolor}\textbf{ $ h(\sigma_0) $ }&\cellcolor{\tableheadbgcolor}\textbf{ $ g $ }&\cellcolor{\tableheadbgcolor}\textbf{ $ \varepsilon_\infty\text{'} / \varepsilon_0 $ }\\\cline{1-4}
+\endhead
+\multirow{1}{*}{mean }&$ 1.26 \times (1000 \sigma_0)^{−0.73} $&0.\+54 &12 \\\cline{1-4}
+\multirow{1}{*}{relatively conservative}&$ 0.95 \times (1000 \sigma_0)^{−0.73} $&0.\+58 &8 \\\cline{1-4}
+\multirow{1}{*}{conservative }&$ 0.70 \times (1000 \sigma_0)^{−0.73} $&0.\+62 &4 \\\cline{1-4}
+\end{longtabu}
+
+
+[1] R. Alipio and S. Visacro, \char`\"{}\+Modeling the Frequency Dependence of Electrical
+\+Parameters of Soil,\char`\"{} in I\+E\+EE Transactions on Electromagnetic Compatibility, vol. 56, no. 5, pp. 1163-\/1171, Oct. 2014, doi\+: 10.\+1109/\+T\+E\+MC.2014.\+2313977. 
+\begin{DoxyParams}{Parameters}
+{\em sigma} & pointer to where the conductivity \$f \textbackslash{}sigma(s) \$f is written in S/m \\
+\hline
+{\em epsr} & pointer to where the relative permitivitty $ \varepsilon_r(s) $ is written \\
+\hline
+{\em sigma0} & value of the soil conductivity in low frequency $ \sigma_0 $ in S/m \\
+\hline
+{\em s} & complex frequency $ s = c + j\omega $ of interest in rad/s \\
+\hline
+{\em h} & parameter $ h(\sigma_0) $ \\
+\hline
+{\em g} & parameter $ g $ \\
+\hline
+{\em eps\+\_\+ratio} & parameter $ \varepsilon_\infty\text{'} / \varepsilon_0 $ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\mbox{\label{auxiliary_8h_a34462927b891adb5ee6a8b9d9a06e20e}} 
+\index{auxiliary.h@{auxiliary.h}!complex\_matrix\_file@{complex\_matrix\_file}}
+\index{complex\_matrix\_file@{complex\_matrix\_file}!auxiliary.h@{auxiliary.h}}
+\paragraph{complex\_matrix\_file()}
+{\footnotesize\ttfamily int complex\+\_\+matrix\+\_\+file (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{m,  }\item[{size\+\_\+t}]{n,  }\item[{const \+\_\+\+Complex double $\ast$}]{a,  }\item[{int}]{lda,  }\item[{F\+I\+LE $\ast$}]{fp }\end{DoxyParamCaption})}
+
+Prints a complex (double) matrix to a file. 
+\begin{DoxyParams}{Parameters}
+{\em m} & number of rows \\
+\hline
+{\em n} & number of columns \\
+\hline
+{\em a} & pointer to array where matrix is stored \\
+\hline
+{\em lda} & leading dimension of $ a $ \\
+\hline
+{\em fp} & pointer to file stream \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\mbox{\label{auxiliary_8h_a38738a2dececb8e48d8e3f930ac8f608}} 
+\index{auxiliary.h@{auxiliary.h}!double\_matrix\_file@{double\_matrix\_file}}
+\index{double\_matrix\_file@{double\_matrix\_file}!auxiliary.h@{auxiliary.h}}
+\paragraph{double\_matrix\_file()}
+{\footnotesize\ttfamily int double\+\_\+matrix\+\_\+file (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{m,  }\item[{size\+\_\+t}]{n,  }\item[{const double $\ast$}]{a,  }\item[{int}]{lda,  }\item[{F\+I\+LE $\ast$}]{fp }\end{DoxyParamCaption})}
+
+Prints a real (double) matrix to a file. 
+\begin{DoxyParams}{Parameters}
+{\em m} & number of rows \\
+\hline
+{\em n} & number of columns \\
+\hline
+{\em a} & pointer to array where matrix is stored \\
+\hline
+{\em lda} & leading dimension of $ a $ \\
+\hline
+{\em fp} & pointer to file stream \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\mbox{\label{auxiliary_8h_a0ba79a4d97d4b7510978ebf0ac03f2a6}} 
+\index{auxiliary.h@{auxiliary.h}!equal\_points@{equal\_points}}
+\index{equal\_points@{equal\_points}!auxiliary.h@{auxiliary.h}}
+\paragraph{equal\_points()}
+{\footnotesize\ttfamily bool equal\+\_\+points (\begin{DoxyParamCaption}\item[{const double $\ast$}]{point\+\_\+1,  }\item[{const double $\ast$}]{point\+\_\+2 }\end{DoxyParamCaption})}
+
+Check if two points are the same using D\+B\+L\+\_\+\+E\+P\+S\+I\+L\+ON as tolerance. 
+\begin{DoxyParams}{Parameters}
+{\em point1} & first point in $ \mathbf{R}^3 $ \\
+\hline
+{\em point2} & second point in $ \mathbf{R}^3 $ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true or false 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{equal\+\_\+points\+\_\+tol}{p.}{auxiliary_8h_a349eca4c3583fea980a75b3bba2cc798} 
+\end{DoxySeeAlso}
+\mbox{\label{auxiliary_8h_a349eca4c3583fea980a75b3bba2cc798}} 
+\index{auxiliary.h@{auxiliary.h}!equal\_points\_tol@{equal\_points\_tol}}
+\index{equal\_points\_tol@{equal\_points\_tol}!auxiliary.h@{auxiliary.h}}
+\paragraph{equal\_points\_tol()}
+{\footnotesize\ttfamily bool equal\+\_\+points\+\_\+tol (\begin{DoxyParamCaption}\item[{const double $\ast$}]{point\+\_\+1,  }\item[{const double $\ast$}]{point\+\_\+2,  }\item[{double}]{tol }\end{DoxyParamCaption})}
+
+Check if two points are the same within a tolerance. 
+\begin{DoxyParams}{Parameters}
+{\em point1} & first point in $ \mathbf{R}^3 $ \\
+\hline
+{\em point2} & second point in $ \mathbf{R}^3 $ \\
+\hline
+{\em tol} & the tolerance $ \epsilon $ applied to each coordinate. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+false if the difference between any coordinates is greater than tol (e.\+g. $ |x_1 - x_2| > \epsilon $). 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{equal\+\_\+points}{p.}{auxiliary_8h_a0ba79a4d97d4b7510978ebf0ac03f2a6} 
+\end{DoxySeeAlso}
+\mbox{\label{auxiliary_8h_a3608e3061b15ed46ad27ad0eda19b80f}} 
+\index{auxiliary.h@{auxiliary.h}!heidler@{heidler}}
+\index{heidler@{heidler}!auxiliary.h@{auxiliary.h}}
+\paragraph{heidler()}
+{\footnotesize\ttfamily double heidler (\begin{DoxyParamCaption}\item[{double}]{t,  }\item[{double}]{imax,  }\item[{double}]{tau1,  }\item[{double}]{tau2,  }\item[{int}]{n }\end{DoxyParamCaption})}
+
+Heidler function to create lightning current waveforms [1]. For parameters\textquotesingle{} values, see e.\+g. [2]. Calculates $ i(t) = \frac{I_0}{\xi} \frac{(t / \tau_1)^n}{1 + (t / \tau_1)^n} e^{-t / \tau_2} $ where $ \xi = e^{-(\tau_1 / \tau_2) (n\,\tau_2 / \tau_1)^{1 / n}} $
+
+[1] H\+E\+I\+D\+L\+ER, Fridolin; C\+V\+E\+T\+IĆ, J. A class of analytical functions to study the lightning effects associated with the current front. European transactions on electrical power, v. 12, n. 2, p. 141-\/150, 2002. doi\+: 10.\+1002/etep.4450120209
+
+[2] A. De Conti and S. Visacro, \char`\"{}\+Analytical Representation of Single-\/ and
+\+Double-\/\+Peaked Lightning Current Waveforms,\char`\"{} in I\+E\+EE Transactions on Electromagnetic Compatibility, vol. 49, no. 2, pp. 448-\/451, May 2007, doi\+: 10.\+1109/\+T\+E\+MC.2007.\+897153.
+
+
+\begin{DoxyParams}{Parameters}
+{\em t} & time \$t\$ in seconds \\
+\hline
+{\em imax} & current peak $ I_0 $ in Amperes \\
+\hline
+{\em tau1} & rise time $ \tau_1 $ in seconds \\
+\hline
+{\em tau2} & decay time $ \tau_2 $ in seconds \\
+\hline
+{\em n} & steepness expoent \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+current $ i(t) $ in Amperes 
+\end{DoxyReturn}
+\mbox{\label{auxiliary_8h_a3db9ab4d57ccbfa1e5ff1d17ee1a5faa}} 
+\index{auxiliary.h@{auxiliary.h}!inv\_laplace\_trans@{inv\_laplace\_trans}}
+\index{inv\_laplace\_trans@{inv\_laplace\_trans}!auxiliary.h@{auxiliary.h}}
+\paragraph{inv\_laplace\_trans()}
+{\footnotesize\ttfamily int inv\+\_\+laplace\+\_\+trans (\begin{DoxyParamCaption}\item[{double $\ast$}]{f,  }\item[{\+\_\+\+Complex double $\ast$}]{g,  }\item[{\+\_\+\+Complex double $\ast$}]{s,  }\item[{double}]{tmax,  }\item[{size\+\_\+t}]{nt,  }\item[{int}]{filter }\end{DoxyParamCaption})}
+
+$ with a real output. Uses FFTW, therefore is not thread-safe! Based on: GÓMEZ, Pablo; URIBE, Felipe A. The numerical Laplace transform: An accurate technique for analyzing electromagnetic transients on power system devices. International Journal of Electrical Power & Energy Systems, v. 31, n. 2-3, p. 116-123, 2009. @param f inverse transfomed function $ f(t) $ of size $ n $ from $ t = 0 $ to $ t = t\+\_\+\textbackslash{}max $ with uniform spacing $ \textbackslash{}\+Delta t $ @param g sampled function $ g(s) $ of size $ \textbackslash{}left \textbackslash{}lfloor\{n/2\}\textbackslash{}right \textbackslash{}rfloor + 1 $ @param s ``frequencies\text{'}\text{'} $ s\+\_\+k = c + j\textbackslash{}omega\+\_\+k $ of size $ \textbackslash{}left \textbackslash{}lfloor\{n/2\}\textbackslash{}right \textbackslash{}rfloor + 1 $, the value of $ c $ is assumed constant @param tmax maximum time $ t\+\_\+\textbackslash{}max \$f of the inverse transformed function $ f(t) \$f @param nt size $ n $ of the inverse transformed function $ f(t) \$f 
+\begin{DoxyParams}{Parameters}
+{\em filter} & enum I\+N\+L\+T\+\_\+\+Filter that defines the $ \sigma(\omega) $ filter (data window) to apply to $ g(s) := \sigma(\omega) g(s)$ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+laplace\+\_\+trans 
+
+I\+N\+L\+T\+\_\+\+Filter 
+
+{\texttt{ http\+://www.\+fftw.\+org/fftw3\+\_\+doc/}} 
+
+planned\+\_\+inv\+\_\+laplace 
+\end{DoxySeeAlso}
+\mbox{\label{auxiliary_8h_a685cb9f3fde9c1c0486042b5163f097d}} 
+\index{auxiliary.h@{auxiliary.h}!linspace@{linspace}}
+\index{linspace@{linspace}!auxiliary.h@{auxiliary.h}}
+\paragraph{linspace()}
+{\footnotesize\ttfamily double$\ast$ linspace (\begin{DoxyParamCaption}\item[{double}]{a,  }\item[{double}]{b,  }\item[{size\+\_\+t}]{n,  }\item[{double}]{u[$\,$] }\end{DoxyParamCaption})}
+
+Fill array $ u $ with $ n $ linearly spaced numbers between $ a $ and $ b $ (included). 
+\begin{DoxyParams}{Parameters}
+{\em a} & first number \\
+\hline
+{\em b} & last number \\
+\hline
+{\em n} & size of array \\
+\hline
+{\em u} & array to be filled \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+pointer to filled array 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+Source code taken from {\texttt{ https\+://github.\+com/ntessore/algo}} 
+\end{DoxySeeAlso}
+\mbox{\label{auxiliary_8h_aa5b07e432b0ac7a58d0960eca0b2f953}} 
+\index{auxiliary.h@{auxiliary.h}!logspace@{logspace}}
+\index{logspace@{logspace}!auxiliary.h@{auxiliary.h}}
+\paragraph{logspace()}
+{\footnotesize\ttfamily double$\ast$ logspace (\begin{DoxyParamCaption}\item[{double}]{a,  }\item[{double}]{b,  }\item[{size\+\_\+t}]{n,  }\item[{double}]{u[$\,$] }\end{DoxyParamCaption})}
+
+Fill array $ u $ with $ n $ logarithmically spaced numbers between $ 10^a $ and $ 10^b $ (included). 
+\begin{DoxyParams}{Parameters}
+{\em a} & first power \\
+\hline
+{\em b} & last power \\
+\hline
+{\em n} & size of array \\
+\hline
+{\em u} & array to be filled \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+pointer to filled array 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+Source code taken from {\texttt{ https\+://github.\+com/ntessore/algo}} 
+\end{DoxySeeAlso}
+\mbox{\label{auxiliary_8h_aa518344fef4551ec45df2fd1119261ca}} 
+\index{auxiliary.h@{auxiliary.h}!matrix\_copy@{matrix\_copy}}
+\index{matrix\_copy@{matrix\_copy}!auxiliary.h@{auxiliary.h}}
+\paragraph{matrix\_copy()}
+{\footnotesize\ttfamily int matrix\+\_\+copy (\begin{DoxyParamCaption}\item[{const \+\_\+\+Complex double $\ast$}]{source,  }\item[{\+\_\+\+Complex double $\ast$}]{target,  }\item[{size\+\_\+t}]{lds,  }\item[{size\+\_\+t}]{ldt,  }\item[{size\+\_\+t}]{nline,  }\item[{size\+\_\+t}]{ncol }\end{DoxyParamCaption})}
+
+Copies the source matrix into target matrix considering C\+O\+L\+U\+MN M\+A\+J\+OR storage. $ B := A $ 
+\begin{DoxyParams}{Parameters}
+{\em source} & pointer to be copied \\
+\hline
+{\em target} & pointer where the copy will be stored \\
+\hline
+{\em lds} & leading dimension of the source array \\
+\hline
+{\em ldt} & leading dimension of the target array \\
+\hline
+{\em nline} & number of lines in source array to copy \\
+\hline
+{\em ncol} & number of columns in source array to copy \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\mbox{\label{auxiliary_8h_a17c9c756299fd7fd34b48aecf6b4f322}} 
+\index{auxiliary.h@{auxiliary.h}!pc\_copy@{pc\_copy}}
+\index{pc\_copy@{pc\_copy}!auxiliary.h@{auxiliary.h}}
+\paragraph{pc\_copy()}
+{\footnotesize\ttfamily int pc\+\_\+copy (\begin{DoxyParamCaption}\item[{const \+\_\+\+Complex double $\ast$}]{source,  }\item[{\+\_\+\+Complex double $\ast$}]{target,  }\item[{size\+\_\+t}]{lds,  }\item[{size\+\_\+t}]{ldt,  }\item[{size\+\_\+t}]{nline,  }\item[{size\+\_\+t}]{ncol }\end{DoxyParamCaption})}
+
+pc\+\_\+copy Copies the column permutation of {\ttfamily source} matrix into {\ttfamily target} matrix considering C\+O\+L\+U\+MN M\+A\+J\+OR storage. 
+\begin{DoxyParams}{Parameters}
+{\em source} & pointer to be copied \\
+\hline
+{\em target} & pointer where the copy will be stored \\
+\hline
+{\em lds} & leading dimension of the source array \\
+\hline
+{\em ldt} & leading dimension of the target array \\
+\hline
+{\em nline} & number of lines in source array to copy \\
+\hline
+{\em ncol} & number of columns in source array to copy \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\mbox{\label{auxiliary_8h_ad7eb762e834cbce3253f8d2e74d44ef0}} 
+\index{auxiliary.h@{auxiliary.h}!pcl\_copy@{pcl\_copy}}
+\index{pcl\_copy@{pcl\_copy}!auxiliary.h@{auxiliary.h}}
+\paragraph{pcl\_copy()}
+{\footnotesize\ttfamily int pcl\+\_\+copy (\begin{DoxyParamCaption}\item[{const \+\_\+\+Complex double $\ast$}]{source,  }\item[{\+\_\+\+Complex double $\ast$}]{target,  }\item[{size\+\_\+t}]{lds,  }\item[{size\+\_\+t}]{ldt,  }\item[{size\+\_\+t}]{nline,  }\item[{size\+\_\+t}]{ncol }\end{DoxyParamCaption})}
+
+Copies the column and line permutation of source matrix into target matrix considering C\+O\+L\+U\+MN M\+A\+J\+OR storage. $ B := A^{Pcl} $ 
+\begin{DoxyParams}{Parameters}
+{\em source} & pointer to be copied \\
+\hline
+{\em target} & pointer where the copy will be stored \\
+\hline
+{\em lds} & leading dimension of the source array \\
+\hline
+{\em ldt} & leading dimension of the target array \\
+\hline
+{\em nline} & number of lines in source array to copy \\
+\hline
+{\em ncol} & number of columns in source array to copy \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\mbox{\label{auxiliary_8h_ab611dd0a22cf7eddc4e5afbd53c7598f}} 
+\index{auxiliary.h@{auxiliary.h}!pl\_copy@{pl\_copy}}
+\index{pl\_copy@{pl\_copy}!auxiliary.h@{auxiliary.h}}
+\paragraph{pl\_copy()}
+{\footnotesize\ttfamily int pl\+\_\+copy (\begin{DoxyParamCaption}\item[{const \+\_\+\+Complex double $\ast$}]{source,  }\item[{\+\_\+\+Complex double $\ast$}]{target,  }\item[{size\+\_\+t}]{lds,  }\item[{size\+\_\+t}]{ldt,  }\item[{size\+\_\+t}]{nline,  }\item[{size\+\_\+t}]{ncol }\end{DoxyParamCaption})}
+
+Copies the line permutation of source matrix into target matrix considering C\+O\+L\+U\+MN M\+A\+J\+OR storage. $ B := A^{Pl} $ 
+\begin{DoxyParams}{Parameters}
+{\em source} & pointer to be copied \\
+\hline
+{\em target} & pointer where the copy will be stored \\
+\hline
+{\em lds} & leading dimension of the source array \\
+\hline
+{\em ldt} & leading dimension of the target array \\
+\hline
+{\em nline} & number of lines in source array to copy \\
+\hline
+{\em ncol} & number of columns in source array to copy \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\mbox{\label{auxiliary_8h_a1fb6ac634d450092a5c465270141305e}} 
+\index{auxiliary.h@{auxiliary.h}!print\_matrix@{print\_matrix}}
+\index{print\_matrix@{print\_matrix}!auxiliary.h@{auxiliary.h}}
+\paragraph{print\_matrix()}
+{\footnotesize\ttfamily void print\+\_\+matrix (\begin{DoxyParamCaption}\item[{char $\ast$}]{desc,  }\item[{int}]{m,  }\item[{int}]{n,  }\item[{const \+\_\+\+Complex double $\ast$}]{a,  }\item[{int}]{lda }\end{DoxyParamCaption})}
+
+Prints a C\+O\+L\+U\+MN M\+A\+J\+OR matrix to stdio. 
+\begin{DoxyParams}{Parameters}
+{\em desc} & description to print before the matrix \\
+\hline
+{\em m} & number of rows \\
+\hline
+{\em n} & number of columns \\
+\hline
+{\em a} & column major matrix to be printed \\
+\hline
+{\em lda} & leading dimension of a \\
+\hline
+\end{DoxyParams}
+\mbox{\label{auxiliary_8h_acd9edae25054a054015f0fdad2debe72}} 
+\index{auxiliary.h@{auxiliary.h}!print\_matrix\_row@{print\_matrix\_row}}
+\index{print\_matrix\_row@{print\_matrix\_row}!auxiliary.h@{auxiliary.h}}
+\paragraph{print\_matrix\_row()}
+{\footnotesize\ttfamily void print\+\_\+matrix\+\_\+row (\begin{DoxyParamCaption}\item[{char $\ast$}]{desc,  }\item[{int}]{m,  }\item[{int}]{n,  }\item[{const \+\_\+\+Complex double $\ast$}]{a,  }\item[{int}]{lda }\end{DoxyParamCaption})}
+
+Prints a R\+OW M\+A\+J\+OR matrix to stdio. 
+\begin{DoxyParams}{Parameters}
+{\em desc} & description to print before the matrix \\
+\hline
+{\em m} & number of rows \\
+\hline
+{\em n} & number of columns \\
+\hline
+{\em a} & row major matrix to be printed \\
+\hline
+{\em lda} & leading dimension of a \\
+\hline
+\end{DoxyParams}
+\mbox{\label{auxiliary_8h_a85235c0330f4d9ae90c87dcee29dca27}} 
+\index{auxiliary.h@{auxiliary.h}!smith\_longmire\_soil@{smith\_longmire\_soil}}
+\index{smith\_longmire\_soil@{smith\_longmire\_soil}!auxiliary.h@{auxiliary.h}}
+\paragraph{smith\_longmire\_soil()}
+{\footnotesize\ttfamily int smith\+\_\+longmire\+\_\+soil (\begin{DoxyParamCaption}\item[{\+\_\+\+Complex double $\ast$}]{sigma,  }\item[{\+\_\+\+Complex double $\ast$}]{epsr,  }\item[{double}]{sigma0,  }\item[{\+\_\+\+Complex double}]{s,  }\item[{double}]{erinf }\end{DoxyParamCaption})}
+
+\mbox{\label{auxiliary_8h_a734db467de5a186ea1516e3837aff087}} 
+\index{auxiliary.h@{auxiliary.h}!snrm2\_@{snrm2\_}}
+\index{snrm2\_@{snrm2\_}!auxiliary.h@{auxiliary.h}}
+\paragraph{snrm2\_()}
+{\footnotesize\ttfamily double snrm2\+\_\+ (\begin{DoxyParamCaption}\item[{int $\ast$}]{n,  }\item[{double $\ast$}]{x,  }\item[{int $\ast$}]{incx }\end{DoxyParamCaption})}
+
+L\+A\+P\+A\+CK routine to compute the Euclidean norm of a vector $ \|x\|_2 $. 
+\begin{DoxyParams}{Parameters}
+{\em n} & Specifies the number of elements in vector $x$. \\
+\hline
+{\em x} & Array of size at least $(1 + (n-1) \times i)$ \\
+\hline
+{\em incx} & Specifies the increment $ i $ for the elements of $x$ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+$ \|x\|_2 $ 
+\end{DoxyReturn}
+\mbox{\label{auxiliary_8h_a0e8a9cb693626505b7f12dba375a4a6c}} 
+\index{auxiliary.h@{auxiliary.h}!transpose\_copy@{transpose\_copy}}
+\index{transpose\_copy@{transpose\_copy}!auxiliary.h@{auxiliary.h}}
+\paragraph{transpose\_copy()}
+{\footnotesize\ttfamily int transpose\+\_\+copy (\begin{DoxyParamCaption}\item[{const \+\_\+\+Complex double $\ast$}]{source,  }\item[{\+\_\+\+Complex double $\ast$}]{target,  }\item[{size\+\_\+t}]{lds,  }\item[{size\+\_\+t}]{ldt,  }\item[{size\+\_\+t}]{nline,  }\item[{size\+\_\+t}]{ncol }\end{DoxyParamCaption})}
+
+Copies the transpose of source matrix into target matrix considering C\+O\+L\+U\+MN M\+A\+J\+OR storage. $ B := A^{T} $ 
+\begin{DoxyParams}{Parameters}
+{\em source} & pointer to be copied \\
+\hline
+{\em target} & pointer where the copy will be stored \\
+\hline
+{\em lds} & leading dimension of the source array \\
+\hline
+{\em ldt} & leading dimension of the target array \\
+\hline
+{\em nline} & number of lines in source array to copy \\
+\hline
+{\em ncol} & number of columns in source array to copy \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\mbox{\label{auxiliary_8h_a50c2dcb9eea81718a678f92c6b7451f1}} 
+\index{auxiliary.h@{auxiliary.h}!vector\_length@{vector\_length}}
+\index{vector\_length@{vector\_length}!auxiliary.h@{auxiliary.h}}
+\paragraph{vector\_length()}
+{\footnotesize\ttfamily double vector\+\_\+length (\begin{DoxyParamCaption}\item[{const double}]{start\+\_\+point[3],  }\item[{const double}]{end\+\_\+point[3] }\end{DoxyParamCaption})}
+
+Computes the $ \|\cdot\|_2 $ (euclidian length) of the vector which starts at start\+\_\+point and ends at end\+\_\+point. 
+\begin{DoxyParams}{Parameters}
+{\em start\+\_\+point} & array $(x,y,z)_1$ that defines the starting point \\
+\hline
+{\em end\+\_\+point} & array $(x,y,z)_0$ that defines the ending point \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+$ \| (x,y,z)_1 - (x,y,z)_0 \|_2 $ 
+\end{DoxyReturn}
+\mbox{\label{auxiliary_8h_a1ba184a1812b50fce3340247beb9b9c0}} 
+\index{auxiliary.h@{auxiliary.h}!wave\_length@{wave\_length}}
+\index{wave\_length@{wave\_length}!auxiliary.h@{auxiliary.h}}
+\paragraph{wave\_length()}
+{\footnotesize\ttfamily double wave\+\_\+length (\begin{DoxyParamCaption}\item[{double}]{f,  }\item[{double}]{sigma,  }\item[{double}]{ep,  }\item[{double}]{mur }\end{DoxyParamCaption})}
+
+Computes the harmonic electromagnetic wave length $ \lambda $ in a lossy medium. 
+\begin{DoxyParams}{Parameters}
+{\em f} & frequency (Hz) \\
+\hline
+{\em sigma} & medium (real) conductivity $ \sigma $ in $ \Omega \cdot m $ \\
+\hline
+{\em ep} & medium electric permittivity $ \varepsilon = \varepsilon_r \, \varepsilon_0$ \\
+\hline
+{\em mur} & medium relative magnetic permeability $ \mu_r $ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+$ \lambda $ in $ m $ 
+\end{DoxyReturn}
+\mbox{\label{auxiliary_8h_a8b21c63cf65f3a1053284c2c73e95ad2}} 
+\index{auxiliary.h@{auxiliary.h}!zbesi\_@{zbesi\_}}
+\index{zbesi\_@{zbesi\_}!auxiliary.h@{auxiliary.h}}
+\paragraph{zbesi\_()}
+{\footnotesize\ttfamily int zbesi\+\_\+ (\begin{DoxyParamCaption}\item[{double $\ast$}]{zr,  }\item[{double $\ast$}]{zi,  }\item[{double $\ast$}]{fnu,  }\item[{int $\ast$}]{kode,  }\item[{int $\ast$}]{n,  }\item[{double $\ast$}]{cyr,  }\item[{double $\ast$}]{cyi,  }\item[{int $\ast$}]{nz,  }\item[{int $\ast$}]{ierr }\end{DoxyParamCaption})}
+
+F\+O\+R\+T\+R\+AN subroutine (from S\+L\+A\+T\+EC) to calculate I-\/\+Bessel function, i.\+e., modified Bessel function of the first kind, with complex argument. $ cy = I_{fnu} (z) $ 
+\begin{DoxyParams}{Parameters}
+{\em zr} & argument\textquotesingle{}s real part $\Re(z)$ \\
+\hline
+{\em zi} & argument\textquotesingle{}s imaginary part $\Im(z)$ \\
+\hline
+{\em fnu} & order of initial I function \\
+\hline
+{\em kode} & scaling ~\newline
+ 1\+: no scaling ~\newline
+ 2\+: $e^{-|x|}$ \\
+\hline
+{\em n} & number of members of the sequence \\
+\hline
+{\em cyr} & result\textquotesingle{}s real part $\Re(cy)$ \\
+\hline
+{\em cyi} & result\textquotesingle{}s imaginary part $\Im(cy)$ \\
+\hline
+{\em nz} & number of components set to zero due to underflow \\
+\hline
+{\em ierr} & error flag \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See also}
+{\texttt{ http\+://netlib.\+org/amos/zbesi.\+f}} 
+\end{DoxySeeAlso}

@@ -1,0 +1,128 @@
+\subsection{Grid Struct Reference}
+\label{structGrid}\index{Grid@{Grid}}
+
+
+{\ttfamily \#include $<$grid.\+h$>$}
+
+\subsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+unsigned int \textbf{ vertices\+\_\+x}
+\item 
+unsigned int \textbf{ vertices\+\_\+y}
+\item 
+double \textbf{ length\+\_\+x}
+\item 
+double \textbf{ length\+\_\+y}
+\item 
+unsigned int \textbf{ edge\+\_\+segments\+\_\+x}
+\item 
+unsigned int \textbf{ edge\+\_\+segments\+\_\+y}
+\item 
+double \textbf{ radius}
+\item 
+double \textbf{ depth}
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Strutcture to represent an uniform rectangular grid to be used in specialized routines. This grid has dimensions $ L_x \, L_y $, a total of (before segmentation) $ nv = (v_x \, v_y) $ vertices and $ ne = v_y\, (v_x - 1) + v_x\, (v_y - 1) $ edges. Each edge is divided into $ N $ segments so that the total number of nodes after segmentation is $ n = v_x\,v_y + v_x\,(v_y - 1)(N_y - 1) + v_y\,(v_x - 1)(N_x - 1) $ and the total number of segments is $ m = N_x\,v_x\,(v_y - 1) + N_y\,v_y\,(v_x - 1) $ ~\newline
+ \begin{DoxyVerb}     1          vx
+ -  o---o---o---o 1
+ |  |   |   |   |
+Ly  o---o---o---o
+ |  |   |   |   |
+ -  o---o---o---o vy
+    |---- Lx ---| \end{DoxyVerb}
+ 
+
+Definition at line 35 of file grid.\+h.
+
+
+
+\subsubsection{Field Documentation}
+\mbox{\label{structGrid_a3f3a8a30a6bd2803ec870d7bcaf95035}} 
+\index{Grid@{Grid}!depth@{depth}}
+\index{depth@{depth}!Grid@{Grid}}
+\paragraph{depth}
+{\footnotesize\ttfamily double Grid\+::depth}
+
+\doxyref{Grid}{p.}{structGrid} coordinate in the $\vec z$ direction (the same for all segments) 
+
+Definition at line 51 of file grid.\+h.
+
+\mbox{\label{structGrid_a905568d6a9f97a22b845dc56f623cf89}} 
+\index{Grid@{Grid}!edge\_segments\_x@{edge\_segments\_x}}
+\index{edge\_segments\_x@{edge\_segments\_x}!Grid@{Grid}}
+\paragraph{edge\_segments\_x}
+{\footnotesize\ttfamily unsigned int Grid\+::edge\+\_\+segments\+\_\+x}
+
+number of segments $N_x$ that each edge has in the $\vec x$ direction 
+
+Definition at line 45 of file grid.\+h.
+
+\mbox{\label{structGrid_a7a0a4ade5f057a50827d8117bde81efb}} 
+\index{Grid@{Grid}!edge\_segments\_y@{edge\_segments\_y}}
+\index{edge\_segments\_y@{edge\_segments\_y}!Grid@{Grid}}
+\paragraph{edge\_segments\_y}
+{\footnotesize\ttfamily unsigned int Grid\+::edge\+\_\+segments\+\_\+y}
+
+number of segments $N_y$ that each edge has in the $\vec y$ direction 
+
+Definition at line 47 of file grid.\+h.
+
+\mbox{\label{structGrid_ad02b72c53c1ba1a4e9be901ccda60e7c}} 
+\index{Grid@{Grid}!length\_x@{length\_x}}
+\index{length\_x@{length\_x}!Grid@{Grid}}
+\paragraph{length\_x}
+{\footnotesize\ttfamily double Grid\+::length\+\_\+x}
+
+total grid length $L_x$ in the $\vec x$ direction; 
+
+Definition at line 41 of file grid.\+h.
+
+\mbox{\label{structGrid_ac00c764ace026bb66dfaeb686e5c009f}} 
+\index{Grid@{Grid}!length\_y@{length\_y}}
+\index{length\_y@{length\_y}!Grid@{Grid}}
+\paragraph{length\_y}
+{\footnotesize\ttfamily double Grid\+::length\+\_\+y}
+
+total grid length $L_y$ in the $\vec y$ direction; 
+
+Definition at line 43 of file grid.\+h.
+
+\mbox{\label{structGrid_abd628d92509e509d62f76369d59f14e1}} 
+\index{Grid@{Grid}!radius@{radius}}
+\index{radius@{radius}!Grid@{Grid}}
+\paragraph{radius}
+{\footnotesize\ttfamily double Grid\+::radius}
+
+\doxyref{Grid}{p.}{structGrid} conductors\textquotesingle{} radius (the same for all segments) 
+
+Definition at line 49 of file grid.\+h.
+
+\mbox{\label{structGrid_ad3c75d617e6462578a1efd5138f53595}} 
+\index{Grid@{Grid}!vertices\_x@{vertices\_x}}
+\index{vertices\_x@{vertices\_x}!Grid@{Grid}}
+\paragraph{vertices\_x}
+{\footnotesize\ttfamily unsigned int Grid\+::vertices\+\_\+x}
+
+number of vertices $v_x$ in the $\vec x$ direction 
+
+Definition at line 37 of file grid.\+h.
+
+\mbox{\label{structGrid_ac87c4f057e78f94c80a5e9b419f894b6}} 
+\index{Grid@{Grid}!vertices\_y@{vertices\_y}}
+\index{vertices\_y@{vertices\_y}!Grid@{Grid}}
+\paragraph{vertices\_y}
+{\footnotesize\ttfamily unsigned int Grid\+::vertices\+\_\+y}
+
+number of vertices $v_y$ in the $\vec y$ direction 
+
+Definition at line 39 of file grid.\+h.
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/\textbf{ grid.\+h}\end{DoxyCompactItemize}

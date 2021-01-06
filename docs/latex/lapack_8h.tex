@@ -1,0 +1,74 @@
+\subsection{src/lapack.h File Reference}
+\label{lapack_8h}\index{src/lapack.h@{src/lapack.h}}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \textbf{ zsysv\+\_\+} (char $\ast$uplo, int $\ast$n, int $\ast$nrhs, \+\_\+\+Complex double $\ast$a, int $\ast$lda, int $\ast$ipiv, \+\_\+\+Complex double $\ast$b, int $\ast$ldb, \+\_\+\+Complex double $\ast$work, int $\ast$lwork, int $\ast$info)
+\item 
+void \textbf{ zgesv\+\_\+} (int $\ast$n, int $\ast$nrhs, \+\_\+\+Complex double $\ast$a, int $\ast$lda, int $\ast$ipiv, \+\_\+\+Complex double $\ast$b, int $\ast$ldb, int $\ast$info)
+\item 
+void \textbf{ zgetrf\+\_\+} (int $\ast$m, int $\ast$n, \+\_\+\+Complex double $\ast$a, int $\ast$lda, int $\ast$ipiv, int $\ast$info)
+\item 
+void \textbf{ zgetri\+\_\+} (int $\ast$n, \+\_\+\+Complex double $\ast$a, int $\ast$lda, int $\ast$ipiv, \+\_\+\+Complex double $\ast$work, int $\ast$lwork, int $\ast$info)
+\item 
+void \textbf{ zsytrf\+\_\+} (char $\ast$uplo, int $\ast$n, \+\_\+\+Complex double $\ast$a, int $\ast$lda, int $\ast$ipiv, \+\_\+\+Complex double $\ast$work, int $\ast$lwork, int $\ast$info)
+\item 
+void \textbf{ zsytri\+\_\+} (char $\ast$uplo, int $\ast$n, \+\_\+\+Complex double $\ast$a, int $\ast$lda, int $\ast$ipiv, \+\_\+\+Complex double $\ast$work, int $\ast$info)
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Function Documentation}
+\mbox{\label{lapack_8h_a95e2fd44ba94a6e0cadb86df3aaa62f3}} 
+\index{lapack.h@{lapack.h}!zgesv\_@{zgesv\_}}
+\index{zgesv\_@{zgesv\_}!lapack.h@{lapack.h}}
+\paragraph{zgesv\_()}
+{\footnotesize\ttfamily void zgesv\+\_\+ (\begin{DoxyParamCaption}\item[{int $\ast$}]{n,  }\item[{int $\ast$}]{nrhs,  }\item[{\+\_\+\+Complex double $\ast$}]{a,  }\item[{int $\ast$}]{lda,  }\item[{int $\ast$}]{ipiv,  }\item[{\+\_\+\+Complex double $\ast$}]{b,  }\item[{int $\ast$}]{ldb,  }\item[{int $\ast$}]{info }\end{DoxyParamCaption})}
+
+Z\+G\+E\+SV computes the solution to a complex system of linear equations A $\ast$ X = B, where A is an N-\/by-\/N matrix and X and B are N-\/by-\/\+N\+R\+HS matrices. The LU decomposition with partial pivoting and row interchanges is used to factor A as A = P $\ast$ L $\ast$ U, where P is a permutation matrix, L is unit lower triangular, and U is upper triangular. The factored form of A is then used to solve the system of equations A $\ast$ X = B. \begin{DoxySeeAlso}{See also}
+{\texttt{ http\+://www.\+netlib.\+org/lapack/explore-\/html/}} 
+\end{DoxySeeAlso}
+\mbox{\label{lapack_8h_abf2b176271a76994057aad4be330bb9c}} 
+\index{lapack.h@{lapack.h}!zgetrf\_@{zgetrf\_}}
+\index{zgetrf\_@{zgetrf\_}!lapack.h@{lapack.h}}
+\paragraph{zgetrf\_()}
+{\footnotesize\ttfamily void zgetrf\+\_\+ (\begin{DoxyParamCaption}\item[{int $\ast$}]{m,  }\item[{int $\ast$}]{n,  }\item[{\+\_\+\+Complex double $\ast$}]{a,  }\item[{int $\ast$}]{lda,  }\item[{int $\ast$}]{ipiv,  }\item[{int $\ast$}]{info }\end{DoxyParamCaption})}
+
+Z\+G\+E\+T\+RF computes an LU factorization of a general M-\/by-\/N matrix A using partial pivoting with row interchanges. The factorization has the form A = P $\ast$ L $\ast$ U where P is a permutation matrix, L is lower triangular with unit diagonal elements (lower trapezoidal if m $>$ n), and U is upper triangular (upper trapezoidal if m $<$ n). This is the right-\/looking Level 3 B\+L\+AS version of the algorithm. \begin{DoxySeeAlso}{See also}
+{\texttt{ http\+://www.\+netlib.\+org/lapack/explore-\/html/}} 
+\end{DoxySeeAlso}
+\mbox{\label{lapack_8h_ace13790934af89bc9dea51550b50fb31}} 
+\index{lapack.h@{lapack.h}!zgetri\_@{zgetri\_}}
+\index{zgetri\_@{zgetri\_}!lapack.h@{lapack.h}}
+\paragraph{zgetri\_()}
+{\footnotesize\ttfamily void zgetri\+\_\+ (\begin{DoxyParamCaption}\item[{int $\ast$}]{n,  }\item[{\+\_\+\+Complex double $\ast$}]{a,  }\item[{int $\ast$}]{lda,  }\item[{int $\ast$}]{ipiv,  }\item[{\+\_\+\+Complex double $\ast$}]{work,  }\item[{int $\ast$}]{lwork,  }\item[{int $\ast$}]{info }\end{DoxyParamCaption})}
+
+Z\+G\+E\+T\+RI computes the inverse of a matrix using the LU factorization computed by Z\+G\+E\+T\+RF. This method inverts U and then computes inv(\+A) by solving the system inv(\+A)$\ast$L = inv(\+U) for inv(\+A). \begin{DoxySeeAlso}{See also}
+{\texttt{ http\+://www.\+netlib.\+org/lapack/explore-\/html/}} 
+\end{DoxySeeAlso}
+\mbox{\label{lapack_8h_aa97b75b6555008c4720a3ae650ef9ed2}} 
+\index{lapack.h@{lapack.h}!zsysv\_@{zsysv\_}}
+\index{zsysv\_@{zsysv\_}!lapack.h@{lapack.h}}
+\paragraph{zsysv\_()}
+{\footnotesize\ttfamily void zsysv\+\_\+ (\begin{DoxyParamCaption}\item[{char $\ast$}]{uplo,  }\item[{int $\ast$}]{n,  }\item[{int $\ast$}]{nrhs,  }\item[{\+\_\+\+Complex double $\ast$}]{a,  }\item[{int $\ast$}]{lda,  }\item[{int $\ast$}]{ipiv,  }\item[{\+\_\+\+Complex double $\ast$}]{b,  }\item[{int $\ast$}]{ldb,  }\item[{\+\_\+\+Complex double $\ast$}]{work,  }\item[{int $\ast$}]{lwork,  }\item[{int $\ast$}]{info }\end{DoxyParamCaption})}
+
+Z\+S\+Y\+SV computes the solution to a complex system of linear equations A $\ast$ X = B, where A is an N-\/by-\/N symmetric matrix and X and B are N-\/by-\/\+N\+R\+HS matrices. The diagonal pivoting method is used to factor A as A = U $\ast$ D $\ast$ U$\ast$$\ast$T, if U\+P\+LO = \textquotesingle{}U\textquotesingle{}, or A = L $\ast$ D $\ast$ L$\ast$$\ast$T, if U\+P\+LO = \textquotesingle{}L\textquotesingle{}, where U (or L) is a product of permutation and unit upper (lower) triangular matrices, and D is symmetric and block diagonal with 1-\/by-\/1 and 2-\/by-\/2 diagonal blocks. The factored form of A is then used to solve the system of equations A $\ast$ X = B. \begin{DoxySeeAlso}{See also}
+{\texttt{ http\+://www.\+netlib.\+org/lapack/explore-\/html/}} 
+\end{DoxySeeAlso}
+\mbox{\label{lapack_8h_a130ae850ea77a38ac29edef82d390fa7}} 
+\index{lapack.h@{lapack.h}!zsytrf\_@{zsytrf\_}}
+\index{zsytrf\_@{zsytrf\_}!lapack.h@{lapack.h}}
+\paragraph{zsytrf\_()}
+{\footnotesize\ttfamily void zsytrf\+\_\+ (\begin{DoxyParamCaption}\item[{char $\ast$}]{uplo,  }\item[{int $\ast$}]{n,  }\item[{\+\_\+\+Complex double $\ast$}]{a,  }\item[{int $\ast$}]{lda,  }\item[{int $\ast$}]{ipiv,  }\item[{\+\_\+\+Complex double $\ast$}]{work,  }\item[{int $\ast$}]{lwork,  }\item[{int $\ast$}]{info }\end{DoxyParamCaption})}
+
+Z\+S\+Y\+T\+RF computes the factorization of a complex symmetric matrix A using the Bunch-\/\+Kaufman diagonal pivoting method. The form of the factorization is A = U$\ast$\+D$\ast$\+U$\ast$$\ast$T or A = L$\ast$\+D$\ast$\+L$\ast$$\ast$T where U (or L) is a product of permutation and unit upper (lower) triangular matrices, and D is symmetric and block diagonal with with 1-\/by-\/1 and 2-\/by-\/2 diagonal blocks. This is the blocked version of the algorithm, calling Level 3 B\+L\+AS. \begin{DoxySeeAlso}{See also}
+{\texttt{ http\+://www.\+netlib.\+org/lapack/explore-\/html/}} 
+\end{DoxySeeAlso}
+\mbox{\label{lapack_8h_ae705b6c33da659b7e71b19e99be38341}} 
+\index{lapack.h@{lapack.h}!zsytri\_@{zsytri\_}}
+\index{zsytri\_@{zsytri\_}!lapack.h@{lapack.h}}
+\paragraph{zsytri\_()}
+{\footnotesize\ttfamily void zsytri\+\_\+ (\begin{DoxyParamCaption}\item[{char $\ast$}]{uplo,  }\item[{int $\ast$}]{n,  }\item[{\+\_\+\+Complex double $\ast$}]{a,  }\item[{int $\ast$}]{lda,  }\item[{int $\ast$}]{ipiv,  }\item[{\+\_\+\+Complex double $\ast$}]{work,  }\item[{int $\ast$}]{info }\end{DoxyParamCaption})}
+
+Z\+S\+Y\+T\+RI computes the inverse of a complex symmetric indefinite matrix A using the factorization A = U$\ast$\+D$\ast$\+U$\ast$$\ast$T or A = L$\ast$\+D$\ast$\+L$\ast$$\ast$T computed by Z\+S\+Y\+T\+RF. \begin{DoxySeeAlso}{See also}
+{\texttt{ http\+://www.\+netlib.\+org/lapack/explore-\/html/}} 
+\end{DoxySeeAlso}

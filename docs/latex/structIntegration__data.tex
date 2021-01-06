@@ -1,0 +1,63 @@
+\subsection{Integration\+\_\+data Struct Reference}
+\label{structIntegration__data}\index{Integration\_data@{Integration\_data}}
+
+
+{\ttfamily \#include $<$electrode.\+h$>$}
+
+\subsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+const \textbf{ Electrode} $\ast$ \textbf{ sender}
+\item 
+const \textbf{ Electrode} $\ast$ \textbf{ receiver}
+\item 
+\+\_\+\+Complex double \textbf{ gamma}
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Structure to make the integration of the \char`\"{}potential\char`\"{} between two electrodes. \begin{DoxySeeAlso}{See also}
+\doxyref{Integration\+\_\+type}{p.}{electrode_8h_aecb2139825ccfa31212af58a4bf3e332} 
+\end{DoxySeeAlso}
+
+
+Definition at line 50 of file electrode.\+h.
+
+
+
+\subsubsection{Field Documentation}
+\mbox{\label{structIntegration__data_accf98a06708fc625d8b75b4b7b33cf57}} 
+\index{Integration\_data@{Integration\_data}!gamma@{gamma}}
+\index{gamma@{gamma}!Integration\_data@{Integration\_data}}
+\paragraph{gamma}
+{\footnotesize\ttfamily \+\_\+\+Complex double Integration\+\_\+data\+::gamma}
+
+Complex propagation constant of the medium $ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} $ 
+
+Definition at line 57 of file electrode.\+h.
+
+\mbox{\label{structIntegration__data_a4094fe51bc72b6ca0a110dd81c57c40d}} 
+\index{Integration\_data@{Integration\_data}!receiver@{receiver}}
+\index{receiver@{receiver}!Integration\_data@{Integration\_data}}
+\paragraph{receiver}
+{\footnotesize\ttfamily const \textbf{ Electrode}$\ast$ Integration\+\_\+data\+::receiver}
+
+Potential receiving \doxyref{Electrode}{p.}{structElectrode} that receives the excitation. 
+
+Definition at line 54 of file electrode.\+h.
+
+\mbox{\label{structIntegration__data_ae662fcff973469388ef4a9581bf27560}} 
+\index{Integration\_data@{Integration\_data}!sender@{sender}}
+\index{sender@{sender}!Integration\_data@{Integration\_data}}
+\paragraph{sender}
+{\footnotesize\ttfamily const \textbf{ Electrode}$\ast$ Integration\+\_\+data\+::sender}
+
+Current carrying \doxyref{Electrode}{p.}{structElectrode} that generates the excitation. 
+
+Definition at line 52 of file electrode.\+h.
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/\textbf{ electrode.\+h}\end{DoxyCompactItemize}

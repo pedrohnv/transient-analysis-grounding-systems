@@ -1,0 +1,38 @@
+\subsection{src/blas.h File Reference}
+\label{blas_8h}\index{src/blas.h@{src/blas.h}}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \textbf{ zgemm\+\_\+} (char $\ast$transa, char $\ast$transb, int $\ast$m, int $\ast$n, int $\ast$k, \+\_\+\+Complex double $\ast$alpha, \+\_\+\+Complex double $\ast$a, int $\ast$lda, \+\_\+\+Complex double $\ast$b, int $\ast$ldb, \+\_\+\+Complex double $\ast$beta, \+\_\+\+Complex double $\ast$c, int $\ast$ldc)
+\item 
+void \textbf{ zsymm\+\_\+} (char $\ast$side, char $\ast$uplo, int $\ast$m, int $\ast$n, \+\_\+\+Complex double $\ast$alpha, \+\_\+\+Complex double $\ast$a, int $\ast$lda, \+\_\+\+Complex double $\ast$b, int $\ast$ldb, \+\_\+\+Complex double $\ast$beta, \+\_\+\+Complex double $\ast$c, int $\ast$ldc)
+\item 
+void \textbf{ zgemv\+\_\+} (char $\ast$trans, int $\ast$m, int $\ast$n, \+\_\+\+Complex double $\ast$alpha, \+\_\+\+Complex double $\ast$a, int $\ast$lda, \+\_\+\+Complex double $\ast$x, int $\ast$incx, \+\_\+\+Complex double $\ast$beta, \+\_\+\+Complex double $\ast$y, int $\ast$incy)
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Function Documentation}
+\mbox{\label{blas_8h_afccb2308797975a14df9fa31c4e28b3f}} 
+\index{blas.h@{blas.h}!zgemm\_@{zgemm\_}}
+\index{zgemm\_@{zgemm\_}!blas.h@{blas.h}}
+\paragraph{zgemm\_()}
+{\footnotesize\ttfamily void zgemm\+\_\+ (\begin{DoxyParamCaption}\item[{char $\ast$}]{transa,  }\item[{char $\ast$}]{transb,  }\item[{int $\ast$}]{m,  }\item[{int $\ast$}]{n,  }\item[{int $\ast$}]{k,  }\item[{\+\_\+\+Complex double $\ast$}]{alpha,  }\item[{\+\_\+\+Complex double $\ast$}]{a,  }\item[{int $\ast$}]{lda,  }\item[{\+\_\+\+Complex double $\ast$}]{b,  }\item[{int $\ast$}]{ldb,  }\item[{\+\_\+\+Complex double $\ast$}]{beta,  }\item[{\+\_\+\+Complex double $\ast$}]{c,  }\item[{int $\ast$}]{ldc }\end{DoxyParamCaption})}
+
+Z\+G\+E\+MM performs one of the matrix-\/matrix operations C \+:= alpha$\ast$op( A )$\ast$op( B ) + beta$\ast$C, where op( X ) is one of op( X ) = X or op( X ) = X$\ast$$\ast$T or op( X ) = X$\ast$$\ast$H, alpha and beta are scalars, and A, B and C are matrices, with op( A ) an m by k matrix, op( B ) a k by n matrix and C an m by n matrix. \begin{DoxySeeAlso}{See also}
+{\texttt{ netlib zgemm}} for full documentation 
+\end{DoxySeeAlso}
+\mbox{\label{blas_8h_ac049eb291e4fd87095c07bd9fcd7b069}} 
+\index{blas.h@{blas.h}!zgemv\_@{zgemv\_}}
+\index{zgemv\_@{zgemv\_}!blas.h@{blas.h}}
+\paragraph{zgemv\_()}
+{\footnotesize\ttfamily void zgemv\+\_\+ (\begin{DoxyParamCaption}\item[{char $\ast$}]{trans,  }\item[{int $\ast$}]{m,  }\item[{int $\ast$}]{n,  }\item[{\+\_\+\+Complex double $\ast$}]{alpha,  }\item[{\+\_\+\+Complex double $\ast$}]{a,  }\item[{int $\ast$}]{lda,  }\item[{\+\_\+\+Complex double $\ast$}]{x,  }\item[{int $\ast$}]{incx,  }\item[{\+\_\+\+Complex double $\ast$}]{beta,  }\item[{\+\_\+\+Complex double $\ast$}]{y,  }\item[{int $\ast$}]{incy }\end{DoxyParamCaption})}
+
+Z\+G\+E\+MV performs one of the matrix-\/vector operations y \+:= alpha$\ast$\+A$\ast$x + beta$\ast$y, or y \+:= alpha$\ast$\+A$\ast$$\ast$\+T$\ast$x + beta$\ast$y, or y \+:= alpha$\ast$\+A$\ast$$\ast$\+H$\ast$x + beta$\ast$y, where alpha and beta are scalars, x and y are vectors and A is an m by n matrix. \mbox{\label{blas_8h_aa0defc808d7ec4b2f69e532f0e277bac}} 
+\index{blas.h@{blas.h}!zsymm\_@{zsymm\_}}
+\index{zsymm\_@{zsymm\_}!blas.h@{blas.h}}
+\paragraph{zsymm\_()}
+{\footnotesize\ttfamily void zsymm\+\_\+ (\begin{DoxyParamCaption}\item[{char $\ast$}]{side,  }\item[{char $\ast$}]{uplo,  }\item[{int $\ast$}]{m,  }\item[{int $\ast$}]{n,  }\item[{\+\_\+\+Complex double $\ast$}]{alpha,  }\item[{\+\_\+\+Complex double $\ast$}]{a,  }\item[{int $\ast$}]{lda,  }\item[{\+\_\+\+Complex double $\ast$}]{b,  }\item[{int $\ast$}]{ldb,  }\item[{\+\_\+\+Complex double $\ast$}]{beta,  }\item[{\+\_\+\+Complex double $\ast$}]{c,  }\item[{int $\ast$}]{ldc }\end{DoxyParamCaption})}
+
+Z\+S\+Y\+MM performs one of the matrix-\/matrix operations C \+:= alpha$\ast$\+A$\ast$B + beta$\ast$C, or C \+:= alpha$\ast$\+B$\ast$A + beta$\ast$C, where alpha and beta are scalars, A is a symmetric matrix and B and C are m by n matrices. \begin{DoxySeeAlso}{See also}
+{\texttt{ netlib zsymm}} for full documentation 
+\end{DoxySeeAlso}

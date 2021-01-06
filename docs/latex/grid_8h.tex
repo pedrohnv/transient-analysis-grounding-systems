@@ -1,0 +1,59 @@
+\subsection{src/grid.h File Reference}
+\label{grid_8h}\index{src/grid.h@{src/grid.h}}
+{\ttfamily \#include $<$complex.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}electrode.\+h\char`\"{}}\newline
+\subsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \textbf{ Grid}
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \textbf{ number\+\_\+segments} (const \textbf{ Grid} grid)
+\item 
+int \textbf{ number\+\_\+nodes} (const \textbf{ Grid} grid)
+\item 
+int \textbf{ electrode\+\_\+grid} (const \textbf{ Grid} grid, \textbf{ Electrode} $\ast$electrodes, double $\ast$nodes)
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Function Documentation}
+\mbox{\label{grid_8h_ae3b4a9c5e7e2c0347e4063b2389da0be}} 
+\index{grid.h@{grid.h}!electrode\_grid@{electrode\_grid}}
+\index{electrode\_grid@{electrode\_grid}!grid.h@{grid.h}}
+\paragraph{electrode\_grid()}
+{\footnotesize\ttfamily int electrode\+\_\+grid (\begin{DoxyParamCaption}\item[{const \textbf{ Grid}}]{grid,  }\item[{\textbf{ Electrode} $\ast$}]{electrodes,  }\item[{double $\ast$}]{nodes }\end{DoxyParamCaption})}
+
+Populates electrodes and nodes arrays given a \doxyref{Grid}{p.}{structGrid} structure. 
+\begin{DoxyParams}{Parameters}
+{\em grid} & structure \\
+\hline
+{\em electrodes} & array to be filled \\
+\hline
+{\em nodes} & array to be filled \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\doxyref{number\+\_\+segments}{p.}{grid_8h_ad320ca3c79b883309ca7db9468d8978c} for the minimum size of the array electrodes 
+
+\doxyref{number\+\_\+nodes}{p.}{grid_8h_a5c94965ee7c9c95436f995eb76ab6f8e} for the minimum size of the array nodes 
+\end{DoxySeeAlso}
+\mbox{\label{grid_8h_a5c94965ee7c9c95436f995eb76ab6f8e}} 
+\index{grid.h@{grid.h}!number\_nodes@{number\_nodes}}
+\index{number\_nodes@{number\_nodes}!grid.h@{grid.h}}
+\paragraph{number\_nodes()}
+{\footnotesize\ttfamily int number\+\_\+nodes (\begin{DoxyParamCaption}\item[{const \textbf{ Grid}}]{grid }\end{DoxyParamCaption})}
+
+Returns how many nodes the grid has. \mbox{\label{grid_8h_ad320ca3c79b883309ca7db9468d8978c}} 
+\index{grid.h@{grid.h}!number\_segments@{number\_segments}}
+\index{number\_segments@{number\_segments}!grid.h@{grid.h}}
+\paragraph{number\_segments()}
+{\footnotesize\ttfamily int number\+\_\+segments (\begin{DoxyParamCaption}\item[{const \textbf{ Grid}}]{grid }\end{DoxyParamCaption})}
+
+Returns how many segments the \doxyref{Grid}{p.}{structGrid} has. 

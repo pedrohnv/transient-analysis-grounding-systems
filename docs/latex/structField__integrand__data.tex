@@ -1,0 +1,185 @@
+\subsection{Field\+\_\+integrand\+\_\+data Struct Reference}
+\label{structField__integrand__data}\index{Field\_integrand\_data@{Field\_integrand\_data}}
+
+
+{\ttfamily \#include $<$electrode.\+h$>$}
+
+\subsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+const double $\ast$ \textbf{ point1}
+\item 
+const double $\ast$ \textbf{ point2}
+\item 
+const \textbf{ Electrode} $\ast$ \textbf{ electrodes}
+\item 
+size\+\_\+t \textbf{ num\+\_\+electrodes}
+\item 
+const \+\_\+\+Complex double $\ast$ \textbf{ il}
+\item 
+const \+\_\+\+Complex double $\ast$ \textbf{ it}
+\item 
+\+\_\+\+Complex double \textbf{ gamma}
+\item 
+\+\_\+\+Complex double \textbf{ s}
+\item 
+double \textbf{ mur}
+\item 
+\+\_\+\+Complex double \textbf{ kappa}
+\item 
+size\+\_\+t \textbf{ max\+\_\+eval}
+\item 
+double \textbf{ req\+\_\+abs\+\_\+error}
+\item 
+double \textbf{ req\+\_\+rel\+\_\+error}
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Structure to pass all needed arguments by magnetic\+\_\+potential to mag\+\_\+pot\+\_\+integral. \begin{DoxySeeAlso}{See also}
+\doxyref{magnetic\+\_\+potential}{p.}{electrode_8h_a1c8c0a10a6ecd104500405f7fe5a3e0f} 
+
+{\texttt{ https\+://github.\+com/stevengj/cubature}} 
+\end{DoxySeeAlso}
+
+
+Definition at line 64 of file electrode.\+h.
+
+
+
+\subsubsection{Field Documentation}
+\mbox{\label{structField__integrand__data_ad2b8dbfbf282c23eb4a3349f30c41129}} 
+\index{Field\_integrand\_data@{Field\_integrand\_data}!electrodes@{electrodes}}
+\index{electrodes@{electrodes}!Field\_integrand\_data@{Field\_integrand\_data}}
+\paragraph{electrodes}
+{\footnotesize\ttfamily const \textbf{ Electrode}$\ast$ Field\+\_\+integrand\+\_\+data\+::electrodes}
+
+array of electrodes 
+
+Definition at line 70 of file electrode.\+h.
+
+\mbox{\label{structField__integrand__data_a4a11a2a784cc7563b13a57d58d26174c}} 
+\index{Field\_integrand\_data@{Field\_integrand\_data}!gamma@{gamma}}
+\index{gamma@{gamma}!Field\_integrand\_data@{Field\_integrand\_data}}
+\paragraph{gamma}
+{\footnotesize\ttfamily \+\_\+\+Complex double Field\+\_\+integrand\+\_\+data\+::gamma}
+
+medium propagation constant $ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} $ 
+
+Definition at line 79 of file electrode.\+h.
+
+\mbox{\label{structField__integrand__data_a50356aaa5b491351d13e3d8070855dc2}} 
+\index{Field\_integrand\_data@{Field\_integrand\_data}!il@{il}}
+\index{il@{il}!Field\_integrand\_data@{Field\_integrand\_data}}
+\paragraph{il}
+{\footnotesize\ttfamily const \+\_\+\+Complex double$\ast$ Field\+\_\+integrand\+\_\+data\+::il}
+
+longitudinal currents array $ I_L $ 
+
+Definition at line 74 of file electrode.\+h.
+
+\mbox{\label{structField__integrand__data_a3e5959db14d5504a4412730640382c86}} 
+\index{Field\_integrand\_data@{Field\_integrand\_data}!it@{it}}
+\index{it@{it}!Field\_integrand\_data@{Field\_integrand\_data}}
+\paragraph{it}
+{\footnotesize\ttfamily const \+\_\+\+Complex double$\ast$ Field\+\_\+integrand\+\_\+data\+::it}
+
+transversal currents array $ I_T $ 
+
+Definition at line 76 of file electrode.\+h.
+
+\mbox{\label{structField__integrand__data_a180c07f102607963e7312f649794d98a}} 
+\index{Field\_integrand\_data@{Field\_integrand\_data}!kappa@{kappa}}
+\index{kappa@{kappa}!Field\_integrand\_data@{Field\_integrand\_data}}
+\paragraph{kappa}
+{\footnotesize\ttfamily \+\_\+\+Complex double Field\+\_\+integrand\+\_\+data\+::kappa}
+
+medium complex conductivity $ \sigma + j\omega\varepsilon $ in [S/m] 
+
+Definition at line 87 of file electrode.\+h.
+
+\mbox{\label{structField__integrand__data_ac5cdc15cdc0db4699270d4861d3f3e9d}} 
+\index{Field\_integrand\_data@{Field\_integrand\_data}!max\_eval@{max\_eval}}
+\index{max\_eval@{max\_eval}!Field\_integrand\_data@{Field\_integrand\_data}}
+\paragraph{max\_eval}
+{\footnotesize\ttfamily size\+\_\+t Field\+\_\+integrand\+\_\+data\+::max\+\_\+eval}
+
+specifies a maximum number of function evaluations (0 for no limit) 
+
+Definition at line 89 of file electrode.\+h.
+
+\mbox{\label{structField__integrand__data_a96e3ed4ca7eed73db8b14454e5ccc82c}} 
+\index{Field\_integrand\_data@{Field\_integrand\_data}!mur@{mur}}
+\index{mur@{mur}!Field\_integrand\_data@{Field\_integrand\_data}}
+\paragraph{mur}
+{\footnotesize\ttfamily double Field\+\_\+integrand\+\_\+data\+::mur}
+
+relative magnetic permeability of the medium $ \mu_r $ 
+
+Definition at line 84 of file electrode.\+h.
+
+\mbox{\label{structField__integrand__data_a9174967e77d1ff07a49f9502c3cb621b}} 
+\index{Field\_integrand\_data@{Field\_integrand\_data}!num\_electrodes@{num\_electrodes}}
+\index{num\_electrodes@{num\_electrodes}!Field\_integrand\_data@{Field\_integrand\_data}}
+\paragraph{num\_electrodes}
+{\footnotesize\ttfamily size\+\_\+t Field\+\_\+integrand\+\_\+data\+::num\+\_\+electrodes}
+
+number of electrodes $ m $ 
+
+Definition at line 72 of file electrode.\+h.
+
+\mbox{\label{structField__integrand__data_adcd1cd2307991df9eaae6c1a9d5647c1}} 
+\index{Field\_integrand\_data@{Field\_integrand\_data}!point1@{point1}}
+\index{point1@{point1}!Field\_integrand\_data@{Field\_integrand\_data}}
+\paragraph{point1}
+{\footnotesize\ttfamily const double$\ast$ Field\+\_\+integrand\+\_\+data\+::point1}
+
+Line integral start point 
+
+Definition at line 66 of file electrode.\+h.
+
+\mbox{\label{structField__integrand__data_a9950e4a8fd3d694a2852ebc5b5007ab4}} 
+\index{Field\_integrand\_data@{Field\_integrand\_data}!point2@{point2}}
+\index{point2@{point2}!Field\_integrand\_data@{Field\_integrand\_data}}
+\paragraph{point2}
+{\footnotesize\ttfamily const double$\ast$ Field\+\_\+integrand\+\_\+data\+::point2}
+
+Line integral end point 
+
+Definition at line 68 of file electrode.\+h.
+
+\mbox{\label{structField__integrand__data_aeab7b73a7b3a7d32bb79927d753ffaee}} 
+\index{Field\_integrand\_data@{Field\_integrand\_data}!req\_abs\_error@{req\_abs\_error}}
+\index{req\_abs\_error@{req\_abs\_error}!Field\_integrand\_data@{Field\_integrand\_data}}
+\paragraph{req\_abs\_error}
+{\footnotesize\ttfamily double Field\+\_\+integrand\+\_\+data\+::req\+\_\+abs\+\_\+error}
+
+the absolute error requested (0 to ignore) 
+
+Definition at line 91 of file electrode.\+h.
+
+\mbox{\label{structField__integrand__data_a6fbe8b3d3cd4d726b0c3f58e923b4fc7}} 
+\index{Field\_integrand\_data@{Field\_integrand\_data}!req\_rel\_error@{req\_rel\_error}}
+\index{req\_rel\_error@{req\_rel\_error}!Field\_integrand\_data@{Field\_integrand\_data}}
+\paragraph{req\_rel\_error}
+{\footnotesize\ttfamily double Field\+\_\+integrand\+\_\+data\+::req\+\_\+rel\+\_\+error}
+
+req\+\_\+rel\+\_\+error the relative error requested (0 to ignore) 
+
+Definition at line 93 of file electrode.\+h.
+
+\mbox{\label{structField__integrand__data_a1c9c84670abfca109ae8708421575e0d}} 
+\index{Field\_integrand\_data@{Field\_integrand\_data}!s@{s}}
+\index{s@{s}!Field\_integrand\_data@{Field\_integrand\_data}}
+\paragraph{s}
+{\footnotesize\ttfamily \+\_\+\+Complex double Field\+\_\+integrand\+\_\+data\+::s}
+
+complex frequency $ s = c + j\omega $ 
+
+Definition at line 82 of file electrode.\+h.
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/\textbf{ electrode.\+h}\end{DoxyCompactItemize}
