@@ -1,8 +1,6 @@
 /*
-Test case grcev12pwrd01-a
-
-Reproducing the results in [1] for a grounding grid.
-Execution time is expected to be up to 20 min.
+Reproducing the results in [1] for a square grounding grid.
+This example is single threaded (no parallelism).
 
 [1] L. D. Grcev and M. Heimbach, "Frequency dependent and transient
 characteristics of substation grounding systems," in IEEE Transactions on
@@ -14,150 +12,217 @@ doi: 10.1109/61.568238
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-//#include <omp.h>
 #include "auxiliary.h"
 #include "electrode.h"
 #include "linalg.h"
 #include "cubature.h"
 #include "grid.h"
 
+/** Run example using admittance formulation
+@param gs grid size in meters
+@param div how many segments each edge of the grid has (that is, each segment
+will have length $L = 10 / div$)
+@param nf number of frequencies logspaced between $10^{2}$ and $10^{6.4}$ Hz
+*/
 int
-run_case (int gs, int num_electrodes, int num_nodes)
+run_case_adm (int gs, int div, size_t nf)
 {
     size_t max_eval = 0;
-    double req_abs_error = 1e-3;
-    double req_rel_error = 1e-4;
+    double req_abs_error = 1e-4;
+    double req_rel_error = 1e-5;
     char file_name[50];
-    sprintf(file_name, "gs%d.dat", gs);
+    sprintf(file_name, "gs%d.csv", gs);
     FILE *save_file = fopen(file_name, "w");
-    // parameters
-    double sigma = 1.0/1000.0; // soil conductivity
-    double er = 10.0; // soil rel. permitivitty
-    double rho_c = 1.9e-6; // copper resistivity
+    // soil parameters, constant with frequency
+    double sigma = 1.0 / 1000.0;  // soil conductivity
+    double er = 10.0;  // soil rel. permitivitty
     // frequencies of interest
-    size_t nf = 150;
     double freq[nf];
     logspace(2, 6.4, nf, freq);
     // electrode definition
-    int read;
-    sprintf(file_name, "examples/grcev12pwrd01_auxfiles/elec_gs%d.txt", gs);
-    Electrode *electrodes = malloc(sizeof(Electrode)*num_electrodes);
-    read = electrodes_file(file_name, electrodes, num_electrodes);
-    if (read == -10) exit(read);
-    Electrode *images = malloc(sizeof(Electrode)*num_electrodes);
-    electrodes_file(file_name, images, num_electrodes);
-    //double nodes[num_nodes][3];
-    sprintf(file_name, "examples/grcev12pwrd01_auxfiles/nodes_gs%d.txt", gs);
-    double *nodes = malloc(num_nodes*3*sizeof(double));
-    read = nodes_file(file_name, nodes, num_nodes);
-    if (read == -10) exit(read);
+    int err;
+    Grid grid = {gs/10 + 1, gs/10 + 1, gs, gs, div, div, 7e-3, -0.5};
+    size_t num_electrodes = number_segments(grid);
+    size_t num_nodes = number_nodes(grid);
+    printf("Num. segments = %li\nNum. nodes = %li\n", num_electrodes, num_nodes);
+    Electrode* electrodes = malloc(sizeof(Electrode)*num_electrodes);
+    Electrode* images = malloc(sizeof(Electrode)*num_electrodes);
+    double* nodes = malloc(num_nodes * 3 * sizeof(double));
+    electrode_grid(grid, electrodes, nodes);
+    electrode_grid(grid, images, nodes);
     for (size_t m = 0; m < num_electrodes; m++) {
-        images[m].start_point[2] = -images[m].start_point[2];
-        images[m].end_point[2] = -images[m].end_point[2];
+        images[m].start_point[2]  = -images[m].start_point[2];
+        images[m].end_point[2]    = -images[m].end_point[2];
         images[m].middle_point[2] = -images[m].middle_point[2];
     }
+    size_t ne = num_electrodes;
+    size_t nn = num_nodes;
     size_t ne2 = num_electrodes*num_electrodes;
     size_t nn2 = num_nodes*num_nodes;
-    size_t ss1 = (2*num_electrodes + num_nodes);
-    size_t ss2 = ss1*ss1;
-    _Complex double kappa, gamma, zinternal;
-    _Complex double *zl = malloc(sizeof(_Complex double)*ne2);
-    _Complex double *zt = malloc(sizeof(_Complex double)*ne2);
-    _Complex double *yn = calloc(nn2, sizeof(_Complex double));
-    _Complex double *ie = calloc(ss1, sizeof(_Complex double));
-    _Complex double *ie_cp = malloc(sizeof(_Complex double)*ss1);
-    _Complex double *we = malloc(sizeof(_Complex double)*ss2);
-    _Complex double *we_cp = malloc(sizeof(_Complex double)*ss2);
-    ie[0] = 1.0;
-    fill_incidence_imm(we, electrodes, num_electrodes, nodes, num_nodes);
-    // solve for each frequency: WE*VE = IE
-    _Complex double s;
-    _Complex double ref_l, ref_t;
-    for (size_t k = 0; k < nf; k++) {
-        s = I*TWO_PI*freq[k];
-        kappa = (sigma + s*er*EPS0); //soil complex conductivity
-        gamma = csqrt(s*MU0*kappa); //soil propagation constant
-        ref_t = (kappa - s*EPS0)/(kappa + s*EPS0);
-        //ref_l = (1 - ref_t);
-        ref_l = ref_t;
-        //TODO especialized impedance calculation taking advantage of symmetry
-        calculate_impedances(electrodes, num_electrodes, zl, zt, gamma, s, 1.0,
-                             kappa, max_eval, req_abs_error, req_rel_error,
-                             ERROR_PAIRED, INTG_DOUBLE);
-        zinternal = internal_impedance(s, rho_c, electrodes[0].radius, 1.0, &read)
-                    *electrodes[0].length;
-        for (size_t m = 0; m < num_electrodes; m++) {
-            zl[m*num_electrodes + m] += zinternal;
+    _Complex double kappa, gamma;
+    _Complex double* restrict potzl = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* restrict potzt = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* restrict potzli = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* restrict potzti = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* restrict zl = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* restrict zt = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* restrict zli = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* restrict zti = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* restrict ie = calloc(nn2, sizeof(_Complex double));
+    _Complex double* restrict yn = calloc(nn2, sizeof(_Complex double));
+    _Complex double* restrict a = malloc((num_electrodes*num_nodes) * sizeof(_Complex double));
+    _Complex double* restrict b = malloc((num_electrodes*num_nodes) * sizeof(_Complex double));
+    _Complex double s, ref_l, ref_t, rbar, exp_gr, iwu_4pi, one_4pik;
+    // Incidence and "z-potential" (mHEM) matrices =============================
+    err = fill_incidence_adm(a, b, electrodes, ne, nodes, nn);
+    if (err != 0) printf("Could not build incidence matrices\n");
+    err = calculate_impedances(potzl, potzt, electrodes, ne, 0.0, 0.0, 0.0, 0.0,
+                               max_eval, req_abs_error, req_rel_error, INTG_MHEM);
+    if (err != 0) printf("integration error\n");
+    err = impedances_images(potzli, potzti, electrodes, images, ne,
+                            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, max_eval,
+                            req_abs_error, req_rel_error, INTG_MHEM);
+    if (err != 0) printf("integration error\n");
+    for (size_t i = 0; i < nf; i++) {
+        ie[0] = 1.0;
+        for (size_t m = 1; m < num_nodes; m++) {
+            ie[m] = 0.0;
         }
-        impedances_images(electrodes, images, num_electrodes, zl, zt, gamma,
-                          s, 1.0, kappa, ref_l, ref_t, max_eval, req_abs_error,
-                          req_rel_error, ERROR_PAIRED, INTG_DOUBLE);
-        fill_impedance_imm(we, num_electrodes, num_nodes, zl, zt, yn);
-        //The matrices are pivoted in-place. To recover them, copy
-        for (size_t i = 0; i < ss2; i++) {
-            we_cp[i] = we[i];
+        s = I * TWO_PI * freq[i];
+        kappa = (sigma + s * er * EPS0);  // soil complex conductivity
+        gamma = csqrt(s * MU0 * kappa);  // soil propagation constant
+        ref_t = (kappa - s * EPS0) / (kappa + s * EPS0);
+        ref_l = 1.0;  // longitudinal current has positive image
+        // modified HEM (mHEM):
+        iwu_4pi = s * MU0 / (FOUR_PI);
+        one_4pik = 1.0 / (FOUR_PI * kappa);
+        for (size_t m = 0; m < ne; m++) {
+            for (size_t k = m; k < ne; k++) {
+                rbar = vector_length(electrodes[k].middle_point,
+                                     electrodes[m].middle_point);
+                exp_gr = cexp(-gamma * rbar);
+                zl[m * ne + k] = exp_gr * potzl[m * ne + k];
+                zt[m * ne + k] = exp_gr * potzt[m * ne + k];
+                rbar = vector_length(electrodes[k].middle_point,
+                                     images[m].middle_point);
+                exp_gr = cexp(-gamma * rbar);
+                zl[m * ne + k] += ref_l * exp_gr * potzli[m * ne + k];
+                zt[m * ne + k] += ref_t * exp_gr * potzti[m * ne + k];
+                zl[m * ne + k] *= iwu_4pi;
+                zt[m * ne + k] *= one_4pik;
+            }
         }
-        for (size_t i = 0; i < ss1; i++) {
-            ie_cp[i] = ie[i];
-        }
-        read = solve_immittance(we_cp, ie_cp, num_electrodes, num_nodes);
-        if (read != 0) exit(read);
-        fprintf(save_file, "%f %f\n", creal(ie[0]), cimag(ie[0]));
+        // Traditional HEM (highly discouraged):
+        /*calculate_impedances(zl, zt, electrodes, ne, gamma, s, 1.0, kappa,
+                             max_eval, req_abs_error, req_rel_error, INTG_DOUBLE);
+        impedances_images(zl, zt, electrodes, images, ne, gamma, s, 1.0,
+                          kappa, ref_l, ref_t, max_eval, req_abs_error,
+                          req_rel_error, INTG_DOUBLE);*/
+        fill_impedance_adm(yn, zl, zt, a, b, num_electrodes, num_nodes);
+        err = solve_admittance(yn, ie, num_nodes);
+        if (err != 0) exit(err);
+        fprintf(save_file, "%f + %f%s\n", creal(ie[0]), cimag(ie[0]), "im");
+        fflush(save_file);
     }
     fclose(save_file);
     free(electrodes);
     free(images);
     free(nodes);
+    free(potzl);
+    free(potzt);
+    free(potzli);
+    free(potzti);
     free(zl);
     free(zt);
-    free(yn);
+    free(zli);
+    free(zti);
     free(ie);
-    free(ie_cp);
-    free(we);
-    free(we_cp);
+    free(yn);
     return 0;
 }
 
 int
-main ()
+run_case (int gs, int div, size_t nf)
 {
+    return run_case_adm(gs, div, nf);
+}
+
+/**
+Run cases GS10, GS20, GS30, GS60 and GS120, all with segments of length 10/3 m
+and 150 frequencies.
+*/
+int
+sweep ()
+{
+    printf("Making a sweep of many cases.\n");
+    size_t nf = 150;
     clock_t begin, end;
     double time_spent;
+    int div = 3;
     // ===================================================
     printf("computing GS10\n");
     begin = clock();
-    run_case(10, 12, 12);
+    run_case(10, div, nf);
     end = clock();
     time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
     printf("GS10: end; elapsed time: %f s\n", time_spent);
     // ===================================================
     printf("computing GS20\n");
     begin = clock();
-    run_case(20, 36, 33);
+    run_case(20, div, nf);
     end = clock();
     time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
     printf("GS20: end; elapsed time: %f s\n", time_spent);
     // ===================================================
     printf("computing GS30\n");
     begin = clock();
-    run_case(30, 72, 64);
+    run_case(30, div, nf);
     end = clock();
     time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
     printf("GS30: end; elapsed time: %f s\n", time_spent);
     // ===================================================
     printf("computing GS60\n");
     begin = clock();
-    run_case(60, 252, 217);
+    run_case(60, div, nf);
     end = clock();
     time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
     printf("GS60: end; elapsed time: %f s\n", time_spent);
     // ===================================================
     printf("computing GS120\n");
     begin = clock();
-    run_case(120, 936, 793);
+    run_case(120, div, nf);
     end = clock();
-    time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
-    printf("GS120: end; elapsed time: %f s\n", time_spent);
+    time_spent = (double) (end - begin)/CLOCKS_PER_SEC/60;
+    printf("GS120: end; elapsed time: %f min.\n", time_spent);
     // ===================================================
+    return 0;
+}
+
+int
+main (int argc, char *argv[])
+{
+    char *p;
+    if (argc == 2 && strtol(argv[1], &p, 10) == 0) return sweep();
+    if (argc < 3) {
+        printf("wrong number of arguments, must be 3:\n");
+        printf("  gs  : grid size in meters\n");
+        printf("  len : segments' maximum length in meters\n");
+        printf("  nf  : number of frequencies (logspace from 10^2 to 10^(6.4) Hz)\n");
+        exit(argc);
+    }
+    int gs  = strtol(argv[1], &p, 10);
+    float len = strtof(argv[2], &p);
+    int nf  = strtol(argv[3], &p, 10);
+    printf("gs  = %i x %i m^2\n", gs, gs);
+    printf("len = %.2f m\n", len);
+    printf("nf  = %i\n", nf);
+    clock_t begin, end;
+    double time_spent;
+    begin = clock();
+    int div = ceil(10/len);
+    run_case(gs, div, nf);
+    end = clock();
+    time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
+    printf("elapsed time: %f s\n", time_spent);
     return 0;
 }

@@ -1,9 +1,10 @@
 
 *.dll
 *.so
-*.dat
 *.a
 *.o
 *.exe
 *.lib
 *.mexw64
+*.csv
+docs/**

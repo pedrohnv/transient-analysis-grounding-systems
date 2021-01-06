@@ -1,178 +1,177 @@
-/** High Performance Hybrid Electromagnetic Model calculations in C.
-
-All parameters' units are in the SI base units if omitted.
+/* High Performance implementation of the Hybrid Electromagnetic Model
+Released under the General Public License 3 (GPLv3).
+All parameters' units are in the SI base if omitted.
 
 Routines to manipulate the Electrode struct and do the base calculations, i.e.,
 numerical integration and impedances calculation. It also includes any routines
 to build the linear system to be solved that do not depend on linear algebra
 libraries.
-
-TODO insert condition to check if sender == receiver?
-    during integration and calculate distance from center radius
 */
 #ifndef ELECTRODE_H_
 #define ELECTRODE_H_
 
 #include <complex.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-//default integration options ===============================================
-/** Integration_type
-Type of integration and simplification thereof to be done.
-@param NONE integration has closed form solution \f$ e^{-\gamma \bar r}}{\bar r} L_s L_r \f$
-@param INTG_DOUBLE \f$ \int_0^{L_s} \int_0^{L_r} \frac{e^{-\gamma r}}{r} dl_r dl_s \f$
-@param INTG_EXP_LOGNF \f$ \int_0^{L_r} e^{-\gamma \bar r} Log(N_f) dl_r \f$
-@param INTG_LOGNF \f$ e^{-\gamma \bar r} \int_0^{L_r} Log(N_f) dl_r \f$
-*/
+/** Type of integration and simplification thereof to be done. */
 enum
 Integration_type {
+    /** No integration, returns the geometric distance between middle points */
     INTG_NONE = 1,
+    /** Traditional integral along both electrodes
+    \f$ \int_0^{L_i} \int_0^{L_k} \frac{e^{-\gamma r}}{r} d\ell_k \, d\ell_i \f$ */
     INTG_DOUBLE = 2,
+    /** Traditional integral along sender electrodes
+    \f$ \int_0^{L_k} \frac{e^{-\gamma r}}{r} d\ell_k \f$ */
     INTG_SINGLE = 3,
-    INTG_EXP_LOGNF = 4,
-    INTG_LOGNF = 5
+    /** Modified HEM integral
+    \f$ \int_0^{L_k} \log_e \left( \frac{R_1 + R_2 + L_i}{R_1 + R_2 - L_i} \right) d\ell_k \f$ */
+    INTG_MHEM = 4
 };
 
-/** Electrode
-Structure that defines an electrode.
-@param start_point array `(x,y,z)` that defines the starting point of the
-electrode
-@param end_point array `(x,y,z)` defining the ending point
-@param middle_point array `(x,y,z)` of the middle point:
-`(start_point + end_point)/2`
-@param length electrode length `Norm(start_point - end_point)`
-@param radius electrode radius
-@param zi internal impedance of the electrode (Ohm)
-*/
+/** Structure that defines an electrode (conductor segment). */
 typedef struct {
+    /** Array \f$(x,y,z)_0\f$ that defines the starting point of the electrode */
     double start_point[3];
+    /** Array \f$(x,y,z)_1\f$ that defines the ending point of the electrode */
     double end_point[3];
+    /** Array \f$\frac{(x,y,z)_1 + (x,y,z)_0}{2}\f$ of the middle point of the electrode */
     double middle_point[3];
+    /** The electrode length \f$ \| (x,y,z)_1 - (x,y,z)_0 \|_2 \f$ */
     double length;
+    /** The electrode radius */
     double radius;
-    _Complex double zi;
 } Electrode;
 
-/** Integration_data
-Structure to make the integration of the "potential" between two electrodes.
-@param sender electrode that generates the excitation
-@param receiver electrode that is excitated
-@param gamma complex propagation constant of the medium
-@param simplified integration being done is INTG_EXP_LOGNF (false) or
-INTG_LOGNF (true); no use otherwise
+/** Structure to make the integration of the "potential" between two electrodes.
 @see Integration_type
 */
 typedef struct {
-    const Electrode *sender;
-    const Electrode *receiver;
+    /** Current carrying Electrode that generates the excitation. */
+    const Electrode* sender;
+    /** Potential receiving Electrode that receives the excitation. */
+    const Electrode* receiver;
+    /** Complex propagation constant of the medium
+    \f$ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} \f$ */
     _Complex double gamma;
-    int simplified;
 } Integration_data;
 
-/** populate_electrode
-Populates an Electrode structure.
-@param electrode pointer to an allocated memory
-@param start_point array `(x,y,z)` that defines the starting point of the
-electrode
-@param end_point array `(x,y,z)` defining the ending point
-@param radius electrode radius
-@param zi total internal impedance of the electrode
+/** Structure to pass all needed arguments by magnetic_potential to mag_pot_integral.
+@see magnetic_potential
+@see https://github.com/stevengj/cubature
+*/
+typedef struct {
+    /** Line integral start point */
+    const double* point1;
+    /** Line integral end point */
+    const double* point2;
+    /** array of electrodes */
+    const Electrode* electrodes;
+    /** number of electrodes \f$ m \f$ */
+    size_t num_electrodes;
+    /** longitudinal currents array \f$ I_L \f$ */
+    const _Complex double* il;
+    /** transversal currents array \f$ I_T \f$ */
+    const _Complex double* it;
+    /** medium propagation constant
+        \f$ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} \f$ */
+    _Complex double gamma;
+    /** complex frequency
+        \f$ s = c + j\omega \f$ */
+    _Complex double s;
+    /** relative magnetic permeability of the medium \f$ \mu_r \f$ */
+    double mur;
+    /** medium complex conductivity
+        \f$ \sigma + j\omega\varepsilon \f$ in [S/m] */
+    _Complex double kappa;
+    /** specifies a maximum number of function evaluations (0 for no limit) */
+    size_t max_eval;
+    /** the absolute error requested (0 to ignore) */
+    double req_abs_error;
+    /** req_rel_error the relative error requested (0 to ignore) */
+    double req_rel_error;
+} Field_integrand_data;
+
+
+/** Populates an Electrode structure.
+@param pointer to an allocated memory
+@param start_point Array \f$(x,y,z)_0\f$ that defines the starting point of the electrode
+@param start_point Array \f$(x,y,z)_0\f$ that defines the ending point of the electrode
+@param radius electrode radius The Electrode radius
 @return 0 on success
 */
 int
 populate_electrode (Electrode *electrode, const double start_point[3],
-                    const double end_point[3], double radius, _Complex double zi);
+                    const double end_point[3], double radius);
 
-/** electrodes_file
-Populates an Electrode array from a file. Each Electrode must be defined in
-a single line with parameters: "x0 y0 z0 x1 y1 z1 radius Re(zi) Im(zi)".
-The @param `num_electrodes` is the number of lines in the file to be read.
-Any line number greater than `num_electrodes` will be ignored.
+/** Compares two electrodes for equality: have the same radius and coincide the
+starts and end points (independent of direction).
+@param sender Electrode
+@param receiver Electrode
+@return true or false
+*/
+bool
+equal_electrodes (const Electrode *sender, const Electrode *receiver);
+
+/** Populates an Electrode array from a CSV file. Each Electrode must be defined in
+a single line with parameters: "x0, y0, z0, x1, y1, z1, radius".
 @param file_name path to the file
 @param electrodes pointer to an array of Electrode to be filled
-@param num_electrodes number of electrodes to read (number of lines in file)
-@return error
-    error == 0 on success
-    error < 0: number of missing arguments from last line read (as a negative integer)
-    error > 0: bad input
+@param num_electrodes number of electrodes to read (number of lines in file).
+    Any line number greater than num_electrodes will be ignored.
+@return error == 0 on success \n
+        error < 0: number of missing arguments from last line read (as a negative integer) \n
+        error > 0: bad input
 */
 int
-electrodes_file (const char file_name[], Electrode *electrodes,
-                 size_t num_electrodes);
+electrodes_file (const char file_name[], Electrode *electrodes, size_t num_electrodes);
 
-/** electrode_grid
-Creates a (length1 x length2) grid that has (v1 x v2) vertices. Each edge
-is divided into l1 and l2 segments (row and column, respectively).
-To calculate the number of electrodes and nodes, use the following formulas:
-    num_electrodes = l1*v2*(v1 - 1) + l2*v1*(v2 - 1)
-    num_nodes = v1*v2 + v1*(v2 - 1)*(l2 - 1) + v2*(v1 - 1)*(l1 - 1)
-      1   .....   v1
-      o---o---o---o  1
-      |   |   |   |  .
-  L2  o---o---o---o  .
-      |   |   |   |  .
-      o---o---o---o  v2
-            L1
-@param electrodes array of Electrode of size num_electrodes that will be filled
-@param nodes array of size num_nodes*3 that will be filled
-@param radius conductors radius
-@param depth grid burial depth (air-ground interface considered to be at z=0)
-@param zi constant internal impedance
-@param v1 number of vertice columns
-@param length1 total row length L1
-@param l1 number of divisions to do on each row edge
-@param v2 number of vertice rows
-@param length2 total column length L2
-@param l2 number of divisions to do on each column edge
-*/
-int
-electrode_grid (Electrode *electrodes, double *nodes, size_t num_nodes,
-                double radius, double depth, _Complex double zi, int v1,
-                double length1, int l1, int v2, double length2, int l2);
-
-/** nodes_file
-Fill a nodes array from a file. Each node must be defined in a single line
-with parameters: "x y z".
-The @param `num_nodes` is the number of lines in the file to be read.
-Any line number greater than `num_nodes` will be ignored.
+/** Fill a nodes array from a CSV file. Each node must be defined in a single line
+with parameters: "x, y, z".
 @param file_name path to the file
 @param nodes array of double[3] to be filled
-@param num_nodes number of nodes to read (number of lines in file)
-@return number of missing arguments from last line read (as a negative integer)
+@param num_nodes number of nodes to read (number of lines in file).
+    Any line number greater than num_nodes will be ignored.
+@return error == 0 on success \n
+        error < 0: number of missing arguments from last line read (as a negative integer) \n
+        error > 0: bad input
 */
 int
 nodes_file (const char file_name[], double *nodes, size_t num_nodes);
 
-/** segment_electrode
-Segments an electrode (conductor) populating a passed array of electrodes and
-an array of nodes.
+/** Segments an electrode populating a passed array of electrodes and an array of nodes.
 @param electrodes pointer to an array of Electrode to be filled
-@param nodes flat array `(num_segments + 1) x 3` to be filled by the new nodes
+@param nodes flat array \f$3 (n + 1)\f$ to be filled by the new nodes
 that are created
-@param num_segments number of segments to do
+@param num_segments number \f$ n \f$ of segments to create
 @param start_point electrode's start point
 @param end_point electrode's end point
 @param radius electrode's radius
-@param unit_zi internal impedance per unit length (Ohm/m)
 @return 0 on success
 */
 int
 segment_electrode (Electrode *electrodes, double *nodes, size_t num_segments,
-                   const double *start_point, const double *end_point,
-                   double radius, _Complex double unit_zi);
+                   const double *start_point, const double *end_point, double radius);
 
-/** nodes_from_elecs
-TODO test
+/** DON'T USE THIS FUNCTIONS, IT'S BUGGED.
+
+Given an array of electrodes, populates the nodes array with all the unique
+nodes.
+@param nodes flat array of size \f$n \ge 3(m + 1)\f$ to be filled with
+   the unique nodes.
+@param electrodes array of electrodes
+@param num_electrodes number $m$ of electrodes
+@returns number of unique nodes \f$n_u\f$; can be used to realloc the nodes array
 */
 size_t
 nodes_from_elecs (double *nodes, Electrode *electrodes, size_t num_electrodes);
 
-/** integrand_double
-Calculates the integrand \f$ \frac{e^{-\gamma r}}{r} \f$ to be integrated
+/** Calculates the integrand \f$ \frac{e^{-\gamma r}}{r} \f$ to be integrated
 using Cubature.
 @param ndim must be = 2
-@param t array of electrodes length's percentage (0 to 1)
-@param auxdata Integration_data
+@param t array of size 2 of the electrodes' length as a percentage (0 to 1)
+@param auxdata Integration_data with electrodes and propagation constant
 @param fdim must be = 2
 @param fval pointer to where the result is stored
 @return 0 on success
@@ -185,12 +184,11 @@ int
 integrand_double (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
                   double *fval);
 
-/** integrand_single
-Calculates the integrand \f$ \frac{e^{-\gamma r}}{r} \f$ to be integrated
+/** Calculates the integrand \f$ \frac{e^{-\gamma r}}{r} \f$ to be integrated
 using Cubature; but the point on the receiver electrode is fixed at its middle.
 @param ndim must be = 1
-@param t array of electrodes length's percentage (0 to 1)
-@param auxdata Integration_data
+@param t array of size 1 of the sender electrode's length as a percentage (0 to 1)
+@param auxdata Integration_data with electrodes and propagation constant
 @param fdim must be = 2
 @param fval pointer to where the result is stored
 @return 0 on success
@@ -203,12 +201,12 @@ int
 integrand_single (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
                   double *fval);
 
-/** exp_logNf
-Calculates the simplified integrand \f$ e^{-\gamma \bar r} Log(N_f) \f$ to be used
-in Cubature integration.
+/** Calculates the mHEM integrand
+\f$ \int_0^{L_k} \log_e \left( \frac{R_1 + R_2 + L_i}{R_1 + R_2 - L_i} \right) d\ell_k \f$
+to be used in Cubature integration.
 @param ndim must be = 1
-@param t receiver's length percentage (0 to 1)
-@param auxdata Integration_data
+@param t array of size 1 with receiver's length percentage (0 to 1)
+@param auxdata Integration_data with electrodes and propagation constant
 @param fdim must be = 2
 @param fval pointer to where the result is stored
 @return 0 on success
@@ -218,142 +216,57 @@ in Cubature integration.
 @see https://github.com/stevengj/cubature
 */
 int
-exp_logNf (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
-           double *fval);
+logNf (unsigned ndim, const double *t, void *auxdata, unsigned fdim, double *fval);
 
-/** integral
-Calculates the integral along the sender and receiver using Cubature.
-@param sender Electrode
-@param receiver Electrode
+/** Calculates the mHEM closed form solution of the integral when the sender and receiver
+segments are the same (self impedance).
+\f$ 2 L_k \left[ \log_e \left( \frac{\sqrt{1 + (b/L_k)^2} + 1}{b/L_k} \right)
+- \sqrt{1 + \left(\frac{b}{L_k}\right)^2} + \frac{b}{L_k}  \right] \f$
+*/
+_Complex double
+self_integral (const Electrode *sender);
+
+/** Calculates the integral along the sender and receiver using Cubature.
+Note that the integration stops when either max_eval or req_abs_error
+or req_rel_error is reached.
+@param sender Current carrying Electrode that generates the excitation.
+@param receiver Potential receiving Electrode that receives the excitation.
 @param gamma medium propagation constant
-@param max_eval specifies a maximum number of function evaluations (0 for no
-limit)
+  \f$ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} \f$
+@param max_eval specifies a maximum number of function evaluations (0 for no limit)
 @param req_abs_error the absolute error requested (0 to ignore)
 @param req_rel_error the relative error requested (0 to ignore)
-@param error_norm (enumeration defined in cubature.h) error checking scheme
 @param integration_type type of integration to be done.
-@param result array[2] where to store the integral result (real and imaginary
-parts)
-@param error array[2] where to store the integral error (real and imaginary
-parts)
-@return 0 on success, -10 if integration_type is unrecognized.
+@param result array[2] where to store the integral result (real and imaginary parts)
+@param error array[2] where to store the integral error (real and imaginary parts)
+@return 0 on success \n
+      -10 if integration_type is unrecognized.
 @see Integration_type
 @see https://github.com/stevengj/cubature
 */
 int
 integral (const Electrode *sender, const Electrode *receiver, _Complex double gamma,
           size_t max_eval, double req_abs_error, double req_rel_error,
-          int error_norm, int integration_type, double result[2], double error[2]);
+          int integration_type, double result[2], double error[2]);
 
-/** internal_impedance
-Calculates the internal impedance per unit length of cylindrical conductors.
-@param s complex angular frequency `c + I*w` (rad/s)
-@param rho conductor resistivity
-@param radius conductor radius
-@param mur relative magnetic permeability of the conductor
-@param ierr zbesi error code
-@return zin (Ohm/m) or 0.0 if ierr != 0
-*/
-_Complex double
-internal_impedance (_Complex double s, double rho, double radius, double mur,
-                    int *ierr);
-
-// Longitudinal impedance
-/** longitudinal_self
-Calculates the self longitudinal impedance of a given electrode.
-@param electrode
-@param s complex angular frequency `c + I*w` (rad/s)
-@param mur relative magnetic permeability of the medium
-@return zlp
-*/
-_Complex double
-longitudinal_self (const Electrode *electrode, _Complex double s, double mur);
-
-/** longitudinal_mutual
-Calculates the mutual longitudinal impedance of given electrodes.
-@param sender Electrode
-@param receiver Electrode
-@param s complex angular frequency `c + I*w` (rad/s)
-@param mur relative magnetic permeability of the medium
-@param gamma medium propagation constant
-@param max_eval specifies a maximum number of function evaluations (0 for no
-limit)
-@param req_abs_error the absolute error requested (0 to ignore)
-@param req_rel_error the relative error requested (0 to ignore)
-@param error_norm (enumeration defined in cubature.h) error checking scheme
-@param integration_type type of integration to be done.
-@param result array[2] where to store the integral result (real and imaginary
-parts)
-@param error array[2] where to store the integral error (real and imaginary
-parts)
-@return zlm
-@see integral
-@see Integration_type
-@see https://github.com/stevengj/cubature
-*/
-_Complex double
-longitudinal_mutual (const Electrode *sender, const Electrode *receiver,
-                     _Complex double s, double mur, _Complex double gamma,
-                     size_t max_eval, double req_abs_error, double req_rel_error,
-                     int error_norm, int integration_type, double result[2],
-                     double error[2]);
-
-// Transveral impedance
-/** transversal_self
-Calculates the self transversal impedance of a given electrode.
-@param electrode
-@param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
-@return ztp
-*/
-_Complex double
-transversal_self (const Electrode *electrode, _Complex double kappa);
-
-/** transversal_mutual
-Calculates the mutual transversal impedance of given electrodes.
-@param sender Electrode
-@param receiver Electrode
-@param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
-@param gamma medium propagation constant
-@param max_eval specifies a maximum number of function evaluations (0 for no
-limit)
-@param req_abs_error the absolute error requested (0 to ignore)
-@param req_rel_error the relative error requested (0 to ignore)
-@param error_norm (enumeration defined in cubature.h) error checking scheme
-@param integration_type type of integration to be done.
-@param result array[2] where to store the integral result (real and imaginary
-parts)
-@param error array[2] where to store the integral error (real and imaginary
-parts)
-@return ztm
-@see integral
-@see Integration_type
-@see https://github.com/stevengj/cubature
-*/
-_Complex double
-transversal_mutual (const Electrode *sender, const Electrode *receiver,
-                    _Complex double kappa, _Complex double gamma, size_t max_eval,
-                    double req_abs_error, double req_rel_error, int error_norm,
-                    int integration_type, double result[2], double error[2]);
-
-// Electrode system
-
-/** calculate_impedances
-Calculates the impedance matrices.
+/** Calculates the impedance matrices \f$ Z_L, Z_T \f$. As they are symmetric,
+only their lower half is stored (set).  If pointer zl = zt, then the resulting
+matrix will be filled with zt.\n
+If integration_type == INTG_MHEM or integration_type == INTG_NONE, then parameters
+gamma, s, mur and kappa are ignored such that
+\f$ \frac{j\omega\mu}{4\pi} = \frac{1}{4\pi\,(\sigma + j\omega\varepsilon)} = 1 \f$.
+@param zl longitudinal impedance matrix \f$ Z_L \f$ as a flat array of size \f$ m^2 \f$
+@param zt transversal impedance matrix \f$ Z_T \f$ as a flat array of size \f$ m^2 \f$
 @param electrodes array of electrodes
-@param num_electrodes number of electrodes
-@param zl longitudinal impedance matrix as a flat array of size
-`num_electrodes^2`
-@param zt transversal impedance matrix as a flat array of size
-`num_electrodes^2`
+@param num_electrodes number of electrodes \f$ m \f$
 @param gamma medium propagation constant
-@param s complex angular frequency `c + I*w` (rad/s)
-@param mur relative magnetic permeability of the medium
-@param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
-@param max_eval specifies a maximum number of function evaluations (0 for no
-limit)
+    \f$ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} \f$
+@param s complex angular frequency \f$ s = c + j\omega \f$ in [rad/s]
+@param mur relative magnetic permeability of the medium \f$ \mu_r \f$
+@param kappa medium complex conductivity \f$ \sigma + j\omega\varepsilon \f$ in [S/m]
+@param max_eval specifies a maximum number of function evaluations (0 for no limit)
 @param req_abs_error the absolute error requested (0 to ignore)
 @param req_rel_error the relative error requested (0 to ignore)
-@param error_norm (enumeration defined in cubature.h) error checking scheme
 @param integration_type type of integration to be done.
 @return 0 on success
 @see integral
@@ -361,32 +274,33 @@ limit)
 @see https://github.com/stevengj/cubature
 */
 int
-calculate_impedances (const Electrode *electrodes, size_t num_electrodes,
-                      _Complex double *zl, _Complex double *zt,
+calculate_impedances (_Complex double *zl, _Complex double *zt,
+                      const Electrode *electrodes, size_t num_electrodes,
                       _Complex double gamma, _Complex double s, double mur,
                       _Complex double kappa, size_t max_eval, double req_abs_error,
-                      double req_rel_error, int error_norm, int integration_type);
+                      double req_rel_error, int integration_type);
 
-/** impedances_images
-Add the images effect to the impedance matrices.
+/** Add the images' effect to the impedance matrices \f$ Z_L \f$ and \f$ Z_T \f$.
+As they are symmetric, only their lower half is stored (set). If pointer
+zl = zt, then the resulting matrix will be filled with zt.\n
+If integration_type == INTG_MHEM or integration_type == INTG_NONE, then parameters
+gamma, s, mur, kappa, ref_l and ref_t are ignored such that
+\f$ \Gamma_L \frac{j\omega\mu}{4\pi} = \Gamma_T \frac{1}{4\pi\,(\sigma + j\omega\varepsilon)} = 1 \f$.
+@param zl longitudinal impedance matrix \f$ Z_L \f$ as a flat array of size \f$ m^2 \f$
+@param zt transversal impedance matrix \f$ Z_T \f$ as a flat array of size \f$ m^2 \f$
 @param electrodes array of electrodes
 @param images array of electrodes
-@param num_electrodes number of electrodes
-@param zl longitudinal impedance matrix as a flat array of size
-`num_electrodes^2`s
-@param zt transversal impedance matrix as a flat array of size
-`num_electrodes^2`
+@param num_electrodes number of electrodes \f$ m \f$
 @param gamma medium propagation constant
-@param s complex angular frequency `c + I*w` (rad/s)
-@param mur relative magnetic permeability of the medium
-@param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
-@param ref_l longitudinal current reflection coefficient
-@param ref_t transversal current reflection coefficient
-@param max_eval specifies a maximum number of function evaluations (0 for no
-limit)
+    \f$ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} \f$
+@param s complex angular frequency \f$ s = c + j\omega \f$ in [rad/s]
+@param mur relative magnetic permeability of the medium \f$ \mu_r \f$
+@param kappa medium complex conductivity \f$ \sigma + j\omega\varepsilon \f$ in [S/m]
+@param ref_l longitudinal current reflection coefficient \f$ \Gamma_L \f$
+@param ref_t transversal current reflection coefficient \f$ \Gamma_T \f$
+@param max_eval specifies a maximum number of function evaluations (0 for no limit)
 @param req_abs_error the absolute error requested (0 to ignore)
 @param req_rel_error the relative error requested (0 to ignore)
-@param error_norm (enumeration defined in cubature.h) error checking scheme
 @param integration_type type of integration to be done.
 @return 0 on success
 @see integral
@@ -394,151 +308,92 @@ limit)
 @see https://github.com/stevengj/cubature
 */
 int
-impedances_images (const Electrode *electrodes, const Electrode *images,
-                   size_t num_electrodes, _Complex double *zl, _Complex double *zt,
-                   _Complex double gamma, _Complex double s, double mur,
-                   _Complex double kappa, _Complex double ref_l,
-                   _Complex double ref_t, size_t max_eval, double req_abs_error,
-                   double req_rel_error, int error_norm, int integration_type);
+impedances_images (_Complex double *zl, _Complex double *zt,
+                   const Electrode *electrodes, const Electrode *images,
+                   size_t num_electrodes, _Complex double gamma,
+                   _Complex double s, double mur, _Complex double kappa,
+                   _Complex double ref_l, _Complex double ref_t,
+                   size_t max_eval, double req_abs_error, double req_rel_error,
+                   int integration_type);
 
-/** electric_potential
-Calculates the scalar electric potential to remote earth at a point.
-@param point array `(x, y, z)`
+/** Calculates the scalar electric potential \f$ u \f$ to remote earth at a point.
+@param point array \f$(x, y, z)\f$
 @param electrodes array of electrodes
-@param num_electrodes number of electrodes
-@param it transversal currents array
+@param num_electrodes number of electrodes \f$ m \f$
+@param it transversal currents array \f$ I_T \f$
 @param gamma medium propagation constant
-@param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
-@param max_eval specifies a maximum number of function evaluations (0 for no
-limit)
+   \f$ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} \f$
+@param kappa medium complex conductivity \f$ \sigma + j\omega\varepsilon \f$ in [S/m]
+@param max_eval specifies a maximum number of function evaluations (0 for no limit)
 @param req_abs_error the absolute error requested (0 to ignore)
 @param req_rel_error the relative error requested (0 to ignore)
-@param error_norm (enumeration defined in cubature.h) error checking scheme
-return potential to remote earth
+@return potential \f$ u \f$ to remote earth
+@see https://github.com/stevengj/cubature
 */
 _Complex double
 electric_potential (const double *point, const Electrode *electrodes,
                     size_t num_electrodes, const _Complex double *it,
                     _Complex double gamma, _Complex double kappa,
-                    size_t max_eval, double req_abs_error, double req_rel_error,
-                    int error_norm);
+                    size_t max_eval, double req_abs_error, double req_rel_error);
 
-/** magnetic_potential
-Calculates the magnetic vector potential.
-@param point array `(x, y, z)`
+/** Calculates the magnetic vector potential \f$ \vec A \f$.
+@param point array \f$(x, y, z)\f$
 @param electrodes array of electrodes
-@param num_electrodes number of electrodes
-@param il longitudinal currents array
+@param num_electrodes number of electrodes \f$ m \f$
+@param il longitudinal currents array \f$ I_L \f$
 @param gamma medium propagation constant
-@param mur relative magnetic permeability of the medium
-@param max_eval specifies a maximum number of function evaluations (0 for no
-limit)
+    \f$ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} \f$
+@param mur relative magnetic permeability of the medium \f$ \mu_r \f$
+@param max_eval specifies a maximum number of function evaluations (0 for no limit)
 @param req_abs_error the absolute error requested (0 to ignore)
 @param req_rel_error the relative error requested (0 to ignore)
-@param error_norm (enumeration defined in cubature.h) error checking scheme
-@param va pointer to array of size `3` in which the magnetic vector potential
-components `Ax`, `Ay` and `Az` will be stored on return.
+@param va pointer to array of size 3 in which the magnetic vector potential
+components \f$ (A_x,A_y,A_z) \f$ will be stored on return.
 @return 0 on success
+@see https://github.com/stevengj/cubature
 */
 int
 magnetic_potential (const double *point, const Electrode *electrodes,
                     size_t num_electrodes, const _Complex double *il,
                     _Complex double gamma, double mur, size_t max_eval,
                     double req_abs_error, double req_rel_error,
-                    int error_norm, _Complex double *va);
+                    _Complex double *va);
 
-/** mag_pot_integrand
-interface to pass magnetic_potential as an integrand to Cubature when
-calculating the voltage along a path.
+/** Integrand to calculate the electric field caused by a differential
+transversal current \f$ dI_T \f$.
 @param ndim should be 1
 @param t integration variable (electrode percentage 0 to 1)
-@param auxdata pointer to Mag_pot_data struct
-@param fdim should be 2: Re(A.dl) + Im(A.dl)
+@param auxdata pointer to Field_integrand_data structure
+@param fdim should be 6 (Real and Imag.):
+    \f$ (\Re(E_x), \Im(E_x), \Re(E_y), \Im(E_y), \Re(E_z), \Im(E_z)) \f$
 @param fval where the results are stored
+    \f$ (\Re(E_x), \Im(E_x), \Re(E_y), \Im(E_y), \Re(E_z), \Im(E_z)) \f$
 return 0 on success
-*/
-int
-mag_pot_integrand (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
-                   double *fval);
-
-/** Mag_pot_data
-Structure to pass all needed arguments by magnetic_potential to mag_pot_integral.
-@see magnetic_potential
-*/
-typedef struct {
-    const double *point1;
-    const double *point2;
-    const Electrode *electrodes;
-    size_t num_electrodes;
-    const _Complex double *il;
-    _Complex double gamma;
-    double mur;
-    size_t max_eval;
-    double req_abs_error;
-    double req_rel_error;
-    int error_norm;
-} Mag_pot_data;
-
-/** voltage
-Calculates the voltage along a straight line from point1 to point2.
-@param point1 array `(x, y, z)` start point
-@param point2 array `(x, y, z)` end point
-@param electrodes array of electrodes
-@param num_electrodes number of electrodes
-@param il longitudinal currents array
-@param gamma medium propagation constant
-@param s complex angular frequency `c + I*w` (rad/s)
-@param mur relative magnetic permeability of the medium
-@param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
-@param max_eval specifies a maximum number of function evaluations (0 for no
-limit)
-@param req_abs_error the absolute error requested (0 to ignore)
-@param req_rel_error the relative error requested (0 to ignore)
-@param error_norm (enumeration defined in cubature.h) error checking scheme
-@return 0 on success
-*/
-_Complex double
-voltage (const double *point1, const double *point2,
-         const Electrode *electrodes, size_t num_electrodes,
-         const _Complex double *il, const _Complex double *it,
-         _Complex double gamma, _Complex double s, double mur,
-         _Complex double kappa, size_t max_eval, double req_abs_error,
-         double req_rel_error, int error_norm);
-
-/** elec_field_integrand
-Integrand to calculate the electric field caused by a differential
-transversal current dIt.
-@param ndim should be 1
-@param t integration variable (electrode percentage 0 to 1)
-@param auxdata pointer to Mag_pot_data struct
-@param fdim should be 6 (Real and Imag.): Ex, Ey, Ez
-@param fval where the results are stored
-return 0 on success
+@see https://github.com/stevengj/cubature
+@see electric_field
 */
 int
 elec_field_integrand (unsigned ndim, const double *t, void *auxdata,
                       unsigned fdim, double *fval);
 
-/**
-Calculates the electric field at a point.
-    \f$ \vec E = -∇u - s \vec A \f$
-@param point array `(x, y, z)`
+/** Calculates the electric field at a point. \f$ \vec E = -\nabla u - s \vec A \f$
+@param point array \f$ (x, y, z) \f$
 @param electrodes array of electrodes
-@param num_electrodes number of electrodes
-@param il longitudinal currents array
-@param it transversal currents array
+@param num_electrodes number of electrodes \f$ m \f$
+@param il longitudinal currents array \f$ I_L \f$
+@param it transversal currents array \f$ I_T \f$
 @param gamma medium propagation constant
-@param s complex angular frequency `c + I*w` (rad/s)
-@param mur relative magnetic permeability of the medium
-@param kappa medium complex conductivity `(sigma + I*w*eps)` in S/m
-@param max_eval specifies a maximum number of function evaluations (0 for no
-limit)
+    \f$ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} \f$
+@param s complex angular frequency \f$ s = c + j\omega \f$ in [rad/s]
+@param mur relative magnetic permeability of the medium \f$ \mu_r \f$
+@param kappa medium complex conductivity \f$ \sigma + j\omega\varepsilon \f$ in [S/m]
+@param max_eval specifies a maximum number of function evaluations (0 for no limit)
 @param req_abs_error the absolute error requested (0 to ignore)
 @param req_rel_error the relative error requested (0 to ignore)
-@param error_norm (enumeration defined in cubature.h) error checking scheme
-@param ve pointer to array of size `3` in which the electric field
-components `Ex`, `Ey` and `Ez` will be stored on return.
+@param ve pointer to array of size 3 in which the electric field
+components \f$ (E_x, E_y, E_z) \f$ will be add to on return.
 @return 0 on success
+@see elec_field_integrand
 */
 int
 electric_field (const double *point, const Electrode *electrodes,
@@ -546,6 +401,48 @@ electric_field (const double *point, const Electrode *electrodes,
                 const _Complex double *it, _Complex double gamma,
                 _Complex double s, double mur, _Complex double kappa,
                 size_t max_eval, double req_abs_error, double req_rel_error,
-                int error_norm, _Complex double *ve);
+                _Complex double *ve);
+
+/** Interface to pass magnetic_potential as an integrand to Cubature when
+calculating the voltage along a path.
+@param ndim should be 1
+@param t integration variable (electrode percentage 0 to 1)
+@param auxdata pointer to Field_integrand_data structure
+@param fdim should be 2: \f$ \Re(\vec A \cdot d\vec\ell) + \Im(\vec A \cdot d\vec\ell) \f$
+@param fval where the results are stored (array of size 2)
+return 0 on success
+@see https://github.com/stevengj/cubature
+*/
+int
+v_mag_pot_integrand (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
+                     double *fval);
+
+/** Calculates the voltage \f$ \Delta U_{12} \f$ along a straight line from
+\f$ \vec p_1 \f$ to \f$ \vec p_2 \f$.\n
+\f$ \Delta U_{12} = \int_{\vec p_1}^{\vec p_2}
+\left( -\nabla u - s \vec A \right) d\vec\ell \f$
+@param point1 Line integral start point \f$ \vec p_1 = (x,y,z)_1 \f$
+@param point2 Line integral start point \f$ \vec p_2 = (x,y,z)_2 \f$
+@param electrodes array of electrodes
+@param num_electrodes number of electrodes \f$ m \f$
+@param il longitudinal currents array \f$ I_L \f$
+@param gamma medium propagation constant
+    \f$ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} \f$
+@param s complex angular frequency \f$ s = c + j\omega \f$ in [rad/s]
+@param mur relative magnetic permeability of the medium \f$ \mu_r \f$
+@param kappa medium complex conductivity \f$ \sigma + j\omega\varepsilon \f$ in [S/m]
+@param max_eval specifies a maximum number of function evaluations (0 for no limit)
+@param req_abs_error the absolute error requested (0 to ignore)
+@param req_rel_error the relative error requested (0 to ignore)
+@return the voltage along the line
+@see https://github.com/stevengj/cubature
+*/
+_Complex double
+voltage (const double *point1, const double *point2,
+         const Electrode *electrodes, size_t num_electrodes,
+         const _Complex double *il, const _Complex double *it,
+         _Complex double gamma, _Complex double s, double mur,
+         _Complex double kappa, size_t max_eval, double req_abs_error,
+         double req_rel_error);
 
 #endif /* ELECTRODE_H_ */
