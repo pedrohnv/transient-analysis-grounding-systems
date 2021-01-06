@@ -41,7 +41,7 @@ linalg.o	:	src/linalg.c
 dynamic_library	:	libhphem.so
 
 libhphem.so	:	$(OBJECTS)
-		$(CC) $(CFLAGS) -fPIC -shared $(INCLUDE) -o libhphem.so $(OBJECTS) $(LINK)
+		$(CC) $(CFLAGS) -fPIC -shared $(INCLUDE) -o libhphem.so $(OBJECTS)
 
 # Examples are named based on publication: author_volume_journal_issue
 grcev12pwrd01	:	$(OBJECTS)

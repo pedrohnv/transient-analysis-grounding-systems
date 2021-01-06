@@ -643,13 +643,6 @@ voltage (const double* point1, const double* point2,
          _Complex double kappa, size_t max_eval, double req_abs_error,
          double req_rel_error)
 {
-    _Complex double u1, u2;
-    u1 = electric_potential(point1, electrodes, num_electrodes, it, gamma,
-                            kappa, max_eval, req_abs_error, req_rel_error);
-    u2 = electric_potential(point2, electrodes, num_electrodes, it, gamma,
-                            kappa, max_eval, req_abs_error, req_rel_error);
-    /*u1 = 0.0;
-    u2 = 0.0;*/
     Field_integrand_data* auxdata = malloc(sizeof(Field_integrand_data));
     auxdata->point1 = point1;
     auxdata->point2 = point2;
@@ -668,12 +661,9 @@ voltage (const double* point1, const double* point2,
     double tmax[] = {1.0};
     unsigned fdim = 2;
     double result[fdim], error[fdim];
-    //hcubature(fdim, v_mag_pot_integrand, auxdata, 1, tmin, tmax, max_eval,
     hcubature(fdim, v_elecf_integrand, auxdata, 1, tmin, tmax, max_eval,
               req_abs_error, req_rel_error, ERROR_PAIRED, result, error);
     free(auxdata);
-    //return (u1 - u2 - s * (result[0] + I * result[1]));
     return (result[0] + I * result[1]);
     // TODO alternative: integrate electric_field directly
-
 }

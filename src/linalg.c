@@ -131,7 +131,7 @@ solve_immittance (_Complex double* wg, _Complex double* ie,
     // Check for the exact singularity
     if (info > 0) {
         printf("The diagonal element of the triangular factor of YN,\n");
-        printf("U(%lli,%lli) is zero, so that YN is singular;\n", info, info);
+        printf("U(%i,%i) is zero, so that YN is singular;\n", info, info);
         printf("the solution could not be computed.\n");
     }
     free(work);
@@ -343,7 +343,7 @@ solve_admittance (_Complex double* yn, _Complex double* ic, size_t num_nodes)
     // Check for the exact singularity
     if (info > 0) {
         printf("The diagonal element of the triangular factor of YN,\n");
-        printf("U(%lli,%lli) is zero, so that YN is singular;\n", info, info);
+        printf("U(%i,%i) is zero, so that YN is singular;\n", info, info);
         printf("the solution could not be computed.\n");
     }
     return info;
