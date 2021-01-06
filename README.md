@@ -1,5 +1,7 @@
 # HP-HEM
-High Performance implementation of the Hybrid Electromagnetic Model and its variants
+High Performance implementation of the Hybrid Electromagnetic Model and its variants.
+
+The documentation of the code can be read at https://pedrohnv.github.io/hp_hem/
 
 The Hybrid Electromagnetic Model can be used to simulate any situation where the
 thin wire hypothesis is valid. See [1] for the mathematical formulation.
@@ -12,8 +14,8 @@ The permanent DOI is https://doi.org/10.5281/zenodo.2644010, which always resolv
 
 This library is intended to be easy to use. Interfaces to use it from other programming languages are provided for (work in progress, Julia is the recommended one):
 
-  Julia https://github.com/pedrohnv/hp_hem_julia
-  Matlab https://github.com/pedrohnv/hp_hem_matlab
+  - Julia https://github.com/pedrohnv/hp_hem_julia
+  - Matlab https://github.com/pedrohnv/hp_hem_matlab
 
 The `examples` folder contains various C files which reproduce results published in the technical literature. Use them as starting point to build your own cases in pure C if you want maximum performance. Examples of use from other programming languages are in their respective repository.
 

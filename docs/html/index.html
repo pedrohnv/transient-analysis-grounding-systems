@@ -73,7 +73,8 @@ $(function() {
 <div class="title">HP-HEM </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>High Performance implementation of the Hybrid Electromagnetic Model and its variants</p>
+<div class="textblock"><p>High Performance implementation of the Hybrid Electromagnetic Model and its variants.</p>
+<p>The documentation of the code can be read at <a href="https://pedrohnv.github.io/hp_hem/">https://pedrohnv.github.io/hp_hem/</a></p>
 <p>The Hybrid Electromagnetic Model can be used to simulate any situation where the thin wire hypothesis is valid. See [1] for the mathematical formulation.</p>
 <p>[1] VISACRO, S.; SOARES, A. HEM: A model for simulation of lightning-related engineering problems. IEEE Transactions on power delivery, v. 20, n. 2, p. 1206-1208, 2005.</p>
 <p>Cite the current release: <a href="https://zenodo.org/badge/latestdoi/151085118"><object type="image/svg+xml" data="https://zenodo.org/badge/151085118.svg" alt="DOI"></object>
@@ -81,7 +82,10 @@ $(function() {
 </a></p>
 <p>The permanent DOI is <a href="https://doi.org/10.5281/zenodo.2644010,">https://doi.org/10.5281/zenodo.2644010,</a> which always resolves to the last release.</p>
 <p>This library is intended to be easy to use. Interfaces to use it from other programming languages are provided for (work in progress, Julia is the recommended one):</p>
-<p>Julia <a href="https://github.com/pedrohnv/hp_hem_julia">https://github.com/pedrohnv/hp_hem_julia</a> Matlab <a href="https://github.com/pedrohnv/hp_hem_matlab">https://github.com/pedrohnv/hp_hem_matlab</a></p>
+<ul>
+<li>Julia <a href="https://github.com/pedrohnv/hp_hem_julia">https://github.com/pedrohnv/hp_hem_julia</a></li>
+<li>Matlab <a href="https://github.com/pedrohnv/hp_hem_matlab">https://github.com/pedrohnv/hp_hem_matlab</a></li>
+</ul>
 <p>The <code>examples</code> folder contains various C files which reproduce results published in the technical literature. Use them as starting point to build your own cases in pure C if you want maximum performance. Examples of use from other programming languages are in their respective repository.</p>
 <p>Dependencies:</p><ul>
 <li><a href="https://github.com/stevengj/cubature">Cubature</a></li>
