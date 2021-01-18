@@ -243,7 +243,7 @@ laplace_trans (double* f, _Complex double* g, _Complex double* s, double tmax, s
         s[k] = c + I * dw * k;
     }
     for (size_t k  = 0; k < nt; k++) {
-        in[k] = f[k] * dt * cexp(-c * k * dt);
+        in[k] = f[k] * dt * exp(-c * k * dt);
     }
     fftw_execute(p);
     // fftw_complex is _Complex double if fftw3.h is included after complex.h
@@ -310,7 +310,7 @@ inv_laplace_trans (double* f, _Complex double* g, _Complex double* s, double tma
     fftw_execute(plan);
     double c = creal(s[0]);
     for (size_t k = 0; k < nt; k++) {
-        f[k] = out[k] * cexp(c * k * dt) / (nt * dt);
+        f[k] = out[k] * exp(c * k * dt) / (nt * dt);
     }
     fftw_destroy_plan(plan);
     //free(in);

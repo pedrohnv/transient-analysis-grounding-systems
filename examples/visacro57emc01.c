@@ -95,7 +95,7 @@ run_case (double tmax, int nt, double Lmax, double* inj_t, const unsigned int NR
         s[k] = c + I * dw * k;
     }
     for (int k = 0; k < nt; k++) {
-        var = dt * cexp(-c * k * dt);
+        var = dt * exp(-c * k * dt);
         for (int i = 0; i < NRHS; i++) {
             nlt_input[k + nt * i] = var * inj_t[k + nt * i];
         }

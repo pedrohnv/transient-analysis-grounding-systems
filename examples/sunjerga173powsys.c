@@ -83,7 +83,7 @@ run_case (double tmax, int nt, double sigma0, double* inj_t, const unsigned int 
         s[k] = c + I * dw * k;
     }
     for (int k = 0; k < nt; k++) {
-        var = dt * cexp(-c * k * dt);
+        var = dt * exp(-c * k * dt);
         for (int i = 0; i < NRHS; i++) {
             nlt_input[k + nt * i] = var * inj_t[k + nt * i];
         }
@@ -447,7 +447,7 @@ run_case (double tmax, int nt, double sigma0, double* inj_t, const unsigned int 
     }  // end parallel
     printf("Frequency loop ended. Saving results.\n");
     // GPR  ==============================================================
-    _Complex double inlt_scale;
+    double inlt_scale;
     fftw_execute(gpr_plan);
     char gpr_file_name[60];
     sprintf(gpr_file_name, "sunjerga173powsys_gpr_%.0f.csv", 1/sigma0);
@@ -456,7 +456,7 @@ run_case (double tmax, int nt, double sigma0, double* inj_t, const unsigned int 
     for (unsigned k = 0; k < NRHS; k++) fprintf(gpr_file, ",i%d", k+1);
     fprintf(gpr_file, "\n");
     for (size_t i = 0; i < nt; i++) {
-        inlt_scale = cexp(c * i * dt) / (nt * dt);
+        inlt_scale = exp(c * i * dt) / (nt * dt);
         fprintf(gpr_file, "%e", dt * i);
         for (size_t k = 0; k < NRHS; k++) {
             fprintf(gpr_file, ",%e", cabs(gpr_t[i + nt * k] * inlt_scale));
@@ -477,7 +477,7 @@ run_case (double tmax, int nt, double sigma0, double* inj_t, const unsigned int 
     fprintf(gpd_file, "\n");
     begin = omp_get_wtime();
     for (size_t i = 0; i < nt; i++) {
-        inlt_scale = cexp(c * i * dt) / (nt * dt);
+        inlt_scale = exp(c * i * dt) / (nt * dt);
         for (size_t p = 0; p < num_points; p++) {
             fprintf(gpd_file, "%e,%f,%f", dt * i, points[p*3], points[p*3 + 1]);
             for (size_t k = 0; k < NRHS; k++) {
@@ -501,7 +501,7 @@ run_case (double tmax, int nt, double sigma0, double* inj_t, const unsigned int 
     }
     fprintf(efield_file, "\n");
     for (size_t i = 0; i < nt; i++) {
-        inlt_scale = cexp(c * i * dt) / (nt * dt);
+        inlt_scale = exp(c * i * dt) / (nt * dt);
         for (size_t p = 0; p < np_field; p++) {
             fprintf(efield_file, "%e,%f,%f", dt * i, points[3 * p], 0.0);
             for (size_t k = 0; k < NRHS; k++) {
