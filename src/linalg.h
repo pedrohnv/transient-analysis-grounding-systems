@@ -131,12 +131,12 @@ in the process. Useful when they are needed to calculate the currents
 \f$ I_L = Z_L^{-1} A U \f$ and \f$ I_T = Z_T^{-1} B U \f$.
 @param yla modified longitudinal admittance \f$ Z_L^{-1} A \f$ of size \f$ m \times n \f$
 @param ytb modified transversal admittance \f$ Z_T^{-1} B \f$ of size \f$ m \times n \f$
+@param zl longitudinal impedance matrix \f$ Z_L \f$ as a flat array of size \f$ m^2 \f$
+@param zt transversal impedance matrix \f$ Z_T \f$ as a flat array of size \f$ m^2 \f$
 @param a longitudinal incidence matrix \f$ A \f$ as flat array of size
 \f$ m \times n \f$ in COLUMN MAJOR ordering
 @param b transversal incidence matrix \f$ B \f$ as flat array of size
 \f$ m \times n \f$ in COLUMN MAJOR ordering
-@param zl longitudinal impedance matrix \f$ Z_L \f$ as a flat array of size \f$ m^2 \f$
-@param zt transversal impedance matrix \f$ Z_T \f$ as a flat array of size \f$ m^2 \f$
 @param num_electrodes number of electrodes \f$ m \f$
 @param num_nodes number of nodes \f$ n \f$
 @return 0 on success
