@@ -54,7 +54,7 @@ alipio_soil (_Complex double* sigma, _Complex double* epsr, double sigma0,
              _Complex double s, double h, double g, double eps_ratio)
 {
 
-    _Complex double f = s / TWO_PI;
+    _Complex double f = s / (TWO_PI * I);
     *sigma = (sigma0 + sigma0 * h * cpow(f/1e6, g));
     double t = tan(PI * g / 2) / (TWO_PI * EPS0 * pow(1e6, g));
     *epsr = eps_ratio + t * sigma0 * h * cpow(f, g - 1.0);

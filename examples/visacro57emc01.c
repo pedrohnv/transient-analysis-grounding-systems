@@ -55,9 +55,9 @@ run_case (double tmax, int nt, double Lmax, double* inj_t, const unsigned int NR
     double mur = 1.0;  // soil rel. magnetic permeability
     double sigma0 = 1.0 / 2000.0;  // soil conductivity in low frequency
     // parameters that I fitted:
-    double h_soil = 0.925 * pow(sigma0 * 1e3, -0.73);
-    double g_soil = 0.325;
-    double eps_ratio = 1.850;  // soil rel. permitivitty ratio
+    double h_soil = 2.1020 * pow(sigma0 * 1e3, -0.73);
+    double g_soil = 0.50890;
+    double eps_ratio = 3.6858;  // soil rel. permitivitty ratio
 
     // Laplace transform of the injection currents =============================
     // do it explicitly for performance reasons, see FFTW3 manual: http://fftw.org/fftw3_doc/
@@ -155,7 +155,6 @@ run_case (double tmax, int nt, double Lmax, double* inj_t, const unsigned int NR
             break;
         }
     }
-
     // define an array of points where to calculate ground scalar electric potential (GPD)
     // They form a grid of (1 x 1) [m^2] meshes
     double offset = 6.0;  // distance from groundig grid where to begin calculating GPD and fields
@@ -451,6 +450,7 @@ run_case (double tmax, int nt, double Lmax, double* inj_t, const unsigned int NR
                     }
                 }
             }
+            
             if (i == 0) {
                 printf("Expected more time until completion of the frequency loop: %.2f min.\n",
                        (omp_get_wtime() - begin) * ns / 60.0 / omp_get_num_threads());

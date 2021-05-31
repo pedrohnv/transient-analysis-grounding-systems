@@ -69,19 +69,17 @@ end
 
 ## Step Voltage along a line in the +x direction
 begin
-    df_gpd = DataFrame(CSV.File("visacro57emc01_gpd.csv"))
     df_efield = DataFrame(CSV.File("visacro57emc01_efield.csv"))
-    t = sort(unique(df_gpd.t))
+    t = sort(unique(df_efield.t))
     nt = length(t)
-    ninj = (size(df_gpd)[2] - 3)  # number of injections
+    ninj = (size(df)[2] - 3) ÷ 2  # number of injections
     for i = 1:ninj
-        gpd = eval(Meta.parse("df_gpd.i$(i)"))
         ecx = eval(Meta.parse("df_efield.ecx$(i)"))
         encx = eval(Meta.parse("df_efield.ecx$(i)"))
         for yi in [0, 8]
             for k in time_steps
                 # integral of the E conservative field =======================
-                x = sort(unique(df.x))
+                x = sort(unique(df_efield.x))
                 dx = x[2] - x[1]
                 c = isapprox.(df_efield.t, t[k]) .& isapprox.(df_efield.y, yi)
                 ef = ecx[c] #+ encx[c]
@@ -97,7 +95,7 @@ begin
                          xlabel="x [m]", label="pot. dif.");
 
                 # integral of the E total field ==============================
-                x = sort(unique(df.x))
+                x = sort(unique(df_efield.x))
                 dx = x[2] - x[1]
                 c = isapprox.(df_efield.t, t[k]) .& isapprox.(df_efield.y, yi)
                 ef = ecx[c] + encx[c]

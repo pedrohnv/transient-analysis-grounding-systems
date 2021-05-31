@@ -37,6 +37,9 @@ grid.o	:	src/grid.c
 linalg.o	:	src/linalg.c
 		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -c src/linalg.c $(LINK)
 
+test	:	$(OBJECTS)
+		$(CC) $(CFLAGS) -fPIC $(INCLUDE) -Isrc/test -o test.exe src/test/testing.c $(OBJECTS) $(LINK)
+
 # Libraries
 dynamic_library	:	libhphem.so
 
