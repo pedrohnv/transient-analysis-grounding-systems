@@ -320,7 +320,7 @@ run_case (double tmax, int nt, double Lmax, double* inj_t, const unsigned int NR
             one_4pik = 1.0 / (FOUR_PI * kappa);
             // reflection coefficient, soil / air
             ref_t = (kappa - s[i] * EPS0) / (kappa + s[i] * EPS0);
-            ref_l = 0.0;  // longitudinal current does not have image
+            ref_l = 1.0;  // longitudinal current has +1 image
             // modified HEM (mHEM):
             for (size_t m = 0; m < ne; m++) {
                 for (size_t k = m; k < ne; k++) {

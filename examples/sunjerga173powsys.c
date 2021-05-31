@@ -306,7 +306,7 @@ run_case (double tmax, int nt, double sigma0, double* inj_t, const unsigned int 
             one_4pik = 1.0 / (FOUR_PI * kappa);
             // reflection coefficient, soil to air
             ref_t = (kappa - s[i] * EPS0) / (kappa + s[i] * EPS0);
-            ref_l = 0.0;
+            ref_l = 1.0;
             // modified HEM (mHEM):
             for (size_t m = 0; m < ne; m++) {
                 for (size_t k = m; k < ne; k++) {
