@@ -19,6 +19,7 @@ This library is intended to be easy to use. Interfaces to use it from other prog
 The `examples` folder contains various C files which reproduce results published in the technical literature. Use them as starting point to build your own cases in pure C if you want maximum performance. Examples of use from other programming languages are in their respective repository.
 
 Dependencies:
+ - A C99 compliant compiler (such as gcc, try MinGW on Windows - Visual Studio won't work)
  - [Cubature](https://github.com/stevengj/cubature)
  - [OpenBLAS](https://www.openblas.net/)
  - [LAPACK](http://www.netlib.org/lapack/)
