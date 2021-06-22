@@ -44,7 +44,7 @@ inj_t : injected current vectors in an 1d array
 NRHS : number of injections (simulations)
 */
 int
-run_case (double tmax, int nt, double Lmax, double* inj_t, const unsigned int NRHS)
+time_domain (double tmax, int nt, double Lmax, double* inj_t, const unsigned int NRHS)
 {
     // numerical integration parameters
     size_t max_eval = 0;
@@ -577,64 +577,31 @@ int
 main (int argc, char *argv[])
 {
     const unsigned int NRHS = 4;  // number of injections (simulations)
-    if (argc != 2 && argc != 3) {
+    if (argc != 3) {
         printf("Wrong number of arguments, the following are needed:\n");
-        printf("  L_max : segments maximum length\n");
-        printf("  Nt (optional) : number of time steps\n");
-        printf("    Nt defaults to 3001 and can be as high as 9000\n");
-        printf("    the simulation is done with a time step of 20 ns.\n");
+        printf("  L_max : segments' maximum length in [m]\n");
+        printf("  dt : time step in [s]\n");
+        printf("  Nt : number of time steps\n");
         exit(argc);
     }
     double dt = 20e-9;
     char *p;
     double Lmax = strtod(argv[1], &p);
-    int nt = 3001;
-    if (argc == 3) {
-        nt = strtol(argv[2], &p, 10);
-    }
+    double Lmax = strtod(argv[2], &p);
+    int nt = strtol(argv[3], &p, 10);
     double tmax = dt * (nt - 1);
     printf("  final time [s] = %g\n", tmax);
-    printf("  number of time steps = %i\n", nt);
-    printf("  seg. max. length [m] = %g\n", Lmax);
     double start_time = omp_get_wtime();
-    // open injected current files
-    char fname_corner_fast[] = "examples/visacro57emc01_auxfiles/it_corner_fast.csv";
-    FILE* file_corner_fast = fopen(fname_corner_fast, "r");
-    if (file_corner_fast == NULL) {
-        printf("Cannot open file %s\n", fname_corner_fast);
-        return -11;
-    }
-    char fname_center_fast[] = "examples/visacro57emc01_auxfiles/it_center_fast.csv";
-    FILE* file_center_fast = fopen(fname_center_fast, "r");
-    if (file_center_fast == NULL) {
-        printf("Cannot open file %s\n", fname_center_fast);
-        return -12;
-    }
-    char fname_corner_slow[] = "examples/visacro57emc01_auxfiles/it_corner_slow.csv";
-    FILE* file_corner_slow = fopen(fname_corner_slow, "r");
-    if (file_corner_slow == NULL) {
-        printf("Cannot open file %s\n", fname_corner_slow);
-        return -13;
-    }
-    char fname_center_slow[] = "examples/visacro57emc01_auxfiles/it_center_slow.csv";
-    FILE* file_center_slow = fopen(fname_center_slow, "r");
-    if (file_center_slow == NULL) {
-        printf("Cannot open file %s\n", fname_center_slow);
-        return -14;
-    }
-
     double* inj_t = malloc(NRHS * nt * sizeof(double));
     for (int i = 0; i < nt; i++) {
-        fscanf(file_corner_fast, "%lf", inj_t + i);
-        fscanf(file_center_fast, "%lf", inj_t + i + nt);
-        fscanf(file_corner_slow, "%lf", inj_t + i + nt * 2);
-        fscanf(file_center_slow, "%lf", inj_t + i + nt * 3);
+        inj_t[i] = heidler(dt * i, 1.09610481e+00, 5.47446858e-07, 1.91552576e-06, 2.94082573e+00)
+                 + heidler(dt * i, 5.06486595e-01, 3.58100804e-06, 5.40426910e-05, 3.41650905e+00);
+        inj_t[i + nt] = inj_t[i];
+        inj_t[i + nt * 2] = heidler(dt * i, 5.31736342e-01, 5.66828155e-06, 7.40316360e-07, 6.45026985e+00)
+                          + heidler(dt * i, 5.86866680e-01, 4.65351493e-06, 5.40167336e-05, 1.07878428e+01);
+        inj_t[i + nt * 3] = inj_t[i + nt * 2];
     }
-    fclose(file_corner_fast);
-    fclose(file_center_fast);
-    fclose(file_corner_slow);
-    fclose(file_center_slow);
-    run_case(tmax, nt, Lmax, inj_t, NRHS);
+    time_domain(tmax, nt, Lmax, inj_t, NRHS);
     free(inj_t);
     double end_time = omp_get_wtime();
     printf("Elapsed time: %.2f minutes\n", (end_time - start_time) / 60.0);
