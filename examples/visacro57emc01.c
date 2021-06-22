@@ -573,6 +573,408 @@ time_domain (double tmax, int nt, double Lmax, double* inj_t, const unsigned int
     return 0;
 }
 
+/* Harmonic analysis =================================================================================
+NRHS : number of injections (simulations) */
+int
+frequency_domain (const unsigned int NRHS)
+{
+    // Frequencies
+    const int ns = 4;
+    _Complex double* s = malloc(ns * sizeof(_Complex double));
+    s[0] = 100.0 * I * TWO_PI;
+    s[1] = 500e3 * I * TWO_PI;
+    s[2] = 1e6 * I * TWO_PI;
+    s[3] = 2e6 * I * TWO_PI;
+
+    // numerical integration parameters
+    size_t max_eval = 0;
+    double req_abs_error = 1e-6;
+    double req_rel_error = 1e-6;
+
+    // soil model (Alipio) parameters
+    double mur = 1.0;  // soil rel. magnetic permeability
+    double sigma0 = 1.0 / 2000.0;  // soil conductivity in low frequency
+    // parameters that I fitted:
+    double h_soil = 2.1020 * pow(sigma0 * 1e3, -0.73);
+    double g_soil = 0.50890;
+    double eps_ratio = 3.6858;  // soil rel. permitivitty ratio
+
+    // electrodes definition ===================================================
+    double Lx = 20.0;
+    double Ly = 16.0;
+    const double h = -0.5;  // burial depth
+    double length = 4.0;
+    int div = length / Lmax;
+    Grid grid = {6, 5, Lx, Ly, div, div, 5e-3, h};
+    int ne = number_segments(grid);
+    int nn = number_nodes(grid);
+    printf("Num. segments = %i\n", ne);
+    printf("Num. nodes    = %i\n", nn);
+    Electrode* electrodes = malloc(sizeof(Electrode) * ne);
+    double* nodes = malloc(nn * 3 * sizeof(double));
+    electrode_grid(grid, electrodes, nodes);
+    Electrode* images = malloc(sizeof(Electrode) * ne);
+    for (size_t m = 0; m < ne; m++) {
+        populate_electrode(images + m, electrodes[m].start_point,
+                           electrodes[m].end_point, electrodes[m].radius);
+        images[m].start_point[2] = -images[m].start_point[2];
+        images[m].end_point[2] = -images[m].end_point[2];
+        images[m].middle_point[2] = -images[m].middle_point[2];
+    }
+    // identify nodes ==========================================================
+    double corner_point[] = {0.0, 0.0, h};
+    size_t corner_node = 0;
+    double tol = 1e-6;
+    for (int i = 0; i <= nn; i++) {
+        if (i == nn) {
+            printf("Could not find corner node [0, 0]\n");
+            exit(-1);
+        }
+        if (equal_points_tol(corner_point, nodes + 3*i, tol)) {
+            corner_node = i;
+            printf("corner node = %li\n", corner_node);
+            break;
+        }
+    }
+    double center_point[] = {8.0, 8.0, h};
+    size_t center_node = 0;
+    for (int i = 0; i <= nn; i++) {
+        if (i == nn) {
+            printf("Could not find center node [8, 8]\n");
+            exit(-1);
+        }
+        if (equal_points_tol(center_point, nodes + 3*i, tol)) {
+            center_node = i;
+            printf("center node = %li\n", center_node);
+            break;
+        }
+    }
+    // define an array of points where to calculate ground scalar electric potential (GPD)
+    // They form a grid of (1 x 1) [m^2] meshes
+    double offset = 6.0;  // distance from groundig grid where to begin calculating GPD
+    Lx += offset * 2;
+    Ly += offset * 2;
+    Grid point_grid = {Lx + 1, Ly + 1, (int) Lx, (int) Ly, 1, 1, 1.0, 0.0};
+    size_t num_points = number_nodes(point_grid);
+    printf("Num. points to calculate GPD = %li\n", num_points);
+    double* points = malloc(num_points * 3 * sizeof(double));
+    Electrode* temp_elec = malloc(number_segments(point_grid) * sizeof(Electrode));
+    electrode_grid(point_grid, temp_elec, points);
+    free(temp_elec);
+    // offset points to start at (-offset, -offset)
+    for (int i = 0; i < num_points; i++) {
+        points[3*i + 0] -= offset;
+        points[3*i + 1] -= offset;
+    }
+
+    // malloc matrices =========================================================
+    size_t ne2 = ne * ne;
+    size_t nn2 = nn * nn;
+    _Complex double* potzl = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* potzt = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* potzli = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* potzti = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* a = malloc((ne * nn) * sizeof(_Complex double));
+    _Complex double* b = malloc((ne * nn) * sizeof(_Complex double));
+
+    // GPR =====================================================================
+    // GPR[i,j] => GPR[i + j * ns]
+    // dimensions: i-frequency, j-injection
+    _Complex double* gpr_s = malloc(NRHS * ns * sizeof(_Complex double));
+
+    // GPD (Ground Potential Distribution) =====================================
+    // GPD array: GPD[i,j,k] => GPD[(i * NRHS * num_points) + (p * NRHS) + k]
+    // the outermost dimension iterates first
+    // dimensions: i-frequency, j-injection, k-point
+    // maybe the following helps with the visualization of the GPD array:
+    //     potential at point 1 for injection 1 at frequency 1
+    //     potential at point 2 for injection 1 at frequency 1
+    //     ...
+    //     potential at point 1 for injection 2 at frequency 1
+    //     ...
+    //     potential at point j for injection k at frequency i
+    _Complex double* ground_pot_s = calloc(NRHS * num_points * ns, sizeof(_Complex double));
+
+    // Electric fields =========================================================
+    double hyp = sqrt( pow(4, 2.0) + pow(5, 2.0) );
+    double cost = 4 / hyp;
+    double sint = 5 / hyp;
+    double efield_dr = 0.1;  // spatial step
+    double efield_dx = efield_dr * cost;
+    double efield_dy = efield_dr * sint;
+    double x0 = -offset * cost;
+    double y0 = -offset * sint;
+    double x1 = 20 + x0;
+    double y1 = 16 + y0;
+    Lx = x1 - x0;
+    Ly = y1 - y0;
+    double Lr = sqrt( pow(Lx, 2.0) + pow(Ly, 2.0) );
+    size_t np_field = (ceil(Lr / efield_dr) + 1);
+    printf("Num. points to electric fields = %li\n", np_field);
+    _Complex double* efield_s = malloc(NRHS * 6 * np_field * ns * sizeof(_Complex double));
+    // efield[i,j,k,m] => efield[m + (k * 6) + (j * 6 * NRHS) + (i * 6 * NRHS * np_field)]
+    // dimensions: i-frequency, j-point, k-injection, m-field
+
+    // Incidence and "z-potential" (mHEM) matrices =============================
+    int err;
+    err = fill_incidence_adm(a, b, electrodes, ne, nodes, nn);
+    if (err != 0) printf("Could not build incidence matrices\n");
+    err = calculate_impedances(potzl, potzt, electrodes, ne, 0.0, 0.0, 0.0, 0.0,
+                               max_eval, req_abs_error, req_rel_error, INTG_MHEM);
+    if (err != 0) printf("integration error\n");
+    err = impedances_images(potzli, potzti, electrodes, images, ne,
+                            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, max_eval,
+                            req_abs_error, req_rel_error, INTG_MHEM);
+    if (err != 0) printf("integration error\n");
+
+    // BLAS and LAPACK helper variables
+    char trans = 'N';
+    _Complex double one = 1.0;
+    _Complex double zero = 0.0;
+    double begin = omp_get_wtime();  // to estimate time until completion
+    #pragma omp parallel private(err)
+    {
+        #pragma omp single
+        {
+            printf("avaible threads: %i\n", omp_get_num_threads());
+        }
+        _Complex double* zl = malloc(ne2 * sizeof(_Complex double));
+        _Complex double* zt = malloc(ne2 * sizeof(_Complex double));
+        _Complex double* yn = malloc(nn2 * sizeof(_Complex double));
+        _Complex double* yla = malloc((ne * nn) * sizeof(_Complex double));
+        _Complex double* ytb = malloc((ne * nn) * sizeof(_Complex double));
+        _Complex double* il = calloc(NRHS * ne, sizeof(_Complex double));
+        _Complex double* it = calloc(NRHS * ne, sizeof(_Complex double));
+        _Complex double* ie = malloc(NRHS * nn * sizeof(_Complex double));
+        if (!zl || !zt || !ie || !yn || !yla || !ytb || !il || !it || !ie) {
+            printf("Can't allocate memory\n");
+            exit(200);
+        }
+        double field_point[3] = {0.0, 0.0, 0.0};
+        _Complex double sigma, epsr, kappa, gamma;  // soil parameters
+        _Complex double ref_l, ref_t;  // reflection coefficients (images)
+        _Complex double iwu_4pi, one_4pik, exp_gr;
+        double rbar, r0, r1, r2;
+        //_Complex double gpd_var[NRHS];
+        _Complex double efvector[3];  // helper variable of a 3d vector
+        size_t index;
+
+        // use raw BLAS and LAPACK to solve system with multiple RHS
+        int nn1 = (int) nn;
+        int ldie = nn1;  // leading dimension of ie
+        int* ipiv = malloc(nn1 * sizeof(int));  // pivot indices
+        int info;
+        int nrhs = NRHS;
+        char uplo = 'L';  // matrices are symmetric, only Lower Half is set
+        int lwork = -1;  // signal to Query the optimal workspace
+        _Complex double wkopt;
+        zsysv_(&uplo, &nn1, &nrhs, yn, &nn1, ipiv, ie, &ldie, &wkopt, &lwork, &info);
+        lwork = creal(wkopt);
+        _Complex double* work = malloc(lwork * sizeof(_Complex double));
+        #pragma omp for
+        for (size_t i = 0; i < ns; i++) {
+            //printf("i = %li from thread %d\n", i, omp_get_thread_num());
+            alipio_soil(&sigma, &epsr, sigma0, s[i], h_soil, g_soil, eps_ratio);
+            kappa = (sigma + s[i] * epsr * EPS0);  // soil complex conductivity
+            gamma = csqrt(s[i] * MU0 * kappa);  // soil propagation constant
+            iwu_4pi = s[i] * mur * MU0 / (FOUR_PI);
+            one_4pik = 1.0 / (FOUR_PI * kappa);
+            // reflection coefficient, soil / air
+            ref_t = (kappa - s[i] * EPS0) / (kappa + s[i] * EPS0);
+            ref_l = 1.0;  // longitudinal current has +1 image
+            // modified HEM (mHEM):
+            for (size_t m = 0; m < ne; m++) {
+                for (size_t k = m; k < ne; k++) {
+                    rbar = vector_length(electrodes[k].middle_point,
+                                         electrodes[m].middle_point);
+                    exp_gr = cexp(-gamma * rbar);
+                    zl[m * ne + k] = exp_gr * potzl[m * ne + k];
+                    zt[m * ne + k] = exp_gr * potzt[m * ne + k];
+                    rbar = vector_length(electrodes[k].middle_point,
+                                         images[m].middle_point);
+                    exp_gr = cexp(-gamma * rbar);
+                    zl[m * ne + k] += ref_l * exp_gr * potzli[m * ne + k];
+                    zt[m * ne + k] += ref_t * exp_gr * potzti[m * ne + k];
+                    zl[m * ne + k] *= iwu_4pi;
+                    zt[m * ne + k] *= one_4pik;
+                }
+            }
+            // Traditional HEM (highly discouraged):
+            /*calculate_impedances(zl, zt, electrodes, ne, gamma, s[i], 1.0, kappa,
+                                 max_eval, req_abs_error, req_rel_error, INTG_DOUBLE);
+            impedances_images(zl, zt, electrodes, images, ne, gamma, s[i], mur,
+                              kappa, ref_l, ref_t, max_eval, req_abs_error,
+                              req_rel_error, INTG_DOUBLE);*/
+            calculate_yla_ytb(yla, ytb, zl, zt, a, b, ne, nn);
+            // YN = A^T * inv(ZL) * A + B^T * inv(ZT) * B
+            fill_impedance_adm2(yn, yla, ytb, a, b, ne, nn);
+            for (size_t m = 0; m < (NRHS * nn); m++) {
+                ie[m] = 0.0;
+            }
+            /*ie[corner_node]            = inj_s[i];           // first column of IE
+            ie[center_node + ldie]     = inj_s[i + ns];      // second column of IE
+            ie[corner_node + ldie * 2] = inj_s[i + ns * 2];  // third column of IE
+            ie[center_node + ldie * 3] = inj_s[i + ns * 3];  // fourth column of IE*/
+            ie[corner_node]            = 1.0;  // first column of IE
+            ie[center_node + ldie]     = 1.0;  // second column of IE
+            ie[corner_node + ldie * 2] = 1.0;  // third column of IE
+            ie[center_node + ldie * 3] = 1.0;  // fourth column of IE
+            // solve
+            zsysv_(&uplo, &nn1, &nrhs, yn, &nn1, ipiv, ie, &ldie, work, &lwork, &info);
+            // Check for the exact singularity
+            if (info > 0) {
+                printf("The diagonal element of the triangular factor of YN,\n");
+                printf("U(%i,%i) is zero, so that YN is singular;\n", info, info);
+                printf("the solution could not be computed.\n");
+                printf("  in the %li-th frequency\n", i);
+                exit(info);
+            } else if (info < 0) {
+                printf("the %i-th parameter to zsysv had an illegal value.\n", info);
+            }
+            gpr_s[i] = ie[corner_node];  // first column of IE
+            if (NRHS > 1) gpr_s[i + ns] = ie[center_node + ldie];  // second column of IE
+            if (NRHS > 2) gpr_s[i + ns * 2] = ie[corner_node + ldie * 2];  // third column of IE
+            if (NRHS > 3) gpr_s[i + ns * 3] = ie[center_node + ldie * 3];  // fourth column of IE
+
+            err = 1;  // used in zgemv_ to specify incx, incy
+            for (int k = 0; k < NRHS; k++) {
+                // IT = inv(ZT) * B * IE + 0 * IT
+                zgemv_(&trans, &ne, &nn, &one, yla, &ne, (ie + nn1 * k), &err,
+                       &zero, (il + ne * k), &err);
+                // IL = inv(ZL) * A * IE + 0 * IL
+                zgemv_(&trans, &ne, &nn, &one, ytb, &ne, (ie + nn1 * k), &err,
+                       &zero, (it + ne * k), &err);
+                // if using intel MKL, replace the above by:
+                /*cblas_zgemv(CblasColMajor, CblasNoTrans, ne, nn, &one, yla, ne,
+                            (ie + nn1 * k), 1, &zero, (il + ne * k), 1);
+                cblas_zgemv(CblasColMajor, CblasNoTrans, ne, nn, &one, ytb, ne,
+                            (ie + nn1 * k), 1, &zero, (it + ne * k), 1);*/
+            }
+            // images' effect as (1 + ref) because we're calculating on ground level
+            for (int k = 0; k < NRHS; k++) {
+                for (size_t m = 0; m < ne; m++) {
+                    it[m + k * ne] *= (1.0 + ref_t);
+                    il[m + k * ne] *= (1.0 + ref_l);
+                }
+            }
+            // Ground Potential Distribution (GPD) =============================
+            for (size_t p = 0; p < num_points; p++) {
+                // multiply by (1 + ref_t) to add the images' effects because
+                // we are calculating on ground level
+                // Traditional HEM:
+                /*gpd_var[k] = electric_potential((points + p*3),
+                                                electrodes, ne, (it + ne * k),
+                                                gamma, kappa, max_eval,
+                                                req_abs_error,
+                                                req_rel_error);*/
+                for (int k = 0; k < NRHS; k++) {
+                    index = (i * NRHS * num_points) + (p * NRHS) + k;
+                    ground_pot_s[index] = 0.0;
+                }
+                for (size_t m = 0; m < ne; m++) {
+                // calculate using a simplification to the numerical integrals (mHEM):
+                    rbar = vector_length((points + p*3), electrodes[m].middle_point);
+                    r1 = vector_length((points + p*3), electrodes[m].start_point);
+                    r2 = vector_length((points + p*3), electrodes[m].end_point);
+                    r0 = (r1 + r2 + electrodes[m].length) / (r1 + r2 - electrodes[m].length);
+                    exp_gr = cexp(-gamma * rbar) * log(r0) / electrodes[m].length;
+                    for (int k = 0; k < NRHS; k++) {
+                        index = (i * NRHS * num_points) + (p * NRHS) + k;
+                        ground_pot_s[index] += one_4pik * it[m + ne * k] * exp_gr;
+                    }
+                }
+            }
+            // Electric Field ==================================================
+            for (size_t p = 0; p < np_field; p++) {
+                field_point[0] = efield_dx * p - offset;
+                field_point[1] = efield_dy * p - offset;
+                for (size_t k = 0; k < NRHS; k++) {
+                    // conservative field
+                    // pass "s = 0.0" so that the non-conservative part is ignored
+                    for (size_t m = 0; m < 3; m++) efvector[m] = 0.0;
+                    electric_field(field_point, electrodes, ne,
+                                   (il + ne * k), (it + ne * k),
+                                   gamma, 0.0, mur, kappa, max_eval,
+                                   req_abs_error, req_rel_error, efvector);
+                    for (size_t m = 0; m < 3; m++) {
+                        index = m + (k * 6) + (p * 6 * NRHS) + (i * 6 * NRHS * np_field);
+                        efield_s[index] = efvector[m];
+                    }
+                    // non-conservative field
+                    for (size_t m = 0; m < 3; m++) efvector[m] = 0.0;
+                    magnetic_potential(field_point, electrodes, ne,
+                                      (il + ne * k), gamma, mur, max_eval,
+                                      req_abs_error, req_rel_error, efvector);
+                    for (size_t m = 3; m < 6; m++) {
+                        index = m + (k * 6) + (p * 6 * NRHS) + (i * 6 * NRHS * np_field);
+                        efield_s[index] = efvector[m - 3] * (-s[i]);
+                    }
+                }
+            }
+            if (i == 0) {
+                printf("Expected more time until completion of the frequency loop: %.2f min.\n",
+                       (omp_get_wtime() - begin) * ns / 60.0 / omp_get_num_threads());
+            }
+        }
+        free(zl);
+        free(zt);
+        free(yn);
+        free(yla);
+        free(ytb);
+        free(ie);
+        free(il);
+        free(it);
+        free(ipiv);
+        free(work);
+    } // end parallel
+    printf("Frequency loop ended. Saving results.\n");
+    // Electric Fields  ===================================================
+    fflush(stdout);
+    size_t index;
+    char efield_file_name[60];
+    sprintf(efield_file_name, "visacro57emc01_efield_harmonic.csv");
+    FILE* efield_file = fopen(efield_file_name, "w");
+    fprintf(efield_file, "f,x,y");
+    for (unsigned k = 0; k < NRHS; k++) {
+        fprintf(efield_file, ",ecx%d,ecy%d,ecz%d,encx%d,ency%d,encz%d",
+                k+1, k+1, k+1, k+1, k+1, k+1);
+    }
+    fprintf(efield_file, "\n");
+    double x, y;
+    for (size_t i = 0; i < ns; i++) {
+        for (size_t p = 0; p < np_field; p++) {
+            x = efield_dx * p - offset;
+            y = efield_dy * p - offset;
+            fprintf(efield_file, "%e,%f,%f", cimag(s[i] / TWO_PI), x, y);
+            for (size_t k = 0; k < NRHS; k++) {
+                for (size_t m = 0; m < 6; m++) {
+                    index = m + (k * 6) + (p * 6 * NRHS) + (i * 6 * NRHS * np_field);
+                    fprintf(efield_file, ",%e%+e%s", creal(efield_s[index]), cimag(efield_s[index]), "im");
+                }
+            }
+            fprintf(efield_file, "\n");
+        }
+    }
+    fclose(efield_file);
+    free(potzl);
+    free(potzt);
+    free(potzli);
+    free(potzti);
+    free(a);
+    free(b);
+    free(electrodes);
+    free(images);
+    free(nodes);
+    free(nlt_input);
+    free(nlt_output);
+    free(gpr_s);
+    free(ground_pot_s);
+    free(efield_s);
+    free(points);
+    return 0;
+}
+
+// ================================================================================================
 int
 main (int argc, char *argv[])
 {
@@ -592,6 +994,10 @@ main (int argc, char *argv[])
     double tmax = dt * (nt - 1);
     printf("  final time [s] = %g\n", tmax);
     double start_time = omp_get_wtime();
+    printf("Harmonic analysis, begin");
+    frequency_domain(NRHS);
+    double end_time = omp_get_wtime();
+    printf("Harmonic analysis ended in %.2f [s]", (end_time - start_time));
     double* inj_t = malloc(NRHS * nt * sizeof(double));
     for (int i = 0; i < nt; i++) {
         inj_t[i] = heidler(dt * i, 1.09610481e+00, 5.47446858e-07, 1.91552576e-06, 2.94082573e+00)
@@ -603,7 +1009,7 @@ main (int argc, char *argv[])
     }
     time_domain(tmax, nt, Lmax, inj_t, NRHS);
     free(inj_t);
-    double end_time = omp_get_wtime();
+    end_time = omp_get_wtime();
     printf("Elapsed time: %.2f minutes\n", (end_time - start_time) / 60.0);
     return 0;
 }
