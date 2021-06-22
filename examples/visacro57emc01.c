@@ -4,7 +4,7 @@ Reproduce Figure 4 in [1] of the experimental results of a
 and at the center of the grid. That is, there are four simulations in total.
 In addition to calculating the GPR (Ground Potential Rise), the ground potential
 distribution (GPD) and the electric field (both conservative and nonconservative)
-along two horizontal lines are all calculated for each injection.
+along a diagonal line are all calculated for each injection.
 mHEM formulation is used.
 
 To get the maximum performance, instead of using some of the high level routines
@@ -56,8 +56,8 @@ run_case (double tmax, int nt, double Lmax, double* inj_t, const unsigned int NR
     double sigma0 = 1.0 / 2000.0;  // soil conductivity in low frequency
     // parameters that I fitted:
     double h_soil = 2.1020 * pow(sigma0 * 1e3, -0.73);
-    double g_soil = 0.50890;
-    double eps_ratio = 3.6858;  // soil rel. permitivitty ratio
+    double g_soil = 0.5089;
+    double eps_ratio = 3.6858;
 
     // Laplace transform of the injection currents =============================
     // do it explicitly for performance reasons, see FFTW3 manual: http://fftw.org/fftw3_doc/
@@ -157,7 +157,7 @@ run_case (double tmax, int nt, double Lmax, double* inj_t, const unsigned int NR
     }
     // define an array of points where to calculate ground scalar electric potential (GPD)
     // They form a grid of (1 x 1) [m^2] meshes
-    double offset = 6.0;  // distance from groundig grid where to begin calculating GPD and fields
+    double offset = 6.0;  // distance from groundig grid where to begin calculating GPD
     Lx += offset * 2;
     Ly += offset * 2;
     Grid point_grid = {Lx + 1, Ly + 1, (int) Lx, (int) Ly, 1, 1, 1.0, 0.0};
@@ -230,10 +230,22 @@ run_case (double tmax, int nt, double Lmax, double* inj_t, const unsigned int NR
                                             ground_pot_t, onembed, ostride, odist,
                                             FFTW_ESTIMATE);
     // Electric fields =========================================================
-    // Along two lines: y = 0 and y = 8
+    // Along the diagonal line through the origin with an angle of atan(4/5)
+    double hyp = sqrt( pow(4, 2.0) + pow(5, 2.0) );
+    double cost = 4 / hyp;
+    double sint = 5 / hyp;
     double efield_dr = 0.1;  // spatial step
-    size_t np_field = (ceil(Lx / efield_dr) + 1) * 2;  // Lx was already added by 2*offset
-    printf("Num. points to electric fields = %li\n", np_field);
+    double efield_dx = efield_dr * cost;
+    double efield_dy = efield_dr * sint;
+    double x0 = -offset * cost;
+    double y0 = -offset * sint;
+    double x1 = 20 + x0;
+    double y1 = 16 + y0;
+    Lx = x1 - x0;
+    Ly = y1 - y0;
+    double Lr = sqrt( pow(Lx, 2.0) + pow(Ly, 2.0) );
+    size_t np_field = (ceil(Lr / efield_dr) + 1);
+    printf("Num. points to calculate electric fields = %li\n", np_field);
     _Complex double* efield_s = malloc(NRHS * 6 * np_field * ns * sizeof(_Complex double));
     double* efield_t = malloc(NRHS * 6 * np_field * nt * sizeof(double));
     // efield[i,j,k,m] => efield[m + (k * 6) + (j * 6 * NRHS) + (i * 6 * NRHS * np_field)]
@@ -420,13 +432,8 @@ run_case (double tmax, int nt, double Lmax, double* inj_t, const unsigned int NR
             }
             // Electric Field ==================================================
             for (size_t p = 0; p < np_field; p++) {
-                if (p < np_field / 2) {
-                    field_point[0] = efield_dr * p - offset;
-                    field_point[1] = 0.0;
-                } else {
-                    field_point[0] = efield_dr * (p - np_field / 2) - offset;
-                    field_point[1] = 8.0;
-                }
+                field_point[0] = efield_dx * p - offset;
+                field_point[1] = efield_dy * p - offset;
                 for (size_t k = 0; k < NRHS; k++) {
                     // conservative field
                     // pass "s = 0.0" so that the non-conservative part is ignored
@@ -450,7 +457,6 @@ run_case (double tmax, int nt, double Lmax, double* inj_t, const unsigned int NR
                     }
                 }
             }
-            
             if (i == 0) {
                 printf("Expected more time until completion of the frequency loop: %.2f min.\n",
                        (omp_get_wtime() - begin) * ns / 60.0 / omp_get_num_threads());
@@ -520,28 +526,22 @@ run_case (double tmax, int nt, double Lmax, double* inj_t, const unsigned int NR
     FILE* efield_file = fopen(efield_file_name, "w");
     fprintf(efield_file, "t,x,y");
     for (unsigned k = 0; k < NRHS; k++) {
-        fprintf(efield_file, ",ecx%d,encx%d", k+1, k+1);
+        fprintf(efield_file, ",ecx%d,ecy%d,ecz%d,encx%d,ency%d,encz%d",
+                k+1, k+1, k+1, k+1, k+1, k+1);
     }
     fprintf(efield_file, "\n");
     double x, y;
     for (size_t i = 0; i < nt; i++) {
         inlt_scale = exp(c * i * dt) / (nt * dt);
         for (size_t p = 0; p < np_field; p++) {
-            if (p < np_field / 2) {
-                x = efield_dr * p - offset;
-                y = 0.0;
-            } else {
-                x = efield_dr * (p - np_field / 2) - offset;
-                y = 8.0;
-            }
+            x = efield_dx * p - offset;
+            y = efield_dy * p - offset;
             fprintf(efield_file, "%e,%f,%f", dt * i, x, y);
             for (size_t k = 0; k < NRHS; k++) {
                 for (size_t m = 0; m < 6; m++) {
-                    if (m == 0 || m == 3) {  // only Ex
-                        index = m + (k * 6) + (p * 6 * NRHS) + (i * 6 * NRHS * np_field);
-                        var = efield_t[index] * inlt_scale;
-                        fprintf(efield_file, ",%e", var);
-                    }
+                    index = m + (k * 6) + (p * 6 * NRHS) + (i * 6 * NRHS * np_field);
+                    var = efield_t[index] * inlt_scale;
+                    fprintf(efield_file, ",%e", var);
                 }
             }
             fprintf(efield_file, "\n");
