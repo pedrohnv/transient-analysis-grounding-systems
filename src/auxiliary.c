@@ -320,7 +320,7 @@ inv_laplace_trans (double* f, _Complex double* g, _Complex double* s, double tma
     return 0;
 }
 
-double heidler (double t, double imax, double tau1, double tau2, int n)
+double heidler (double t, double imax, double tau1, double tau2, double n)
 {
     double xi = exp( -(tau1 / tau2) * pow((n * tau2 / tau1), (1.0 / n)) );
     double tt1n = pow(t / tau1, n);

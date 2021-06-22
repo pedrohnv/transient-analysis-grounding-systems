@@ -391,6 +391,6 @@ doi: 10.1109/TEMC.2007.897153.
 @return current \f$ i(t) \f$ in Amperes
 */
 double
-heidler (double t, double imax, double tau1, double tau2, int n);
+heidler (double t, double imax, double tau1, double tau2, double n);
 
 #endif /* AUXILIARY_H_ */
