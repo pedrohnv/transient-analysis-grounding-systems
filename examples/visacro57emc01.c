@@ -574,9 +574,11 @@ time_domain (double tmax, int nt, double Lmax, double* inj_t, const unsigned int
 }
 
 /* Harmonic analysis =================================================================================
-NRHS : number of injections (simulations) */
+Lmax : segments maximum length [m]
+NRHS : number of injections (simulations)
+*/
 int
-frequency_domain (const unsigned int NRHS)
+harmonic_analysis (double Lmax, const unsigned int NRHS)
 {
     // Frequencies
     const int ns = 4;
@@ -911,10 +913,6 @@ frequency_domain (const unsigned int NRHS)
                     }
                 }
             }
-            if (i == 0) {
-                printf("Expected more time until completion of the frequency loop: %.2f min.\n",
-                       (omp_get_wtime() - begin) * ns / 60.0 / omp_get_num_threads());
-            }
         }
         free(zl);
         free(zt);
@@ -965,8 +963,6 @@ frequency_domain (const unsigned int NRHS)
     free(electrodes);
     free(images);
     free(nodes);
-    free(nlt_input);
-    free(nlt_output);
     free(gpr_s);
     free(ground_pot_s);
     free(efield_s);
@@ -979,25 +975,24 @@ int
 main (int argc, char *argv[])
 {
     const unsigned int NRHS = 4;  // number of injections (simulations)
-    if (argc != 3) {
+    if (argc != 4) {
         printf("Wrong number of arguments, the following are needed:\n");
         printf("  L_max : segments' maximum length in [m]\n");
         printf("  dt : time step in [s]\n");
         printf("  Nt : number of time steps\n");
         exit(argc);
     }
-    double dt = 20e-9;
     char *p;
     double Lmax = strtod(argv[1], &p);
-    double Lmax = strtod(argv[2], &p);
+    double dt = strtod(argv[2], &p);
     int nt = strtol(argv[3], &p, 10);
     double tmax = dt * (nt - 1);
     printf("  final time [s] = %g\n", tmax);
     double start_time = omp_get_wtime();
-    printf("Harmonic analysis, begin");
-    frequency_domain(NRHS);
+    printf("Harmonic analysis, begin\n");
+    harmonic_analysis(Lmax, NRHS);
     double end_time = omp_get_wtime();
-    printf("Harmonic analysis ended in %.2f [s]", (end_time - start_time));
+    printf("Harmonic analysis ended in %.2f s\n", (end_time - start_time));
     double* inj_t = malloc(NRHS * nt * sizeof(double));
     for (int i = 0; i < nt; i++) {
         inj_t[i] = heidler(dt * i, 1.09610481e+00, 5.47446858e-07, 1.91552576e-06, 2.94082573e+00)
