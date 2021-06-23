@@ -47,14 +47,17 @@ libhphem.so	:	$(OBJECTS)
 		$(CC) $(CFLAGS) -fPIC -shared $(INCLUDE) -o libhphem.so $(OBJECTS)
 
 # Examples are named based on publication: author_volume_journal_issue
+alipio83powsys	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o alipio83powsys.exe examples/alipio83powsys.c $(OBJECTS) $(LINK)
+
 grcev12pwrd01	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o grcev12pwrd01.exe examples/grcev12pwrd01.c $(OBJECTS) $(LINK)
 
-visacro57emc01	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o visacro57emc01.exe examples/visacro57emc01.c $(OBJECTS) $(LINK)
+harmonic_impedance	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o harmonic_impedance.exe examples/harmonic_impedance.c $(OBJECTS) $(LINK)
 
 sunjerga173powsys	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o sunjerga173powsys.exe examples/sunjerga173powsys.c $(OBJECTS) $(LINK)
 
-alipio83powsys	:	$(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDE) -o alipio83powsys.exe examples/alipio83powsys.c $(OBJECTS) $(LINK)
+visacro57emc01	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o visacro57emc01.exe examples/visacro57emc01.c $(OBJECTS) $(LINK)
