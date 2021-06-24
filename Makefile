@@ -59,5 +59,8 @@ harmonic_impedance	:	$(OBJECTS)
 sunjerga173powsys	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o sunjerga173powsys.exe examples/sunjerga173powsys.c $(OBJECTS) $(LINK)
 
+three_grids	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o three_grids.exe examples/three_grids.c $(OBJECTS) $(LINK)
+
 visacro57emc01	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o visacro57emc01.exe examples/visacro57emc01.c $(OBJECTS) $(LINK)
