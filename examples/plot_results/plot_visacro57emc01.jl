@@ -282,7 +282,8 @@ begin
 end
 
 ## Electric Field
-time_steps = [6, 26, 46, 76, 101, 126, 251];
+#time_steps = [6, 26, 46, 76, 101, 126, 251];
+time_steps = [6, 26, 101, 251]
 begin
     df = DataFrame(CSV.File("visacro57emc01_efield.csv"))
     t = sort(unique(df.t))
@@ -318,6 +319,9 @@ begin
 end
 
 ## Step Voltage along a line in the +ξ direction
+time_steps = [6, 26, 101, 251]
+colors = [:blue, :darkorange, :blue, :darkorange]
+lines = [:solid, :solid, :dash, :dash]
 begin
     df = DataFrame(CSV.File("visacro57emc01_efield.csv"))
     t = sort(unique(df.t))
@@ -328,8 +332,10 @@ begin
         ecy = eval(Meta.parse("df.ecy$(i)"))
         enoncx = eval(Meta.parse("df.encx$(i)"))
         enoncy = eval(Meta.parse("df.ency$(i)"))
+        lin = 1
+        p = plot(ylabel="Step Voltage Error [V]", xlabel="ξ [m]",
+                 legend=:bottomright, background_color_legend=nothing);
         for k in time_steps
-            p = plot(ylabel="Step Voltage [V]", xlabel="ξ [m]", legend=:bottomright);
             m = 1
             c = isapprox.(df.t, t[k])
             x = df.x[c]
@@ -355,10 +361,11 @@ begin
                 dv2[i] = dξ * (s + (eftot[i] + eftot[i + N]) / 2)
             end
             ξ = ξ[1:end-N]
-            plot!(ξ, (dv1) * m,  label="pot. dif.", color=:blue)
-            plot!(ξ, (dv2) * m, label="∫E⋅dℓ", color=:red)
-            png(p, "visacro57emc01_stepv$(i)_t$(k)")
+            plot!(ξ, (dv2 - dv1) * m,  label="t = $(round(t[k] * 1e6, sigdigits=1)) μs",
+                  linestyle=lines[lin], color=colors[lin])
+            lin += 1
         end
+        png(p, "visacro57emc01_stepv_error$(i)")
     end
 end
 
@@ -406,9 +413,9 @@ end
         end
     end
     p = plot(t[1:nf] * 1e6, rmsd * 1,
-             xlabel="time [μs]", ylabel="Step Voltage RMSD(ξ) [V]",
+             xlabel="time [μs]", ylabel="Step Voltage RMSE(ξ) [V]",
              label=["corner, fast"  "center, fast"  "corner, slow"  "center, slow"],
-             color=[:blue  :red  :blue  :red],
+             color=[:blue  :darkorange  :blue  :darkorange],
              linestyle=[:solid  :solid  :dash  :dash])
     png(p, "visacro57emc01_rmsd.png")
 end
@@ -436,3 +443,101 @@ begin
     end
 end
 =#
+
+## Max error: Step Voltage along a line in the +ξ direction
+time_steps = [6, 26, 101, 251]
+colors = [:blue, :darkorange, :blue, :darkorange]
+lines = [:solid, :solid, :dash, :dash]
+labels = ["corner, fast", "center, fast", "corner, slow", "center, slow"]
+begin
+    df = DataFrame(CSV.File("visacro57emc01_efield.csv"))
+    t = sort(unique(df.t))
+    nt = length(t)
+    ninj = (size(df)[2] - 3) ÷ 6  # number of injections
+    p = plot(xlabel="time [μs]", ylabel="Max Abs. Step Voltage Error [V]")
+    erro_max = zeros(nt÷2)
+    for i = 1:ninj
+        ecx = eval(Meta.parse("df.ecx$(i)"))
+        ecy = eval(Meta.parse("df.ecy$(i)"))
+        enoncx = eval(Meta.parse("df.encx$(i)"))
+        enoncy = eval(Meta.parse("df.ency$(i)"))
+        for k in 1:(nt÷2)
+            c = isapprox.(df.t, t[k])
+            x = df.x[c]
+            y = df.y[c]
+            Lx = x[end] - x[1]
+            Ly = y[end] - y[1]
+            Lr = sqrt(Lx^2 + Ly^2)
+            cosθ = Lx / Lr
+            sinθ = Ly / Lr
+            ξ = x * cosθ + y * sinθ
+            efc = ecx[c] * cosθ + ecy[c] * sinθ
+            efnonc = enoncx[c] * cosθ + enoncy[c] * sinθ
+            eftot = efc + efnonc
+            dξ = ξ[2] - ξ[1]
+            N = Int(1 ÷ dξ)
+            nξ = length(ξ) - N
+            dv1 = zeros(nξ)
+            dv2 = zeros(nξ)
+            for i = 1:nξ
+                s = sum(efc[(i + 1):(i + N - 1)])
+                dv1[i] = dξ * (s + (efc[i] + efc[i + N]) / 2)
+                s = sum(eftot[(i + 1):(i + N - 1)])
+                dv2[i] = dξ * (s + (eftot[i] + eftot[i + N]) / 2)
+            end
+            ξ = ξ[1:end-N]
+            erro_max[k] = maximum(abs,(dv2 - dv1))
+        end
+        plot!(t[1:nt÷2]*1e6, erro_max, label=labels[i],
+              linestyle=lines[i], color=colors[i])
+    end
+    png(p, "visacro57emc01_maxstepverror")
+end
+
+# Harmonic
+colors = [:blue, :darkorange, :blue, :darkorange]
+lines = [:solid, :solid, :dash, :dash]
+labels = ["100 Hz", "500 kHz", "1 MHz", "2 MHz"]
+begin
+    df = DataFrame(CSV.File("visacro57emc01_efield_harmonic.csv"))
+    f = sort(unique(df.f))
+    nf = length(f)
+    ninj = (size(df)[2] - 3) ÷ 6  # number of injections
+    for i = 1:ninj
+        ecx = parse.(ComplexF64, eval(Meta.parse("df.ecx$(i)")))
+        ecy = parse.(ComplexF64, eval(Meta.parse("df.ecy$(i)")))
+        enoncx = parse.(ComplexF64, eval(Meta.parse("df.encx$(i)")))
+        enoncy = parse.(ComplexF64, eval(Meta.parse("df.ency$(i)")))
+        p = plot(xlabel="ξ [m]", ylabel="Abs. Step Voltage Error [V]",
+                 background_color_legend=nothing)
+        for k in 1:nf
+            c = isapprox.(df.f, f[k])
+            x = df.x[c]
+            y = df.y[c]
+            Lx = x[end] - x[1]
+            Ly = y[end] - y[1]
+            Lr = sqrt(Lx^2 + Ly^2)
+            cosθ = Lx / Lr
+            sinθ = Ly / Lr
+            ξ = x * cosθ + y * sinθ
+            efc = ecx[c] * cosθ + ecy[c] * sinθ
+            efnonc = enoncx[c] * cosθ + enoncy[c] * sinθ
+            eftot = efc + efnonc
+            dξ = ξ[2] - ξ[1]
+            N = Int(1 ÷ dξ)
+            nξ = length(ξ) - N
+            dv1 = zeros(ComplexF64, nξ)
+            dv2 = zeros(ComplexF64, nξ)
+            for i = 1:nξ
+                s = sum(efc[(i + 1):(i + N - 1)])
+                dv1[i] = dξ * (s + (efc[i] + efc[i + N]) / 2)
+                s = sum(eftot[(i + 1):(i + N - 1)])
+                dv2[i] = dξ * (s + (eftot[i] + eftot[i + N]) / 2)
+            end
+            ξ = ξ[1:end-N]
+            plot!(ξ, abs.(dv2 - dv1), label=labels[k],
+                  linestyle=lines[k], color=colors[k])
+        end
+        png(p, "visacro57emc01_stepverror_harmonic$(i)")
+    end
+end
