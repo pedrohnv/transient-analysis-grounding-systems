@@ -10,8 +10,8 @@
 #include "cubature.h"
 
 int
-populate_electrode (Electrode* electrode, const double start_point[3],
-                    const double end_point[3], double radius)
+populate_electrode (Electrode* electrode, const float start_point[3],
+                    const float end_point[3], float radius)
 {
     if (equal_points(start_point, end_point)) {
         printf("Error: start_point and end_point are equal.\n");
@@ -38,7 +38,7 @@ equal_electrodes (const Electrode* sender, const Electrode* receiver)
     bool c2 = equal_points(sender->end_point, receiver->end_point);
     bool c3 = equal_points(sender->end_point, receiver->start_point);
     bool c4 = equal_points(sender->start_point, receiver->end_point);
-    bool c5 = ( sender->radius - receiver->radius < DBL_EPSILON );
+    bool c5 = ( sender->radius - receiver->radius < FLT_EPSILON );
     return (c5 && ( (c1 && c2) || (c3 && c4) ));
 }
 
@@ -51,13 +51,13 @@ electrodes_file (const char file_name[], Electrode* electrodes,
         printf("Cannot open file %s\n", file_name);
         return -10;
     }
-    double start_point[3], end_point[3];
-    double radius;
+    float start_point[3], end_point[3];
+    float radius;
     const int nvalues = 7;
     int success = nvalues;
     int pop_error = 0;
     for (size_t i = 0; i < num_electrodes; i++) {
-        success = fscanf(stream, "%lf, %lf, %lf, %lf, %lf, %lf, %lf",
+        success = fscanf(stream, "%f, %f, %f, %f, %f, %f, %f",
                          &start_point[0], &start_point[1], &start_point[2],
                          &end_point[0], &end_point[1], &end_point[2], &radius);
         if (success != nvalues) {
@@ -81,7 +81,7 @@ electrodes_file (const char file_name[], Electrode* electrodes,
 }
 
 int
-nodes_file (const char file_name[], double* nodes, size_t num_nodes)
+nodes_file (const char file_name[], float* nodes, size_t num_nodes)
 {
     FILE* stream = fopen(file_name, "r");
     if (stream == NULL) {
@@ -90,7 +90,7 @@ nodes_file (const char file_name[], double* nodes, size_t num_nodes)
     }
     int success = 3;
     for (size_t i = 0; i < num_nodes; i++) {
-        success = fscanf(stream, "%lf, %lf, %lf", &nodes[i*3],
+        success = fscanf(stream, "%f, %f, %f", &nodes[i*3],
                          &nodes[i*3 + 1], &nodes[i*3 + 2]);
         if (success != 3) {
             printf("error reading line %i of file %s\n", (int) (i+1), file_name);
@@ -102,17 +102,17 @@ nodes_file (const char file_name[], double* nodes, size_t num_nodes)
 }
 
 int
-segment_electrode (Electrode* electrodes, double* nodes, size_t num_segments,
-                   const double* start_point, const double* end_point, double radius)
+segment_electrode (Electrode* electrodes, float* nodes, size_t num_segments,
+                   const float* start_point, const float* end_point, float radius)
 {
     if (num_segments < 1) {
         printf("Error: number of segments should be greater than 0.\n");
         return 1;
     }
     size_t num_nodes = num_segments + 1;
-    double x[num_nodes];
-    double y[num_nodes];
-    double z[num_nodes];
+    float x[num_nodes];
+    float y[num_nodes];
+    float z[num_nodes];
     linspace(start_point[0], end_point[0], num_nodes, x);
     linspace(start_point[1], end_point[1], num_nodes, y);
     linspace(start_point[2], end_point[2], num_nodes, z);
@@ -128,12 +128,12 @@ segment_electrode (Electrode* electrodes, double* nodes, size_t num_segments,
 }
 
 size_t
-nodes_from_elecs (double* nodes, Electrode* electrodes, size_t num_electrodes)
+nodes_from_elecs (float* nodes, Electrode* electrodes, size_t num_electrodes)
 {
     // Array of pointers that will have the maximum number of nodes possible.
     // Make them NULL and malloc for each new unique node.
     // Later copy them to nodes
-    double* *dummy_nodes = malloc(2*num_electrodes * sizeof(double[3]));
+    float* *dummy_nodes = malloc(2*num_electrodes * sizeof(float[3]));
     for (size_t i = 1; i < 2*num_electrodes; i++) {
         dummy_nodes[i] = NULL;
     }
@@ -182,15 +182,15 @@ integrand_double (unsigned ndim, const double* t, void *auxdata, unsigned fdim,
     const Electrode* sender = p->sender;
     const Electrode* receiver = p->receiver;
     _Complex double gamma = p->gamma;
-    double point_r[3], point_s[3];
+    float point_r[3], point_s[3];
     for (size_t i = 0; i < 3; i++) {
         point_r[i] = t[0] * (receiver->end_point[i] - receiver->start_point[i])
                    + receiver->start_point[i];
         point_s[i] = t[1] * (sender->end_point[i] - sender->start_point[i])
                    + sender->start_point[i];
     }
-    double r = vector_length(point_s, point_r);
-    if (r < DBL_EPSILON) r = receiver->radius;
+    float r = vector_length(point_s, point_r);
+    if (r < FLT_EPSILON) r = receiver->radius;
     _Complex double exp_gr = cexp(-gamma * r);
     fval[0] = creal(exp_gr) / r;
     fval[1] = cimag(exp_gr) / r;
@@ -205,13 +205,13 @@ integrand_single (unsigned ndim, const double* t, void *auxdata, unsigned fdim,
     const Electrode* sender = p->sender;
     const Electrode* receiver = p->receiver;
     _Complex double gamma = p->gamma;
-    double point_s[3];
+    float point_s[3];
     for (size_t i = 0; i < 3; i++) {
         point_s[i] = t[0] * (sender->end_point[i] - sender->start_point[i])
                    + sender->start_point[i];
     }
-    double r = vector_length(point_s, receiver->middle_point);
-    if (r < DBL_EPSILON) r = DBL_EPSILON;
+    float r = vector_length(point_s, receiver->middle_point);
+    if (r < FLT_EPSILON) r = FLT_EPSILON;
     _Complex double exp_gr = cexp(-gamma * r);
     fval[0] = creal(exp_gr) / r;
     fval[1] = cimag(exp_gr) / r;
@@ -224,14 +224,14 @@ logNf (unsigned ndim, const double* t, void *auxdata, unsigned fdim, double* fva
     Integration_data* p = (Integration_data*) auxdata;
     const Electrode* sender = p->sender;
     const Electrode* receiver = p->receiver;
-    double point_r[3];
+    float point_r[3];
     for (size_t i = 0; i < 3; i++) {
         point_r[i] = t[0]*(receiver->end_point[i] - receiver->start_point[i])
                    + receiver->start_point[i];
     }
-    double r1 = vector_length(point_r, sender->start_point);
-    double r2 = vector_length(point_r, sender->end_point);
-    double Nf = (r1 + r2 + sender->length)/(r1 + r2 - sender->length);
+    float r1 = vector_length(point_r, sender->start_point);
+    float r2 = vector_length(point_r, sender->end_point);
+    float Nf = (r1 + r2 + sender->length)/(r1 + r2 - sender->length);
     fval[0] = log(Nf);
     return 0;
 }
@@ -303,7 +303,7 @@ integral (const Electrode* sender, const Electrode* receiver,
 }
 
 int
-calculate_impedances (_Complex double* zl, _Complex double* zt,
+calculate_impedances (_Complex float* zl, _Complex float* zt,
                       const Electrode* electrodes, size_t num_electrodes,
                       _Complex double gamma, _Complex double s, double mur,
                       _Complex double kappa, size_t max_eval, double req_abs_error,
@@ -326,8 +326,8 @@ calculate_impedances (_Complex double* zl, _Complex double* zt,
         /*if (integration_type == INTG_DOUBLE) { // FIXME wrong results
             Electrode sender;
             Electrode receiver;
-            double start_point[3];
-            double end_point[3];
+            float start_point[3];
+            float end_point[3];
             lr = electrodes[i].radius;
             start_point[0] = 0.0; start_point[1] = 0.0; start_point[2] = 0.0;
             end_point[0]   =  ls; end_point[1]   = 0.0; end_point[2]   = 0.0;
@@ -363,13 +363,13 @@ calculate_impedances (_Complex double* zl, _Complex double* zt,
                                integration_type, result, error);
             if (failure != 0) return failure; // TODO error check with OpenMP
             intg = result[0] + I*result[1];
-            zt[i*num_electrodes + k] = one_4pik / (ls * lr) * intg;
+            zt[i*num_electrodes + k] = (float) one_4pik / (ls * lr) * intg;
             //zt[k*num_electrodes + i] = zt[i*num_electrodes + k];
-            if (cost < DBL_EPSILON) {
+            if (cost < FLT_EPSILON) {
                 zl[i*num_electrodes + k] = 0.0;
             } else {
                 cost = cost / (ls * lr);
-                zl[i*num_electrodes + k] = iwu_4pi * intg * cost;
+                zl[i*num_electrodes + k] = (float) iwu_4pi * intg * cost;
             }
             //zl[k*num_electrodes + i] = zl[i*num_electrodes + k];
         }
@@ -378,10 +378,10 @@ calculate_impedances (_Complex double* zl, _Complex double* zt,
 }
 
 int
-impedances_images (_Complex double* zl, _Complex double* zt,
+impedances_images (_Complex float* zl, _Complex float* zt,
                    const Electrode* electrodes, const Electrode* images,
-                   size_t num_electrodes,   _Complex double gamma,
-                   _Complex double s, double mur, _Complex double kappa,
+                   size_t num_electrodes, _Complex double gamma,
+                   _Complex double s, float mur, _Complex double kappa,
                    _Complex double ref_l, _Complex double ref_t,
                    size_t max_eval, double req_abs_error,
                    double req_rel_error, int integration_type)
@@ -419,11 +419,11 @@ impedances_images (_Complex double* zl, _Complex double* zt,
                                result, error);
             if (failure != 0) return failure; // TODO error check with OpenMP
             intg = result[0] + I*result[1];
-            zt[i*num_electrodes + k] += one_4pik / (ls * lr) * intg;
+            zt[i*num_electrodes + k] += (float) one_4pik / (ls * lr) * intg;
             //zt[k*num_electrodes + i] = zt[i*num_electrodes + k];
-            if (cost > DBL_EPSILON) {
+            if (cost > FLT_EPSILON) {
                 cost = cost / (ls * lr);
-                zl[i*num_electrodes + k] += iwu_4pi * intg * cost;
+                zl[i*num_electrodes + k] += (float) iwu_4pi * intg * cost;
                 //zl[k*num_electrodes + i] = zl[i*num_electrodes + k];
             }
         }
@@ -432,15 +432,15 @@ impedances_images (_Complex double* zl, _Complex double* zt,
 }
 
 // TODO integration of fields and potentials using the middle_point
-_Complex double
-electric_potential (const double* point, const Electrode* electrodes,
-                    size_t num_electrodes, const _Complex double* it,
+_Complex float
+electric_potential (const float* point, const Electrode* electrodes,
+                    size_t num_electrodes, const _Complex float* it,
                     _Complex double gamma, _Complex double kappa,
                     size_t max_eval, double req_abs_error, double req_rel_error)
 {
     Electrode* point_elec = malloc(sizeof(Electrode));
     double result[2], error[2];
-    _Complex double pot = 0.0;
+    _Complex float pot = 0.0;
     for (int i = 0; i < 3; i++) {
         point_elec->middle_point[i] = *(point + i);
     }
@@ -450,29 +450,29 @@ electric_potential (const double* point, const Electrode* electrodes,
                            req_abs_error, req_rel_error, INTG_SINGLE,
                            result, error);
         if (failure != 0) return failure; // TODO error check with OpenMP
-        pot += (result[0] + I*result[1]) * it[m] / electrodes[m].length;
+        pot += (float) (result[0] + I*result[1]) * it[m] / electrodes[m].length;
     }
     free(point_elec);
     return pot/(FOUR_PI*kappa);
 }
 
 int
-magnetic_potential (const double* point, const Electrode* electrodes,
-                    size_t num_electrodes, const _Complex double* il,
+magnetic_potential (const float* point, const Electrode* electrodes,
+                    size_t num_electrodes, const _Complex float* il,
                     _Complex double gamma, double mur, size_t max_eval,
                     double req_abs_error, double req_rel_error,
-                    _Complex double* va)
+                    _Complex float* va)
 {
     int failure = 0;
     Electrode* point_elec = malloc(sizeof(Electrode));
     double result[2], error[2], dx, dy, dz;
-    _Complex double pot = 0.0;
+    _Complex float pot = 0.0;
     for (int i = 0; i < 3; i++) {
         point_elec->middle_point[i] = *(point + i);
         va[i] = 0.0;
     }
     for (size_t m = 0; m < num_electrodes; m++) {
-        if (cabs(il[m]) < DBL_EPSILON) continue;
+        if (cabsf(il[m]) < FLT_EPSILON) continue;
         dx = electrodes[m].end_point[0] - electrodes[m].start_point[0];
         dy = electrodes[m].end_point[1] - electrodes[m].start_point[1];
         dz = electrodes[m].end_point[2] - electrodes[m].start_point[2];
@@ -481,13 +481,13 @@ magnetic_potential (const double* point, const Electrode* electrodes,
                            result, error);
         if (failure) return failure;
         // divide pot by L as to avoid dividing each dx, dy, dz by L
-        pot = (result[0] + I*result[1]) * il[m] / electrodes[m].length;
+        pot = (float) (result[0] + I*result[1]) * il[m] / electrodes[m].length;
         va[0] += pot * dx;
         va[1] += pot * dy;
         va[2] += pot * dz;
     }
     free(point_elec);
-    _Complex double u_4pi = mur * MU0 / (FOUR_PI);
+    _Complex float u_4pi = mur * MU0 / (FOUR_PI);
     for (int i = 0; i < 3; i++) va[i] *= u_4pi;
     return 0;
 }
@@ -497,21 +497,21 @@ elec_field_integrand (unsigned ndim, const double* t, void *auxdata,
                       unsigned fdim, double* fval)
 {
     Field_integrand_data* p = (Field_integrand_data*) auxdata;
-    const double* point = p->point1;
+    const float* point = p->point1;
     const Electrode* electrode = p->electrodes;
     _Complex double gamma = p->gamma;
-    double r1, dx[3];
-    double r2 = 0.0;
+    float r1, dx[3];
+    float r2 = 0.0;
     for (size_t i = 0; i < 3; i++) {
         r1 = t[0] * (electrode->end_point[i] - electrode->start_point[i])
            + electrode->start_point[i];
         dx[i] = point[i] - r1;
-        r2 += pow(dx[i], 2.0);
+        r2 += powf(dx[i], 2.0);
     }
-    r1 = sqrt(r2);
-    if (r2 < DBL_EPSILON) r2 = DBL_EPSILON;
-    _Complex double efield = (1 + gamma * r1) * cexp(-gamma * r1) / r2;
-    _Complex double ex;
+    r1 = sqrtf(r2);
+    if (r2 < FLT_EPSILON) r2 = FLT_EPSILON;
+    _Complex float efield = (1 + gamma * r1) * cexp(-gamma * r1) / r2;
+    _Complex float ex;
     for (int i = 0; i < 3; i++) {
         ex = efield * dx[i] / r1;
         fval[2*i] = creal(ex);
@@ -521,15 +521,15 @@ elec_field_integrand (unsigned ndim, const double* t, void *auxdata,
 }
 
 int
-electric_field (const double* point, const Electrode* electrodes,
-                size_t num_electrodes, const _Complex double* il,
-                const _Complex double* it, _Complex double gamma,
+electric_field (const float* point, const Electrode* electrodes,
+                size_t num_electrodes, const _Complex float* il,
+                const _Complex float* it, _Complex double gamma,
                 _Complex double s, double mur, _Complex double kappa,
                 size_t max_eval, double req_abs_error, double req_rel_error,
-                _Complex double* ve)
+                _Complex float* ve)
 {
     //for (int i = 0; i < 3; i++) ve[i] = 0.0;
-    if (cabs(s) > DBL_EPSILON) {
+    if (cabs(s) > FLT_EPSILON) {
         magnetic_potential(point, electrodes, num_electrodes, il, gamma, mur,
                            max_eval, req_abs_error, req_rel_error, ve);
         for (int i = 0; i < 3; i++) {
@@ -546,14 +546,14 @@ electric_field (const double* point, const Electrode* electrodes,
     int failure = 0;
     _Complex double it_4pik;
     for (size_t m = 0; m < num_electrodes; m++) {
-        if (cabs(it[m]) < DBL_EPSILON) continue;
+        if (cabsf(it[m]) < FLT_EPSILON) continue;
         auxdata->electrodes = (electrodes + m);
         failure = hcubature(fdim, elec_field_integrand, auxdata, 1, tmin, tmax,
                             max_eval, req_abs_error, req_rel_error, ERROR_PAIRED,
                             result, error);
         it_4pik = it[m] / (FOUR_PI * kappa);
         for (int i = 0; i < 3; i++) {
-            ve[i] += (result[2*i] + I*result[2*i + 1]) * it_4pik;
+            ve[i] += (float) (result[2*i] + I*result[2*i + 1]) * it_4pik;
         }
     }
     free(auxdata);
@@ -565,30 +565,30 @@ v_mag_pot_integrand (unsigned ndim, const double *t, void *auxdata, unsigned fdi
                      double *fval)
 {
     Field_integrand_data* p = (Field_integrand_data*) auxdata;
-    const double* point_1 = p->point1;
-    const double* point_2 = p->point2;
+    const float* point_1 = p->point1;
+    const float* point_2 = p->point2;
     const Electrode* electrodes = p->electrodes;
     size_t num_electrodes = p->num_electrodes;
-    const _Complex double* il = p->il;
+    const _Complex float* il = p->il;
     _Complex double gamma = p->gamma;
     double mur = p->mur;
     size_t max_eval = p->max_eval;
     double req_abs_error = p->req_abs_error;
     double req_rel_error = p->req_rel_error;
-    double point[3];
-    double dx[3];
-    double length = 0.0;
+    float point[3];
+    float dx[3];
+    float length = 0.0;
     for (int i = 0; i < 3; i++) {
         dx[i] = point_2[i] - point_1[i];
         point[i] = t[0] * dx[i] + point_1[i];
-        length += pow(dx[i], 2.0);
+        length += powf(dx[i], 2.0);
     }
-    if (length < DBL_EPSILON) return 1;
-    length = sqrt(length);
-    _Complex double va[3];
+    if (length < FLT_EPSILON) return 1;
+    length = sqrtf(length);
+    _Complex float va[3];
     magnetic_potential(point, electrodes, num_electrodes, il, gamma, mur,
                        max_eval, req_abs_error, req_rel_error, va);
-    _Complex double va_cost = 0.0;
+    _Complex float va_cost = 0.0;
     for (int i = 0; i < 3; i++) va_cost += va[i] * dx[i];
     va_cost = va_cost / length;
     fval[0] = creal(va_cost);
@@ -601,33 +601,33 @@ v_elecf_integrand (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
                   double *fval)
 {
     Field_integrand_data* p = (Field_integrand_data*) auxdata;
-    const double* point_1 = p->point1;
-    const double* point_2 = p->point2;
+    const float* point_1 = p->point1;
+    const float* point_2 = p->point2;
     const Electrode* electrodes = p->electrodes;
     size_t num_electrodes = p->num_electrodes;
-    const _Complex double* il = p->il;
-    const _Complex double* it = p->it;
+    const _Complex float* il = p->il;
+    const _Complex float* it = p->it;
     _Complex double gamma = p->gamma;
     _Complex double s = p->s;
     double mur = p->mur;
-    _Complex double kappa = p->kappa;
+    _Complex float kappa = p->kappa;
     size_t max_eval = p->max_eval;
     double req_abs_error = p->req_abs_error;
     double req_rel_error = p->req_rel_error;
-    double point[3];
-    double dx[3];
-    double length = 0.0;
+    float point[3];
+    float dx[3];
+    float length = 0.0;
     for (int i = 0; i < 3; i++) {
         dx[i] = point_2[i] - point_1[i];
         point[i] = t[0] * dx[i] + point_1[i];
-        length += pow(dx[i], 2.0);
+        length += powf(dx[i], 2.0);
     }
-    if (length < DBL_EPSILON) return 1;
-    length = sqrt(length);
-    _Complex double ve[3];
+    if (length < FLT_EPSILON) return 1;
+    length = sqrtf(length);
+    _Complex float ve[3];
     electric_field(point, electrodes, num_electrodes, il, it, gamma, s, mur,
                    kappa, max_eval, req_abs_error, req_rel_error, ve);
-    _Complex double ve_cost = 0.0;
+    _Complex float ve_cost = 0.0;
     for (int i = 0; i < 3; i++) ve_cost += ve[i] * dx[i];
     ve_cost /= length;
     fval[0] = creal(ve_cost);
@@ -635,10 +635,10 @@ v_elecf_integrand (unsigned ndim, const double *t, void *auxdata, unsigned fdim,
     return 0;
 }
 
-_Complex double
-voltage (const double* point1, const double* point2,
+_Complex float
+voltage (const float* point1, const float* point2,
          const Electrode* electrodes, size_t num_electrodes,
-         const _Complex double* il, const _Complex double* it,
+         const _Complex float* il, const _Complex float* it,
          _Complex double gamma, _Complex double s, double mur,
          _Complex double kappa, size_t max_eval, double req_abs_error,
          double req_rel_error)

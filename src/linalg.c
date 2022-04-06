@@ -10,8 +10,8 @@
 #include "lapack.h"
 
 int
-fill_incidence_imm (_Complex double* wg, const Electrode* electrodes,
-                    size_t num_electrodes, const double* nodes,
+fill_incidence_imm (_Complex float* wg, const Electrode* electrodes,
+                    size_t num_electrodes, const float* nodes,
                     size_t num_nodes)
 {
     enum {
@@ -23,9 +23,9 @@ fill_incidence_imm (_Complex double* wg, const Electrode* electrodes,
     int condition;
     bool no_incidence;
     size_t ld = (2 * num_electrodes + num_nodes);
-    double tol = 1e-5;  // using DBL_EPSILON leads to wrong incidence matrix
+    float tol = 1e-5;  // using DBL_EPSILON leads to wrong incidence matrix
     long int suma = 0;
-    double sumb = 0.0;
+    float sumb = 0.0;
     for (size_t n = 0; n < num_nodes; n++) {
         no_incidence = true;
         for (size_t e = 0; e < num_electrodes; e++) {
@@ -79,15 +79,15 @@ fill_incidence_imm (_Complex double* wg, const Electrode* electrodes,
         return -suma;
     }
     if (sumb != num_electrodes) {
-        printf("incidence matrix B is wrong. sum(B) = %.1f != %.1f\n", sumb, (double) num_electrodes);
+        printf("incidence matrix B is wrong. sum(B) = %.1f != %.1f\n", sumb, (float) num_electrodes);
         return (sumb - num_electrodes);
     }
     return 0;
 }
 
 int
-fill_impedance_imm (_Complex double* wg, const _Complex double* zl,
-                    const _Complex double* zt, size_t num_electrodes,
+fill_impedance_imm (_Complex float* wg, const _Complex float* zl,
+                    const _Complex float* zt, size_t num_electrodes,
                     size_t num_nodes)
 {
     size_t n = num_nodes;
@@ -110,7 +110,7 @@ fill_impedance_imm (_Complex double* wg, const _Complex double* zl,
 }
 
 int
-solve_immittance (_Complex double* wg, _Complex double* ie,
+solve_immittance (_Complex float* wg, _Complex float* ie,
                   size_t num_electrodes, size_t num_nodes)
 {
     int n = num_electrodes*2 + num_nodes;
@@ -120,14 +120,14 @@ solve_immittance (_Complex double* wg, _Complex double* ie,
     //zgesv_(&n, &nrhs, wg, &n, ipiv, ie, &n, &info);
     char uplo = 'L';
     int lwmax = 100;
-    _Complex double* work = malloc(lwmax * sizeof(_Complex double));
+    _Complex float* work = malloc(lwmax * sizeof(_Complex float));
     //Query the optimal workspace.
     int lwork = -1;
-    zsysv_(&uplo, &n, &nrhs, wg, &n, ipiv, ie, &n, work, &lwork, &info);
+    csysv_(&uplo, &n, &nrhs, wg, &n, ipiv, ie, &n, work, &lwork, &info);
     lwork = creal(work[0]);
     if (lwork > lwmax) {lwork = lwmax;}
-    work = realloc(work, lwmax * sizeof(_Complex double));
-    zsysv_(&uplo, &n, &nrhs, wg, &n, ipiv, ie, &n, work, &lwork, &info);
+    work = realloc(work, lwmax * sizeof(_Complex float));
+    csysv_(&uplo, &n, &nrhs, wg, &n, ipiv, ie, &n, work, &lwork, &info);
     // Check for the exact singularity
     if (info > 0) {
         printf("The diagonal element of the triangular factor of YN,\n");
@@ -140,9 +140,9 @@ solve_immittance (_Complex double* wg, _Complex double* ie,
 
 
 int
-fill_incidence_adm (_Complex double* a, _Complex double* b,
+fill_incidence_adm (_Complex float* a, _Complex float* b,
                     const Electrode* electrodes, size_t num_electrodes,
-                    const double* nodes, size_t num_nodes)
+                    const float* nodes, size_t num_nodes)
 {
     enum {
         NO_INCIDENCE = 0,
@@ -151,9 +151,9 @@ fill_incidence_adm (_Complex double* a, _Complex double* b,
     };
     int condition, pos;
     bool no_incidence;
-    double tol = 1e-5;  // using DBL_EPSILON leads to wrong incidence matrix
+    float tol = 1e-5;  // using DBL_EPSILON leads to wrong incidence matrix
     long int suma = 0;
-    double sumb = 0.0;
+    float sumb = 0.0;
     for (size_t n = 0; n < num_nodes; n++) {
         no_incidence = true;
         for (size_t e = 0; e < num_electrodes; e++) {
@@ -197,15 +197,15 @@ fill_incidence_adm (_Complex double* a, _Complex double* b,
         return -suma;
     }
     if (sumb != num_electrodes) {
-        printf("incidence matrix B is wrong. sum(B) = %.1f != %.1f\n", sumb, (double) num_electrodes);
+        printf("incidence matrix B is wrong. sum(B) = %.1f != %.1f\n", sumb, (float) num_electrodes);
         return (sumb - num_electrodes);
     }
     return 0;
 }
 
 int
-fill_impedance_adm (_Complex double* yn, _Complex double* zl, _Complex double* zt,
-                    _Complex double* a, _Complex double* b, size_t num_electrodes,
+fill_impedance_adm (_Complex float* yn, _Complex float* zl, _Complex float* zt,
+                    _Complex float* a, _Complex float* b, size_t num_electrodes,
                     size_t num_nodes)
 {
     // yn = aT*(zl^-1)*a + bT*(zt^-1)*b
@@ -215,34 +215,34 @@ fill_impedance_adm (_Complex double* yn, _Complex double* zl, _Complex double* z
     char notrans = 'N';
     char trans = 'T';
     char side = 'L';
-    _Complex double one = 1.0;
-    _Complex double zero = 0.0;
+    _Complex float one = 1.0;
+    _Complex float zero = 0.0;
     int lwork = -1;
     int info;
-    _Complex double* c = malloc( (ne*nn) * sizeof(_Complex double) );
+    _Complex float* c = malloc( (ne*nn) * sizeof(_Complex float) );
     int* ipiv = malloc(ne * sizeof(size_t));
-    _Complex double* work = malloc(100 * sizeof(_Complex double));
+    _Complex float* work = malloc(100 * sizeof(_Complex float));
     // Query the optimal workspace.
-    zsytrf_(&uplo, &ne, zl, &ne, ipiv, work, &lwork, &info);
+    csytrf_(&uplo, &ne, zl, &ne, ipiv, work, &lwork, &info);
     if (info != 0) return info;
     lwork = creal(work[0]);
-    work = realloc(work, lwork * sizeof(_Complex double));
+    work = realloc(work, lwork * sizeof(_Complex float));
     // inv(ZL)
-    zsytrf_(&uplo, &ne, zl, &ne, ipiv, work, &lwork, &info);
+    csytrf_(&uplo, &ne, zl, &ne, ipiv, work, &lwork, &info);
     if (info != 0) return info;
-    zsytri_(&uplo, &ne, zl, &ne, ipiv, work, &info);
+    csytri_(&uplo, &ne, zl, &ne, ipiv, work, &info);
     // inv(ZT)
-    zsytrf_(&uplo, &ne, zt, &ne, ipiv, work, &lwork, &info);
+    csytrf_(&uplo, &ne, zt, &ne, ipiv, work, &lwork, &info);
     if (info != 0) return info;
-    zsytri_(&uplo, &ne, zt, &ne, ipiv, work, &info);
+    csytri_(&uplo, &ne, zt, &ne, ipiv, work, &info);
     // c = yl*a + c*0
-    zsymm_(&side, &uplo, &ne, &nn, &one, zl, &ne, a, &ne, &zero, c, &ne);
+    csymm_(&side, &uplo, &ne, &nn, &one, zl, &ne, a, &ne, &zero, c, &ne);
     // yn = aT*c + yn*0
-    zgemm_(&trans, &notrans, &nn, &nn, &ne, &one, a, &ne, c, &ne, &zero, yn, &nn);
+    cgemm_(&trans, &notrans, &nn, &nn, &ne, &one, a, &ne, c, &ne, &zero, yn, &nn);
     // c = yt*b + c*0
-    zsymm_(&side, &uplo, &ne, &nn, &one, zt, &ne, b, &ne, &zero, c, &ne);
+    csymm_(&side, &uplo, &ne, &nn, &one, zt, &ne, b, &ne, &zero, c, &ne);
     // yn = bT*c + yn
-    zgemm_(&trans, &notrans, &nn, &nn, &ne, &one, b, &ne, c, &ne, &one, yn, &nn);
+    cgemm_(&trans, &notrans, &nn, &nn, &ne, &one, b, &ne, c, &ne, &one, yn, &nn);
     // if using Intel MKL, replace the above BLAS calls by:
     /*cblas_zsymm(CblasColMajor, CblasLeft, CblasLower,
                 ne, nn, &one, zl, ne, a, ne, &zero, c, ne);
@@ -259,36 +259,36 @@ fill_impedance_adm (_Complex double* yn, _Complex double* zl, _Complex double* z
 }
 
 int
-calculate_yla_ytb (_Complex double* yla, _Complex double* ytb,
-                   _Complex double* zl, _Complex double* zt,
-                   _Complex double* a, _Complex double* b,
+calculate_yla_ytb (_Complex float* yla, _Complex float* ytb,
+                   _Complex float* zl, _Complex float* zt,
+                   _Complex float* a, _Complex float* b,
                    size_t num_electrodes, size_t num_nodes)
 {
     int ne = num_electrodes;
     int nn = num_nodes;
     char uplo = 'L';
     char side = 'L';
-    _Complex double one = 1.0;
-    _Complex double zero = 0.0;
+    _Complex float one = 1.0;
+    _Complex float zero = 0.0;
     int lwork = -1;
     int info;
     int* ipiv = malloc(ne * sizeof(size_t));
-    _Complex double* work = malloc(100 * sizeof(_Complex double));
+    _Complex float* work = malloc(100 * sizeof(_Complex float));
     // Query the optimal workspace.
-    zsytrf_(&uplo, &ne, zl, &ne, ipiv, work, &lwork, &info);
+    csytrf_(&uplo, &ne, zl, &ne, ipiv, work, &lwork, &info);
     if (info != 0) return info;
     lwork = creal(work[0]);
-    work = realloc(work, lwork * sizeof(_Complex double));
+    work = realloc(work, lwork * sizeof(_Complex float));
     // inv(ZL)
-    zsytrf_(&uplo, &ne, zl, &ne, ipiv, work, &lwork, &info);
+    csytrf_(&uplo, &ne, zl, &ne, ipiv, work, &lwork, &info);
     if (info != 0) return info;
-    zsytri_(&uplo, &ne, zl, &ne, ipiv, work, &info);
+    csytri_(&uplo, &ne, zl, &ne, ipiv, work, &info);
     // inv(ZT)
-    zsytrf_(&uplo, &ne, zt, &ne, ipiv, work, &lwork, &info);
+    csytrf_(&uplo, &ne, zt, &ne, ipiv, work, &lwork, &info);
     if (info != 0) return info;
-    zsytri_(&uplo, &ne, zt, &ne, ipiv, work, &info);
-    zsymm_(&side, &uplo, &ne, &nn, &one, zl, &ne, a, &ne, &zero, yla, &ne);
-    zsymm_(&side, &uplo, &ne, &nn, &one, zt, &ne, b, &ne, &zero, ytb, &ne);
+    csytri_(&uplo, &ne, zt, &ne, ipiv, work, &info);
+    csymm_(&side, &uplo, &ne, &nn, &one, zl, &ne, a, &ne, &zero, yla, &ne);
+    csymm_(&side, &uplo, &ne, &nn, &one, zt, &ne, b, &ne, &zero, ytb, &ne);
     // if using Intel MKL, replace the above BLAS calls by:
     /*cblas_zsymm(CblasColMajor, CblasLeft, CblasLower,
                 ne, nn, &one, zl, ne, a, ne, &zero, yla, ne);
@@ -300,22 +300,22 @@ calculate_yla_ytb (_Complex double* yla, _Complex double* ytb,
 }
 
 int
-fill_impedance_adm2 (_Complex double* yn, _Complex double* yla,
-                     _Complex double* ytb, _Complex double* a,
-                     _Complex double* b, size_t num_electrodes,
+fill_impedance_adm2 (_Complex float* yn, _Complex float* yla,
+                     _Complex float* ytb, _Complex float* a,
+                     _Complex float* b, size_t num_electrodes,
                      size_t num_nodes)
 {
     int ne = num_electrodes;
     int nn = num_nodes;
     char notrans = 'N';
     char trans = 'T';
-    _Complex double one = 1.0;
-    _Complex double zero = 0.0;
+    _Complex float one = 1.0;
+    _Complex float zero = 0.0;
     // yn = aT*(zl^-1)*a + bT*(zt^-1)*b
     // yn = aT*yla + yn*0
-    zgemm_(&trans, &notrans, &nn, &nn, &ne, &one, a, &ne, yla, &ne, &zero, yn, &nn);
+    cgemm_(&trans, &notrans, &nn, &nn, &ne, &one, a, &ne, yla, &ne, &zero, yn, &nn);
     // yn = bT*ytb + yn
-    zgemm_(&trans, &notrans, &nn, &nn, &ne, &one, b, &ne, ytb, &ne, &one, yn, &nn);
+    cgemm_(&trans, &notrans, &nn, &nn, &ne, &one, b, &ne, ytb, &ne, &one, yn, &nn);
     // if using Intel MKL, replace the above BLAS calls by:
     /*cblas_zgemm(CblasColMajor, CblasTrans, CblasNoTrans,
                 nn, nn, ne, &one, a, ne, yla, ne, &zero, yn, nn);
@@ -325,7 +325,7 @@ fill_impedance_adm2 (_Complex double* yn, _Complex double* yla,
 }
 
 int
-solve_admittance (_Complex double* yn, _Complex double* ic, size_t num_nodes)
+solve_admittance (_Complex float* yn, _Complex float* ic, size_t num_nodes)
 {
     int n = (int) num_nodes;
     int ipiv[n]; //pivot indices
@@ -333,13 +333,13 @@ solve_admittance (_Complex double* yn, _Complex double* ic, size_t num_nodes)
     int nrhs = 1;
     char uplo = 'L';
     int lwork = -1;
-    _Complex double* work = malloc(100 * sizeof(_Complex double));
+    _Complex float* work = malloc(100 * sizeof(_Complex float));
     // Query the optimal workspace.
-    zsysv_(&uplo, &n, &nrhs, yn, &n, ipiv, ic, &n, work, &lwork, &info);
+    csysv_(&uplo, &n, &nrhs, yn, &n, ipiv, ic, &n, work, &lwork, &info);
     //if (info != 0) return info;
     lwork = creal(work[0]);
-    work = realloc(work, lwork * sizeof(_Complex double));
-    zsysv_(&uplo, &n, &nrhs, yn, &n, ipiv, ic, &n, work, &lwork, &info);
+    work = realloc(work, lwork * sizeof(_Complex float));
+    csysv_(&uplo, &n, &nrhs, yn, &n, ipiv, ic, &n, work, &lwork, &info);
     // Check for the exact singularity
     if (info > 0) {
         printf("The diagonal element of the triangular factor of YN,\n");

@@ -33,15 +33,15 @@ Integration_type {
 /** Structure that defines an electrode (conductor segment). */
 typedef struct {
     /** Array \f$(x,y,z)_0\f$ that defines the starting point of the electrode */
-    double start_point[3];
+    float start_point[3];
     /** Array \f$(x,y,z)_1\f$ that defines the ending point of the electrode */
-    double end_point[3];
+    float end_point[3];
     /** Array \f$\frac{(x,y,z)_1 + (x,y,z)_0}{2}\f$ of the middle point of the electrode */
-    double middle_point[3];
+    float middle_point[3];
     /** The electrode length \f$ \| (x,y,z)_1 - (x,y,z)_0 \|_2 \f$ */
-    double length;
+    float length;
     /** The electrode radius */
-    double radius;
+    float radius;
 } Electrode;
 
 /** Structure to make the integration of the "potential" between two electrodes.
@@ -63,17 +63,17 @@ typedef struct {
 */
 typedef struct {
     /** Line integral start point */
-    const double* point1;
+    const float* point1;
     /** Line integral end point */
-    const double* point2;
+    const float* point2;
     /** array of electrodes */
     const Electrode* electrodes;
     /** number of electrodes \f$ m \f$ */
     size_t num_electrodes;
     /** longitudinal currents array \f$ I_L \f$ */
-    const _Complex double* il;
+    const _Complex float* il;
     /** transversal currents array \f$ I_T \f$ */
-    const _Complex double* it;
+    const _Complex float* it;
     /** medium propagation constant
         \f$ \gamma = \sqrt{j\omega\mu(\sigma + j\omega\varepsilon)} \f$ */
     _Complex double gamma;
@@ -102,8 +102,8 @@ typedef struct {
 @return 0 on success
 */
 int
-populate_electrode (Electrode *electrode, const double start_point[3],
-                    const double end_point[3], double radius);
+populate_electrode (Electrode *electrode, const float start_point[3],
+                    const float end_point[3], float radius);
 
 /** Compares two electrodes for equality: have the same radius and coincide the
 starts and end points (independent of direction).
@@ -130,7 +130,7 @@ electrodes_file (const char file_name[], Electrode *electrodes, size_t num_elect
 /** Fill a nodes array from a CSV file. Each node must be defined in a single line
 with parameters: "x, y, z".
 @param file_name path to the file
-@param nodes array of double[3] to be filled
+@param nodes array of float[3] to be filled
 @param num_nodes number of nodes to read (number of lines in file).
     Any line number greater than num_nodes will be ignored.
 @return error == 0 on success \n
@@ -138,7 +138,7 @@ with parameters: "x, y, z".
         error > 0: bad input
 */
 int
-nodes_file (const char file_name[], double *nodes, size_t num_nodes);
+nodes_file (const char file_name[], float *nodes, size_t num_nodes);
 
 /** Segments an electrode populating a passed array of electrodes and an array of nodes.
 @param electrodes pointer to an array of Electrode to be filled
@@ -151,8 +151,8 @@ that are created
 @return 0 on success
 */
 int
-segment_electrode (Electrode *electrodes, double *nodes, size_t num_segments,
-                   const double *start_point, const double *end_point, double radius);
+segment_electrode (Electrode *electrodes, float *nodes, size_t num_segments,
+                   const float *start_point, const float *end_point, float radius);
 
 /** DON'T USE THIS FUNCTIONS, IT'S BUGGED.
 
@@ -165,7 +165,7 @@ nodes.
 @returns number of unique nodes \f$n_u\f$; can be used to realloc the nodes array
 */
 size_t
-nodes_from_elecs (double *nodes, Electrode *electrodes, size_t num_electrodes);
+nodes_from_elecs (float *nodes, Electrode *electrodes, size_t num_electrodes);
 
 /** Calculates the integrand \f$ \frac{e^{-\gamma r}}{r} \f$ to be integrated
 using Cubature.
@@ -274,7 +274,7 @@ gamma, s, mur and kappa are ignored such that
 @see https://github.com/stevengj/cubature
 */
 int
-calculate_impedances (_Complex double *zl, _Complex double *zt,
+calculate_impedances (_Complex float *zl, _Complex float *zt,
                       const Electrode *electrodes, size_t num_electrodes,
                       _Complex double gamma, _Complex double s, double mur,
                       _Complex double kappa, size_t max_eval, double req_abs_error,
@@ -308,10 +308,10 @@ gamma, s, mur, kappa, ref_l and ref_t are ignored such that
 @see https://github.com/stevengj/cubature
 */
 int
-impedances_images (_Complex double *zl, _Complex double *zt,
+impedances_images (_Complex float *zl, _Complex float *zt,
                    const Electrode *electrodes, const Electrode *images,
                    size_t num_electrodes, _Complex double gamma,
-                   _Complex double s, double mur, _Complex double kappa,
+                   _Complex double s, float mur, _Complex double kappa,
                    _Complex double ref_l, _Complex double ref_t,
                    size_t max_eval, double req_abs_error, double req_rel_error,
                    int integration_type);
@@ -330,9 +330,9 @@ impedances_images (_Complex double *zl, _Complex double *zt,
 @return potential \f$ u \f$ to remote earth
 @see https://github.com/stevengj/cubature
 */
-_Complex double
-electric_potential (const double *point, const Electrode *electrodes,
-                    size_t num_electrodes, const _Complex double *it,
+_Complex float
+electric_potential (const float *point, const Electrode *electrodes,
+                    size_t num_electrodes, const _Complex float *it,
                     _Complex double gamma, _Complex double kappa,
                     size_t max_eval, double req_abs_error, double req_rel_error);
 
@@ -353,11 +353,11 @@ components \f$ (A_x,A_y,A_z) \f$ will be stored on return.
 @see https://github.com/stevengj/cubature
 */
 int
-magnetic_potential (const double *point, const Electrode *electrodes,
-                    size_t num_electrodes, const _Complex double *il,
+magnetic_potential (const float *point, const Electrode *electrodes,
+                    size_t num_electrodes, const _Complex float *il,
                     _Complex double gamma, double mur, size_t max_eval,
                     double req_abs_error, double req_rel_error,
-                    _Complex double *va);
+                    _Complex float *va);
 
 /** Integrand to calculate the electric field caused by a differential
 transversal current \f$ dI_T \f$.
@@ -396,12 +396,12 @@ components \f$ (E_x, E_y, E_z) \f$ will be add to on return.
 @see elec_field_integrand
 */
 int
-electric_field (const double *point, const Electrode *electrodes,
-                size_t num_electrodes, const _Complex double *il,
-                const _Complex double *it, _Complex double gamma,
+electric_field (const float *point, const Electrode *electrodes,
+                size_t num_electrodes, const _Complex float *il,
+                const _Complex float *it, _Complex double gamma,
                 _Complex double s, double mur, _Complex double kappa,
                 size_t max_eval, double req_abs_error, double req_rel_error,
-                _Complex double *ve);
+                _Complex float *ve);
 
 /** Interface to pass magnetic_potential as an integrand to Cubature when
 calculating the voltage along a path.
@@ -437,10 +437,10 @@ v_mag_pot_integrand (unsigned ndim, const double *t, void *auxdata, unsigned fdi
 @return the voltage along the line
 @see https://github.com/stevengj/cubature
 */
-_Complex double
-voltage (const double *point1, const double *point2,
+_Complex float
+voltage (const float *point1, const float *point2,
          const Electrode *electrodes, size_t num_electrodes,
-         const _Complex double *il, const _Complex double *it,
+         const _Complex float *il, const _Complex float *it,
          _Complex double gamma, _Complex double s, double mur,
          _Complex double kappa, size_t max_eval, double req_abs_error,
          double req_rel_error);

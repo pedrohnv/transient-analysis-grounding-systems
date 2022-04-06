@@ -22,6 +22,12 @@ zgemm_ (char* transa, char* transb, int* m, int* n, int* k,
         _Complex double* b, int* ldb, _Complex double* beta,
         _Complex double* c, int* ldc);
 
+extern void
+cgemm_ (char* transa, char* transb, int* m, int* n, int* k,
+        _Complex float* alpha, _Complex float* a, int* lda,
+        _Complex float* b, int* ldb, _Complex float* beta,
+        _Complex float* c, int* ldc);
+
 /** ZSYMM  performs one of the matrix-matrix operations
 C := alpha*A*B + beta*C,
 or
@@ -35,6 +41,11 @@ zsymm_ (char* side, char* uplo, int* m, int* n, _Complex double* alpha,
         _Complex double* a, int* lda, _Complex double* b, int* ldb,
         _Complex double* beta, _Complex double* c, int* ldc);
 
+extern void
+csymm_ (char* side, char* uplo, int* m, int* n, _Complex float* alpha,
+        _Complex float* a, int* lda, _Complex float* b, int* ldb,
+        _Complex float* beta, _Complex float* c, int* ldc);
+
 /** ZGEMV  performs one of the matrix-vector operations
 y := alpha*A*x + beta*y, or
 y := alpha*A**T*x + beta*y, or
@@ -47,5 +58,9 @@ zgemv_ (char *trans, int *m, int *n, _Complex double *alpha,
         _Complex double *a, int *lda, _Complex double *x, int *incx,
         _Complex double *beta, _Complex double *y, int *incy);
 
+extern void
+cgemv_ (char *trans, int *m, int *n, _Complex float *alpha,
+        _Complex float *a, int *lda, _Complex float *x, int *incx,
+        _Complex float *beta, _Complex double *y, int *incy);
 
 #endif /* BLAS_H_ */

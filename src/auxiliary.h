@@ -36,8 +36,8 @@ and \f$ b \f$ (included).
 @return pointer to filled array
 @see Source code taken from https://github.com/ntessore/algo
 */
-double*
-linspace (double a, double b, size_t n, double u[]);
+float*
+linspace (float a, float b, size_t n, float u[]);
 
 /** Fill array \f$ u \f$ with \f$ n \f$ logarithmically spaced numbers between
 \f$ 10^a \f$ and \f$ 10^b \f$ (included).
@@ -48,8 +48,8 @@ linspace (double a, double b, size_t n, double u[]);
 @return pointer to filled array
 @see Source code taken from https://github.com/ntessore/algo
 */
-double*
-logspace (double a, double b, size_t n, double u[]);
+float*
+logspace (float a, float b, size_t n, float u[]);
 
 /** Computes the harmonic electromagnetic wave length \f$ \lambda \f$ in a lossy medium.
 @param f frequency (Hz)
@@ -58,8 +58,8 @@ logspace (double a, double b, size_t n, double u[]);
 @param mur medium relative magnetic permeability \f$ \mu_r \f$
 @return \f$ \lambda \f$ in \f$ m \f$
 */
-double
-wave_length (double f, double sigma, double ep, double mur);
+float
+wave_length (float f, float sigma, float ep, float mur);
 
 /** Calculates the soil parameters \f$ \sigma(s) \f$ and \f$ \varepsilon_r(s) \f$
 based on the Alipio-Visacro model [1].
@@ -95,8 +95,8 @@ vol. 56, no. 5, pp. 1163-1171, Oct. 2014, doi: 10.1109/TEMC.2014.2313977.
 @return 0 on success
 */
 int
-alipio_soil (_Complex double* sigma, _Complex double* epsr, double sigma0,
-	           _Complex double s, double h, double g, double eps_ratio);
+alipio_soil (_Complex float* sigma, _Complex float* epsr, float sigma0,
+	           _Complex float s, float h, float g, float eps_ratio);
 
 /* Calculates the soil parameters \f$ \sigma(s) \f$ and \f$ \varepsilon_r(s) \f$
 based on the Smith-Longmire model as presented in [1].
@@ -113,8 +113,8 @@ Electromagn. Compat. 56 (February (1)) (2014) 177–187.
 @return 0 on success
 */
 int
-smith_longmire_soil (_Complex double* sigma, _Complex double* epsr, double sigma0,
-                     _Complex double s, double erinf);
+smith_longmire_soil (_Complex float* sigma, _Complex float* epsr, float sigma0,
+                     _Complex float s, float erinf);
 
 /** Check if two points are the same using DBL_EPSILON as tolerance.
 @param point1 first point in \f$ \mathbf{R}^3 \f$
@@ -123,7 +123,7 @@ smith_longmire_soil (_Complex double* sigma, _Complex double* epsr, double sigma
 @see equal_points_tol
 */
 bool
-equal_points (const double* point_1, const double* point_2);
+equal_points (const float* point_1, const float* point_2);
 
 /** Check if two points are the same within a tolerance.
 @param point1 first point in \f$ \mathbf{R}^3 \f$
@@ -134,7 +134,7 @@ equal_points (const double* point_1, const double* point_2);
 @see equal_points
 */
 bool
-equal_points_tol (const double* point_1, const double* point_2, double tol);
+equal_points_tol (const float* point_1, const float* point_2, float tol);
 
 /** Computes the \f$ \|\cdot\|_2 \f$ (euclidian length) of the vector which starts at
 start_point and ends at end_point.
@@ -142,8 +142,8 @@ start_point and ends at end_point.
 @param end_point array \f$(x,y,z)_0\f$ that defines the ending point
 @return \f$ \| (x,y,z)_1 - (x,y,z)_0 \|_2 \f$
 */
-double
-vector_length (const double start_point[3], const double end_point[3]);
+float
+vector_length (const float start_point[3], const float end_point[3]);
 
 /** LAPACK routine to compute the Euclidean norm of a vector \f$ \|x\|_2 \f$.
 @param n Specifies the number of elements in vector \f$x\f$.
@@ -151,10 +151,10 @@ vector_length (const double start_point[3], const double end_point[3]);
 @param incx Specifies the increment \f$ i \f$ for the elements of \f$x\f$
 @return \f$ \|x\|_2 \f$
 */
-extern double
-snrm2_ (int* n, double* x, int* incx);
+extern float
+snrm2_ (int* n, float* x, int* incx);
 
-/** Prints a complex (double) matrix to a file.
+/** Prints a complex (float) matrix to a file.
 @param m number of rows
 @param n number of columns
 @param a pointer to array where matrix is stored
@@ -163,9 +163,9 @@ snrm2_ (int* n, double* x, int* incx);
 @return 0 on success
 */
 int
-complex_matrix_file (size_t m, size_t n, const _Complex double* a, int lda, FILE* fp);
+complex_matrix_file (size_t m, size_t n, const _Complex float* a, int lda, FILE* fp);
 
-/** Prints a real (double) matrix to a file.
+/** Prints a real (float) matrix to a file.
 @param m number of rows
 @param n number of columns
 @param a pointer to array where matrix is stored
@@ -174,7 +174,7 @@ complex_matrix_file (size_t m, size_t n, const _Complex double* a, int lda, FILE
 @return 0 on success
 */
 int
-double_matrix_file (size_t m, size_t n, const double* a, int lda, FILE* fp);
+float_matrix_file (size_t m, size_t n, const float* a, int lda, FILE* fp);
 
 /** FORTRAN subroutine (from SLATEC) to calculate I-Bessel function, i.e.,
 modified Bessel function of the first kind, with complex argument.
@@ -204,7 +204,7 @@ zbesi_ (double* zr, double* zi, double* fnu, int* kode, int* n, double* cyr,
 @param lda leading dimension of a
 */
 void
-print_matrix (char *desc, int m, int n, const _Complex double* a, int lda);
+print_matrix (char *desc, int m, int n, const _Complex float* a, int lda);
 
 /** Prints a ROW MAJOR matrix to stdio.
 @param desc description to print before the matrix
@@ -214,7 +214,7 @@ print_matrix (char *desc, int m, int n, const _Complex double* a, int lda);
 @param lda leading dimension of a
 */
 void
-print_matrix_row (char *desc, int m, int n, const _Complex double* a, int lda);
+print_matrix_row (char *desc, int m, int n, const _Complex float* a, int lda);
 
 /** Copies the source matrix into target matrix considering COLUMN MAJOR storage.
 \f$ B := A \f$
@@ -227,7 +227,7 @@ print_matrix_row (char *desc, int m, int n, const _Complex double* a, int lda);
 @return 0 on success
 */
 int
-matrix_copy (const _Complex double* source, _Complex double* target,
+matrix_copy (const _Complex float* source, _Complex float* target,
 			       size_t lds, size_t ldt, size_t nline, size_t ncol);
 
 /** Copies the transpose of source matrix into target matrix considering
@@ -242,7 +242,7 @@ COLUMN MAJOR storage.
 @return 0 on success
 */
 int
-transpose_copy (const _Complex double* source, _Complex double* target,
+transpose_copy (const _Complex float* source, _Complex float* target,
                 size_t lds, size_t ldt, size_t nline, size_t ncol);
 
 /** pc_copy
@@ -257,7 +257,7 @@ considering COLUMN MAJOR storage.
 @return 0 on success
 */
 int
-pc_copy (const _Complex double* source, _Complex double* target,
+pc_copy (const _Complex float* source, _Complex float* target,
          size_t lds, size_t ldt, size_t nline, size_t ncol);
 
 /** Copies the line permutation of source matrix into target matrix
@@ -272,7 +272,7 @@ considering COLUMN MAJOR storage.
 @return 0 on success
 */
 int
-pl_copy (const _Complex double* source, _Complex double* target,
+pl_copy (const _Complex float* source, _Complex float* target,
          size_t lds, size_t ldt, size_t nline, size_t ncol);
 
 /** Copies the column and line permutation of source matrix into target matrix
@@ -287,7 +287,7 @@ considering COLUMN MAJOR storage.
 @return 0 on success
 */
 int
-pcl_copy (const _Complex double* source, _Complex double* target,
+pcl_copy (const _Complex float* source, _Complex float* target,
           size_t lds, size_t ldt, size_t nline, size_t ncol);
 
 
@@ -392,5 +392,13 @@ doi: 10.1109/TEMC.2007.897153.
 */
 double
 heidler (double t, double imax, double tau1, double tau2, double n);
+
+/**
+Read the number of lines in a file.
+@param filename the name of the file
+@return the number of lines in the file
+*/
+int
+lines_in_file (const char filename[]);
 
 #endif /* AUXILIARY_H_ */

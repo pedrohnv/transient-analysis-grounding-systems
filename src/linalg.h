@@ -36,8 +36,8 @@ only its lower half is stored (set).
 @see solve_immittance
 */
 int
-fill_incidence_imm (_Complex double* wg, const Electrode* electrodes,
-                    size_t num_electrodes, const double* nodes,
+fill_incidence_imm (_Complex float* wg, const Electrode* electrodes,
+                    size_t num_electrodes, const float* nodes,
                     size_t num_nodes);
 
 /** Fills the Global Immittance matrix
@@ -54,8 +54,8 @@ half is stored (set).
 @see solve_immittance
 */
 int
-fill_impedance_imm (_Complex double* wg, const _Complex double* zl,
-                    const _Complex double* zt, size_t num_electrodes,
+fill_impedance_imm (_Complex float* wg, const _Complex float* zl,
+                    const _Complex float* zt, size_t num_electrodes,
                     size_t num_nodes);
 
 /** Solves the system of equations of the Global Immitance formulation.
@@ -77,7 +77,7 @@ for multiple frequencies. See the source code of this function to have an idea.
 @see fill_impedance_imm
 */
 int
-solve_immittance (_Complex double* wg, _Complex double* ie, size_t num_electrodes,
+solve_immittance (_Complex float* wg, _Complex float* ie, size_t num_electrodes,
                   size_t num_nodes);
 
 /* ================= Admittance Formulation ================= */
@@ -101,9 +101,9 @@ point to \f$ A, (B := A)\f$, saving memory space. Then call the function as:
 @see fill_impedance_adm2
 */
 int
-fill_incidence_adm (_Complex double* a, _Complex double* b,
+fill_incidence_adm (_Complex float* a, _Complex float* b,
                     const Electrode* electrodes, size_t num_electrodes,
-                    const double* nodes, size_t num_nodes);
+                    const float* nodes, size_t num_nodes);
 
 /** Calculates the nodal admittance matrix \f$ Y_N = A^T Z_L^{-1} A + B^T Z_T^{-1} B \f$.
 As it is symmetric, only its lower half is stored (set).
@@ -121,8 +121,8 @@ As it is symmetric, only its lower half is stored (set).
 @see solve_admittance
 */
 int
-fill_impedance_adm (_Complex double* yn, _Complex double* zl, _Complex double* zt,
-                    _Complex double* a, _Complex double* b, size_t num_electrodes,
+fill_impedance_adm (_Complex float* yn, _Complex float* zl, _Complex float* zt,
+                    _Complex float* a, _Complex float* b, size_t num_electrodes,
                     size_t num_nodes);
 
 /** Calculates the modified longitudinal and transversal admittances \f$ Z_L^{-1} A \f$
@@ -143,9 +143,9 @@ in the process. Useful when they are needed to calculate the currents
 @see fill_impedance_adm2
 */
 int
-calculate_yla_ytb (_Complex double* yla, _Complex double* ytb,
-                   _Complex double* zl, _Complex double* zt,
-                   _Complex double* a, _Complex double* b,
+calculate_yla_ytb (_Complex float* yla, _Complex float* ytb,
+                   _Complex float* zl, _Complex float* zt,
+                   _Complex float* a, _Complex float* b,
                    size_t num_electrodes, size_t num_nodes);
 
 /** Calculates the nodal admittance matrix \f$ Y_N = A^T Z_L^{-1} A + B^T Z_T^{-1} B \f$,
@@ -167,9 +167,9 @@ matrices are preserved. Useful when they must be calculated to find the currents
 @see solve_admittance
 */
 int
-fill_impedance_adm2 (_Complex double* yn, _Complex double* yla,
-                     _Complex double* ytb, _Complex double* a,
-                     _Complex double* b, size_t num_electrodes,
+fill_impedance_adm2 (_Complex float* yn, _Complex float* yla,
+                     _Complex float* ytb, _Complex float* a,
+                     _Complex float* b, size_t num_electrodes,
                      size_t num_nodes);
 
 /** Solves the system of equations of the Nodal Admitance formulation
@@ -190,6 +190,6 @@ this array in-place.
 @see fill_impedance_adm2
 */
 int
-solve_admittance (_Complex double* yn, _Complex double* ic, size_t num_nodes);
+solve_admittance (_Complex float* yn, _Complex float* ic, size_t num_nodes);
 
 #endif /* LINALG_H_ */
