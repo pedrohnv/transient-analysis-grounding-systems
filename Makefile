@@ -64,3 +64,6 @@ three_grids	:	$(OBJECTS)
 
 visacro57emc01	:	$(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDE) -o visacro57emc01.exe examples/visacro57emc01.c $(OBJECTS) $(LINK)
+
+substation500kv	:	$(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDE) -o substation500kv.exe examples/substation500kv.c $(OBJECTS) $(LINK)
