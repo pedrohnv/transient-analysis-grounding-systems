@@ -4,7 +4,7 @@ CUBATUREPATH = cubature
 
 INCLUDE = -Isrc -I$(CUBATUREPATH)
 CFLAGS = -Wall -fno-exceptions -Wfatal-errors -std=c11 -O3 -m64 -fopenmp
-LINK = -L. -llapack -lblas -lgfortran -lpthread -lfftw3 -lm -ldl
+LINK = -L. -llapack -lopenblas -lgfortran -lpthread -lfftw3 -lm -ldl
 
 ## Intel MKL version:
 #INCLUDE = -Isrc -I$(CUBATUREPATH) -I${MKLROOT}/include
