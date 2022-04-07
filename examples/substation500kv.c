@@ -24,7 +24,7 @@ To use less memory, the matrices of the system are float instead of float.
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-//#include <omp.h>
+#include <mpi.h>
 #include "auxiliary.h"
 #include "electrode.h"
 #include "linalg.h"
@@ -44,6 +44,22 @@ int set_image_dist (Electrode *images, size_t num_electrodes, float h)
 int
 run_case ()
 {
+    // A MPI program runs everything on every process,
+    // even before initializing the MPI environment.
+    // Initialize the MPI environment.
+    MPI_Init(NULL, NULL);
+    // Get the number of processes
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    printf("Number of processors executing: %d\n", world_size);
+    // Get the rank of the process
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    // Get the name of the processor
+    char processor_name[MPI_MAX_PROCESSOR_NAME];
+    int name_len;
+    MPI_Get_processor_name(processor_name, &name_len);
+
     char elec_file_name[] = "examples/substation500kv.txt";
     char zh_file_name[] = "substation500kv_zh.csv";
     //char gpr_file_name[] = "substation500kv_gpr.csv";
@@ -85,123 +101,157 @@ run_case ()
     size_t nn2 = num_nodes * num_nodes;
     // malloc matrices
     size_t nbytes = sizeof(_Complex float) * (ne2 * 4 + nn2 * 2 + (num_electrodes * num_nodes) * 2);
-    printf("Expected memory needed for matrices: %f GB\n", nbytes * 1e-9);
+    printf("Expected memory needed by each process for matrices: %f GB\n", nbytes * 1e-9);
+
     printf("Enter 0 if you want to continue: ");
-    scanf("%i", &read);
+    scanf("%i", &read); // FIXME delete line
     if (read != 0) exit(0);
-    _Complex float ref_l10, ref_t10, ref_l12, ref_t12;
-    _Complex float* zl = malloc(ne2 * sizeof(_Complex float));
-    _Complex float* zt = malloc(ne2 * sizeof(_Complex float));
-    _Complex float* zli = malloc(ne2 * sizeof(_Complex float));
-    _Complex float* zti = malloc(ne2 * sizeof(_Complex float));
-    _Complex float* ie = malloc(nn2 * sizeof(_Complex float));
-    _Complex float* yn = malloc(nn2 * sizeof(_Complex float));
-    _Complex float* a = malloc((num_electrodes * num_nodes) * sizeof(_Complex float));
-    _Complex float* b = malloc((num_electrodes * num_nodes) * sizeof(_Complex float));
-    fill_incidence_adm(a, b, electrodes, num_electrodes, nodes, num_nodes);
-    FILE *zh_file = fopen(zh_file_name, "w");
-    _Complex double kappa1, kappa2, gamma, s;
-    int converged;
-    printf("entering loop\n");
-    fflush(stdout);
-    // use raw BLAS and LAPACK to solve system with multiple RHS
-    int nn1 = (int) num_nodes;
-    int ldie = nn1;  // leading dimension of ie
-    int* ipiv = malloc(nn1 * sizeof(int));  // pivot indices
-    int info;
-    int nrhs = num_nodes;
-    char uplo = 'L';  // matrices are symmetric, only Lower Half is set
-    int lwork = -1;  // signal to Query the optimal workspace
-    _Complex float wkopt;
-    csysv_(&uplo, &nn1, &nrhs, yn, &nn1, ipiv, ie, &ldie, &wkopt, &lwork, &info);
-    lwork = crealf(wkopt);
-    _Complex float* work = malloc(lwork * sizeof(_Complex float));
-    for (size_t i = 0; i < nf; i++) {
-        s = I * TWO_PI * freq[i];
-        kappa1 = (sigma1 + s * er1 * EPS0);  // soil complex conductivity
-        kappa2 = (sigma2 + s * er2 * EPS0);  // soil complex conductivity
-        gamma = csqrt(s * MU0 * kappa1);  //soil propagation constant
-        calculate_impedances(zl, zt, electrodes, num_electrodes, gamma, s, mur,
-                             kappa1, max_eval, req_abs_error, req_rel_error, intg_type);
-        // Images =====================
-        // reflection coefficient, air
-        ref_t10 = (kappa1 - s * EPS0) / (kappa1 + s * EPS0);
-        ref_l10 = 1.0;
-        // reflection coefficient, 2nd soil
-        ref_t12 = (kappa1 - kappa2)/(kappa1 + kappa2);
-        ref_l12 = 1.0;
-        k = 0;
-        converged = 0;
-        while (!converged) {
-            k += 1;
-            for (size_t m = 0; m < ne2; m++) {
-                zli[m] = 0.0;
-                zti[m] = 0.0;
+    float x;
+    if (world_rank != 0) {
+        _Complex float ref_l10, ref_t10, ref_l12, ref_t12;
+        _Complex float* zl = malloc(ne2 * sizeof(_Complex float));
+        _Complex float* zt = malloc(ne2 * sizeof(_Complex float));
+        _Complex float* zli = malloc(ne2 * sizeof(_Complex float));
+        _Complex float* zti = malloc(ne2 * sizeof(_Complex float));
+        _Complex float* ie = malloc(nn2 * sizeof(_Complex float));
+        _Complex float* yn = malloc(nn2 * sizeof(_Complex float));
+        _Complex float* a = malloc((num_electrodes * num_nodes) * sizeof(_Complex float));
+        _Complex float* b = malloc((num_electrodes * num_nodes) * sizeof(_Complex float));
+        fill_incidence_adm(a, b, electrodes, num_electrodes, nodes, num_nodes);
+        _Complex double kappa1, kappa2, gamma, s;
+        int converged;
+        // use raw BLAS and LAPACK to solve system with multiple RHS
+        int nn1 = (int) num_nodes;
+        int ldie = nn1;  // leading dimension of ie
+        int* ipiv = malloc(nn1 * sizeof(int));  // pivot indices
+        int info;
+        int nrhs = num_nodes;
+        char uplo = 'L';  // matrices are symmetric, only Lower Half is set
+        int lwork = -1;  // signal to Query the optimal workspace
+        _Complex float wkopt;
+        csysv_(&uplo, &nn1, &nrhs, yn, &nn1, ipiv, ie, &ldie, &wkopt, &lwork, &info);
+        lwork = crealf(wkopt);
+        _Complex float* work = malloc(lwork * sizeof(_Complex float));
+
+        // slipt the frequency loop for each proccess
+        // partition = (job size) over (processors).
+        unsigned int partition = nf / (world_size - 1);
+        for (unsigned int i = (world_rank - 1) * partition;
+             i <= (world_rank - 1) * partition + partition; i++ ) {
+            if (world_rank == 0) break;
+            s = I * TWO_PI * freq[i];
+            kappa1 = (sigma1 + s * er1 * EPS0);  // soil complex conductivity
+            kappa2 = (sigma2 + s * er2 * EPS0);  // soil complex conductivity
+            gamma = csqrt(s * MU0 * kappa1);  //soil propagation constant
+            calculate_impedances(zl, zt, electrodes, num_electrodes, gamma, s, mur,
+                                 kappa1, max_eval, req_abs_error, req_rel_error, intg_type);
+            // Images =====================
+            // reflection coefficient, air
+            ref_t10 = (kappa1 - s * EPS0) / (kappa1 + s * EPS0);
+            ref_l10 = 1.0;
+            // reflection coefficient, 2nd soil
+            ref_t12 = (kappa1 - kappa2)/(kappa1 + kappa2);
+            ref_l12 = 1.0;
+            k = 0;
+            converged = 0;
+            while (!converged) {
+                k += 1;
+                for (size_t m = 0; m < ne2; m++) {
+                    zli[m] = 0.0;
+                    zti[m] = 0.0;
+                }
+                // second image group in Air
+                set_image_dist(images, num_electrodes, 2*k*H);
+                impedances_images(zli, zti, electrodes, images, num_electrodes, gamma,
+                                  s, mur, kappa1, 1, 1, max_eval, req_abs_error,
+                                  req_rel_error, intg_type);
+                // first image group in 2nd Soil
+                // has the same distance as second group in air
+                for (size_t m = 0; m < ne2; m++) {
+                    zli[m] *= (ref_l10 + ref_l12);
+                    zti[m] *= (ref_t10 + ref_t12);
+                }
+                // first image group in Air
+                set_image_dist(images, num_electrodes, 2*(k - 1)*H + 2*h);
+                impedances_images(zli, zti, electrodes, images, num_electrodes, gamma,
+                                  s, mur, kappa1, ref_l10, ref_t10, max_eval,
+                                  req_abs_error, req_rel_error, intg_type);
+                // second image group in 2nd Soil
+                set_image_dist(images, num_electrodes, 2*k*H - 2*h);
+                impedances_images(zli, zti, electrodes, images, num_electrodes, gamma,
+                                  s, mur, kappa1, ref_l12, ref_t12, max_eval,
+                                  req_abs_error, req_rel_error, intg_type);
+                c1 = (cabsf(zli[0]) < req_rel_error * cabsf(zl[0]));
+                c2 = (cabsf(zti[0]) < req_rel_error * cabsf(zt[0]));
+                for (size_t m = 0; m < ne2; m++) {
+                    zl[m] += zli[m];
+                    zt[m] += zti[m];
+                }
+                converged = (c1 && c2);
             }
-            // second image group in Air
-            set_image_dist(images, num_electrodes, 2*k*H);
-            impedances_images(zli, zti, electrodes, images, num_electrodes, gamma,
-                              s, mur, kappa1, 1, 1, max_eval, req_abs_error,
-                              req_rel_error, intg_type);
-            // first image group in 2nd Soil
-            // has the same distance as second group in air
-            for (size_t m = 0; m < ne2; m++) {
-                zli[m] *= (ref_l10 + ref_l12);
-                zti[m] *= (ref_t10 + ref_t12);
-            }
-            // first image group in Air
-            set_image_dist(images, num_electrodes, 2*(k - 1)*H + 2*h);
-            impedances_images(zli, zti, electrodes, images, num_electrodes, gamma,
-                              s, mur, kappa1, ref_l10, ref_t10, max_eval,
-                              req_abs_error, req_rel_error, intg_type);
-            // second image group in 2nd Soil
-            set_image_dist(images, num_electrodes, 2*k*H - 2*h);
-            impedances_images(zli, zti, electrodes, images, num_electrodes, gamma,
-                              s, mur, kappa1, ref_l12, ref_t12, max_eval,
-                              req_abs_error, req_rel_error, intg_type);
-            c1 = (cabsf(zli[0]) < req_rel_error * cabsf(zl[0]));
-            c2 = (cabsf(zti[0]) < req_rel_error * cabsf(zt[0]));
-            for (size_t m = 0; m < ne2; m++) {
-                zl[m] += zli[m];
-                zt[m] += zti[m];
-            }
-            converged = (c1 && c2);
-        }
-        printf("f = %.1f Hz, number of images: %i\n", freq[i], 2*k);
-        fill_impedance_adm(yn, zl, zt, a, b, num_electrodes, num_nodes);
-        for (size_t m = 0; m < num_nodes; m++) {
-            for (size_t k = 0; m < num_nodes; m++) {
-                if (m == k) {
-                    ie[m * num_nodes + k] = 1.0;
-                } else {
-                    ie[m * num_nodes + k] = 0.0;
+            printf("f = %.1f Hz, number of images: %i\n", freq[i], 2*k);
+            fill_impedance_adm(yn, zl, zt, a, b, num_electrodes, num_nodes);
+            for (size_t m = 0; m < num_nodes; m++) {
+                for (size_t k = 0; m < num_nodes; m++) {
+                    if (m == k) {
+                        ie[m * num_nodes + k] = 1.0;
+                    } else {
+                        ie[m * num_nodes + k] = 0.0;
+                    }
                 }
             }
+            // solve
+            csysv_(&uplo, &nn1, &nrhs, yn, &nn1, ipiv, ie, &ldie, work, &lwork, &info);
+            // Check for the exact singularity
+            if (info > 0) {
+                printf("The diagonal element of the triangular factor of YN,\n");
+                printf("U(%i,%i) is zero, so that YN is singular;\n", info, info);
+                printf("the solution could not be computed on loop element i = %i\n", i);
+            }
+            if (i == 0) {
+                printf("Expected more time until completion of the frequency loop: %.1f hours.\n",
+                       (MPI_Wtime() - begin) * ns / 3600.0 / (world_size - 1));
+            }
+            for (size_t k = 0; k < num_nodes; k++) {
+                x = crealf(ie + k * num_nodes);
+                MPI_Send(x, 1, MPI_FLOAT, 0, i * num_nodes + 2 * k, MPI_COMM_WORLD);
+                x = cimagf(ie + k * num_nodes);
+                MPI_Send(x, 1, MPI_FLOAT, 0, i * num_nodes + 2 * (k + 1), MPI_COMM_WORLD);
+            }
+        }  // end frequency loop
+        free(electrodes);
+        free(images);
+        free(nodes);
+        free(zl);
+        free(zt);
+        free(zli);
+        free(zti);
+        free(ie);
+        free(yn);
+        free(a);
+        free(b);
+    } else {  // if rank == 0
+        // save the results
+        FILE *zh_file = fopen(zh_file_name, "w");
+        fprintf(zh_file, "f");
+        for (size_t k = 0; k < num_nodes; k++) {
+            fprintf(zh_file, "n%i", k);
         }
-        // solve
-        csysv_(&uplo, &nn1, &nrhs, yn, &nn1, ipiv, ie, &ldie, work, &lwork, &info);
-        // Check for the exact singularity
-        if (info > 0) {
-            printf("The diagonal element of the triangular factor of YN,\n");
-            printf("U(%i,%i) is zero, so that YN is singular;\n", info, info);
-            printf("the solution could not be computed.\n");
+        fprintf(zh_file, "\n");
+        for (size_t i = 0; i < nf; i++) {
+            fprintf(zh_file, "%g", freq[i]);
+            for (size_t k = 0; k < num_nodes; k++) {
+                MPI_Recv(&x, 1, MPI_FLOAT, 0, i * num_nodes + 2 * k, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                fprintf(zh_file, ", %f", x);
+                MPI_Recv(&x, 1, MPI_FLOAT, 0, i * num_nodes + 2 * (k + 1), MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                fprintf(zh_file, "%+f%s", x, "im");
+            }
+            fprintf(zh_file, "\n");
         }
-
-        fprintf(zh_file, "%f + %f%s\n", crealf(ie[0]), cimagf(ie[0]), "im");
-        fflush(zh_file);
+        fclose(zh_file);
     }
-    fclose(zh_file);
-    free(electrodes);
-    free(images);
-    free(nodes);
-    free(zl);
-    free(zt);
-    free(zli);
-    free(zti);
-    free(ie);
-    free(yn);
-    free(a);
-    free(b);
+    // Finalize the MPI environment.
+    MPI_Finalize();
     return 0;
 }
 
