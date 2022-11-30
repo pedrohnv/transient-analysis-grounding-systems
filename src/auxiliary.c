@@ -13,6 +13,14 @@ Constants, auxiliary functions and routines.
 #include <stdbool.h>
 #include <fftw3.h>
 
+// constants
+const double PI = 3.1415926535897932384626433832795029;
+const double TWO_PI = 6.283185307179586476925286766559;
+const double FOUR_PI = 12.5663706143591729538505735331;
+const double MU0 = 1.256637061435917e-6;
+const double EPS0 = 8.854187817620e-12;
+const double RHO_CU = 1.689e-8;
+
 double*
 linspace (double a, double b, size_t n, double u[])
 {

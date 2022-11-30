@@ -14,18 +14,22 @@ Constants, auxiliary functions and routines.
 
 //constants
 /** math constant \f$ \pi \f$ */
-#define PI 3.1415926535897932384626433832795029L
-/** math constant \f$ 2\pi \f$ */
-#define TWO_PI (2.0 * PI)
-/** math constant \f$ 4\pi \f$ */
-#define FOUR_PI (4.0 * PI)
-/** Vacuum permeability \f$ \mu_0 \f$ */
-#define MU0 1.256637061435917e-6
-/** Vacuum permittivity \f$ \varepsilon_0 \f$ */
-#define EPS0 8.854187817620e-12
-/** Copper resistivity \f$ \rho_{cu} \f$ */
-#define RHO_CU 1.689e-8
+extern const double PI;
 
+/** math constant \f$ 2\pi \f$ */
+extern const double TWO_PI;
+
+/** math constant \f$ 4\pi \f$ */
+extern const double FOUR_PI;
+
+/** Vacuum permeability \f$ \mu_0 \f$ */
+extern const double MU0;
+
+/** Vacuum permittivity \f$ \varepsilon_0 \f$ */
+extern const double EPS0;
+
+/** Copper resistivity \f$ \rho_{cu} \f$ */
+extern const double RHO_CU;
 
 /** Fill array \f$ u \f$ with \f$ n \f$ linearly spaced numbers between \f$ a \f$
 and \f$ b \f$ (included).
@@ -394,3 +398,7 @@ double
 heidler (double t, double imax, double tau1, double tau2, double n);
 
 #endif /* AUXILIARY_H_ */
+
+#ifdef __cplusplus
+}
+#endif
