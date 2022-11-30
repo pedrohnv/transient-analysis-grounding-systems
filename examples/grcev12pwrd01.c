@@ -27,12 +27,13 @@ will have length $L = 10 / div$)
 int
 run_case_adm (int gs, int div, size_t nf)
 {
-    size_t max_eval = 0;
-    double req_abs_error = 1e-4;
-    double req_rel_error = 1e-5;
     char file_name[50];
     sprintf(file_name, "gs%d.csv", gs);
     FILE *save_file = fopen(file_name, "w");
+    // integration parameters
+    size_t max_eval = 0;
+    double req_abs_error = 1e-4;
+    double req_rel_error = 1e-5;
     // soil parameters, constant with frequency
     double sigma = 1.0 / 1000.0;  // soil conductivity
     double er = 10.0;  // soil rel. permitivitty
@@ -138,6 +139,8 @@ run_case_adm (int gs, int div, size_t nf)
     free(zti);
     free(ie);
     free(yn);
+    free(a);
+    free(b);
     return 0;
 }
 
@@ -149,13 +152,13 @@ run_case (int gs, int div, size_t nf)
 
 /**
 Run cases GS10, GS20, GS30, GS60 and GS120, all with segments of length 10/3 m
-and 150 frequencies.
+and 100 frequencies.
 */
 int
 sweep ()
 {
     printf("Making a sweep of many cases.\n");
-    size_t nf = 150;
+    size_t nf = 100;
     clock_t begin, end;
     double time_spent;
     int div = 3;
@@ -226,3 +229,27 @@ main (int argc, char *argv[])
     printf("elapsed time: %f s\n", time_spent);
     return 0;
 }
+
+/*
+Making a sweep of many cases.
+computing GS10
+Num. segments = 12
+Num. nodes = 12
+GS10: end; elapsed time: 0.121045 s
+computing GS20
+Num. segments = 36
+Num. nodes = 33
+GS20: end; elapsed time: 0.179825 s
+computing GS30
+Num. segments = 72
+Num. nodes = 64
+GS30: end; elapsed time: 0.729630 s
+computing GS60
+Num. segments = 252
+Num. nodes = 217
+GS60: end; elapsed time: 11.139102 s
+computing GS120
+Num. segments = 936
+Num. nodes = 793
+GS120: end; elapsed time: 5.550624 min.
+*/
