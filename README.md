@@ -1,4 +1,4 @@
-# HP-HEM
+# TAGS
 High Performance implementation of the Hybrid Electromagnetic Model and its variants.
 
 The documentation of the code can be read at https://pedrohnv.github.io/hp_hem/
