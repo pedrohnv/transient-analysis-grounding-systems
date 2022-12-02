@@ -12,9 +12,9 @@ Cite the current release: [![DOI](https://zenodo.org/badge/151085118.svg)](https
 
 The permanent DOI is https://doi.org/10.5281/zenodo.2644010, which always resolves to the last release.
 
-This library is intended to be easy to use. Interfaces to use it from other programming languages are provided for (work in progress, Julia is the recommended one):
+There is a pure Julia version for those who don't want to use C: https://github.com/pedrohnv/transient-analysis-grounding-systems-julia
 
-  - Julia https://github.com/pedrohnv/hp_hem_julia
+There is also an interface to use a dynamic library from Julia (outdated, but it is a starting point): https://github.com/pedrohnv/hp_hem_julia
 
 The `examples` folder contains various C files which reproduce results published in the technical literature. Use them as starting point to build your own cases in pure C if you want maximum performance. Examples of use from other programming languages are in their respective repository.
 
