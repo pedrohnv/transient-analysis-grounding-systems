@@ -1,7 +1,7 @@
 # TAGS
 High Performance implementation of the Hybrid Electromagnetic Model and its variants.
 
-The documentation of the code can be read at https://pedrohnv.github.io/hp_hem/
+The documentation of the code can be read at https://pedrohnv.github.io/transient-analysis-grounding-systems
 
 The Hybrid Electromagnetic Model can be used to simulate any situation where the
 thin wire hypothesis is valid. See [1] for the mathematical formulation.
