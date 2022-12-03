@@ -1,5 +1,5 @@
 # TAGS
-High Performance implementation of the Hybrid Electromagnetic Model and its variants.
+Formely HP-HEM (High Performance implementation of the Hybrid Electromagnetic Model and its variants), but we changed the name to TAGS (Transient Analysis of Grounding Systems) to avoid any confusion with Hewlett-Packard Company.
 
 The documentation of the code can be read at https://pedrohnv.github.io/transient-analysis-grounding-systems
 
