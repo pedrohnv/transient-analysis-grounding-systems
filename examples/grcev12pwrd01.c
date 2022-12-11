@@ -11,7 +11,7 @@ doi: 10.1109/61.568238
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include <time.h>
+#include <omp.h>
 #include "auxiliary.h"
 #include "electrode.h"
 #include "linalg.h"
@@ -27,9 +27,6 @@ will have length $L = 10 / div$)
 int
 run_case_adm (int gs, int div, size_t nf)
 {
-    char file_name[50];
-    sprintf(file_name, "gs%d.csv", gs);
-    FILE *save_file = fopen(file_name, "w");
     // integration parameters
     size_t max_eval = 0;
     double req_abs_error = 1e-4;
@@ -58,22 +55,14 @@ run_case_adm (int gs, int div, size_t nf)
     }
     size_t ne = num_electrodes;
     size_t nn = num_nodes;
-    size_t ne2 = num_electrodes*num_electrodes;
-    size_t nn2 = num_nodes*num_nodes;
-    _Complex double kappa, gamma;
-    _Complex double* restrict potzl = malloc(ne2 * sizeof(_Complex double));
-    _Complex double* restrict potzt = malloc(ne2 * sizeof(_Complex double));
-    _Complex double* restrict potzli = malloc(ne2 * sizeof(_Complex double));
-    _Complex double* restrict potzti = malloc(ne2 * sizeof(_Complex double));
-    _Complex double* restrict zl = malloc(ne2 * sizeof(_Complex double));
-    _Complex double* restrict zt = malloc(ne2 * sizeof(_Complex double));
-    _Complex double* restrict zli = malloc(ne2 * sizeof(_Complex double));
-    _Complex double* restrict zti = malloc(ne2 * sizeof(_Complex double));
-    _Complex double* restrict ie = calloc(nn2, sizeof(_Complex double));
-    _Complex double* restrict yn = calloc(nn2, sizeof(_Complex double));
-    _Complex double* restrict a = malloc((num_electrodes*num_nodes) * sizeof(_Complex double));
-    _Complex double* restrict b = malloc((num_electrodes*num_nodes) * sizeof(_Complex double));
-    _Complex double s, ref_l, ref_t, rbar, exp_gr, iwu_4pi, one_4pik;
+    size_t ne2 = ne * ne;
+    size_t nn2 = nn * nn;
+    _Complex double* potzl = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* potzt = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* potzli = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* potzti = malloc(ne2 * sizeof(_Complex double));
+    _Complex double* a = malloc((ne * nn) * sizeof(_Complex double));
+    _Complex double* b = malloc((ne * nn) * sizeof(_Complex double));
     // Incidence and "z-potential" (mHEM) matrices =============================
     err = fill_incidence_adm(a, b, electrodes, ne, nodes, nn);
     if (err != 0) printf("Could not build incidence matrices\n");
@@ -84,48 +73,68 @@ run_case_adm (int gs, int div, size_t nf)
                             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, max_eval,
                             req_abs_error, req_rel_error, INTG_MHEM);
     if (err != 0) printf("integration error\n");
-    for (size_t i = 0; i < nf; i++) {
-        ie[0] = 1.0;
-        for (size_t m = 1; m < num_nodes; m++) {
-            ie[m] = 0.0;
+    // pre-compute distance matrices
+    double* rbar = malloc(ne2 * sizeof(double));
+    double* rbari = malloc(ne2 * sizeof(double));
+    for (size_t m = 0; m < ne; m++) {
+        for (size_t k = m; k < ne; k++) {
+            rbar[m * ne + k] = vector_length(electrodes[k].middle_point,
+                                             electrodes[m].middle_point);
+            rbari[m * ne + k] = vector_length(electrodes[k].middle_point,
+                                              images[m].middle_point);
         }
-        s = I * TWO_PI * freq[i];
-        kappa = (sigma + s * er * EPS0);  // soil complex conductivity
-        gamma = csqrt(s * MU0 * kappa);  // soil propagation constant
-        ref_t = (kappa - s * EPS0) / (kappa + s * EPS0);
-        ref_l = 1.0;  // longitudinal current has positive image
-        // modified HEM (mHEM):
-        iwu_4pi = s * MU0 / (FOUR_PI);
-        one_4pik = 1.0 / (FOUR_PI * kappa);
-        for (size_t m = 0; m < ne; m++) {
-            for (size_t k = m; k < ne; k++) {
-                rbar = vector_length(electrodes[k].middle_point,
-                                     electrodes[m].middle_point);
-                exp_gr = cexp(-gamma * rbar);
-                zl[m * ne + k] = exp_gr * potzl[m * ne + k];
-                zt[m * ne + k] = exp_gr * potzt[m * ne + k];
-                rbar = vector_length(electrodes[k].middle_point,
-                                     images[m].middle_point);
-                exp_gr = cexp(-gamma * rbar);
-                zl[m * ne + k] += ref_l * exp_gr * potzli[m * ne + k];
-                zt[m * ne + k] += ref_t * exp_gr * potzti[m * ne + k];
-                zl[m * ne + k] *= iwu_4pi;
-                zt[m * ne + k] *= one_4pik;
-            }
-        }
-        // Traditional HEM (highly discouraged):
-        /*calculate_impedances(zl, zt, electrodes, ne, gamma, s, 1.0, kappa,
-                             max_eval, req_abs_error, req_rel_error, INTG_DOUBLE);
-        impedances_images(zl, zt, electrodes, images, ne, gamma, s, 1.0,
-                          kappa, ref_l, ref_t, max_eval, req_abs_error,
-                          req_rel_error, INTG_DOUBLE);*/
-        fill_impedance_adm(yn, zl, zt, a, b, num_electrodes, num_nodes);
-        err = solve_admittance(yn, ie, num_nodes);
-        if (err != 0) exit(err);
-        fprintf(save_file, "%f + %f%s\n", creal(ie[0]), cimag(ie[0]), "im");
-        fflush(save_file);
     }
-    fclose(save_file);
+    _Complex double* zh = malloc(nf * sizeof(_Complex double));
+    openblas_set_num_threads(1);  // this is important! We want to multithread the frequency loop, not the matrix operations
+    #pragma omp parallel
+    {
+        _Complex double* restrict zl = malloc(ne2 * sizeof(_Complex double));
+        _Complex double* restrict zt = malloc(ne2 * sizeof(_Complex double));
+        _Complex double* restrict ie = malloc(nn2 * sizeof(_Complex double));
+        _Complex double* restrict yn = malloc(nn2 * sizeof(_Complex double));
+        _Complex double s, kappa, gamma, ref_l, ref_t, exp_gr, iwu_4pi, one_4pik;
+        #pragma omp for
+        for (size_t i = 0; i < nf; i++) {
+            ie[0] = 1.0;
+            for (size_t m = 1; m < num_nodes; m++) {
+                ie[m] = 0.0;
+            }
+            s = I * TWO_PI * freq[i];
+            kappa = (sigma + s * er * EPS0);  // soil complex conductivity
+            gamma = csqrt(s * MU0 * kappa);  // soil propagation constant
+            ref_t = (kappa - s * EPS0) / (kappa + s * EPS0);
+            ref_l = 1.0;  // longitudinal current has positive image
+            // modified HEM (mHEM):
+            iwu_4pi = s * MU0 / (FOUR_PI);
+            one_4pik = 1.0 / (FOUR_PI * kappa);
+            for (size_t m = 0; m < ne; m++) {
+                for (size_t k = m; k < ne; k++) {
+                    exp_gr = cexp(-gamma * rbar[m * ne + k]);
+                    zl[m * ne + k] = exp_gr * potzl[m * ne + k];
+                    zt[m * ne + k] = exp_gr * potzt[m * ne + k];
+                    exp_gr = cexp(-gamma * rbari[m * ne + k]);
+                    zl[m * ne + k] += ref_l * exp_gr * potzli[m * ne + k];
+                    zt[m * ne + k] += ref_t * exp_gr * potzti[m * ne + k];
+                    zl[m * ne + k] *= iwu_4pi;
+                    zt[m * ne + k] *= one_4pik;
+                }
+            }
+            // Traditional HEM (highly discouraged):
+            /*calculate_impedances(zl, zt, electrodes, ne, gamma, s, 1.0, kappa,
+                                max_eval, req_abs_error, req_rel_error, INTG_DOUBLE);
+            impedances_images(zl, zt, electrodes, images, ne, gamma, s, 1.0,
+                            kappa, ref_l, ref_t, max_eval, req_abs_error,
+                            req_rel_error, INTG_DOUBLE);*/
+            fill_impedance_adm(yn, zl, zt, a, b, num_electrodes, num_nodes);
+            err = solve_admittance(yn, ie, num_nodes);
+            if (err != 0) exit(err);
+            zh[i] = ie[0];
+        }
+        free(zl);
+        free(zt);
+        free(ie);
+        free(yn);
+    }  // end parallel
     free(electrodes);
     free(images);
     free(nodes);
@@ -133,14 +142,18 @@ run_case_adm (int gs, int div, size_t nf)
     free(potzt);
     free(potzli);
     free(potzti);
-    free(zl);
-    free(zt);
-    free(zli);
-    free(zti);
-    free(ie);
-    free(yn);
+    free(rbar);
+    free(rbari);
     free(a);
     free(b);
+    char file_name[50];
+    sprintf(file_name, "gs%d.csv", gs);
+    FILE *save_file = fopen(file_name, "w");
+    for (int i = 0; i < nf; i++) {
+        fprintf(save_file, "%f + %f%s\n", creal(zh[i]), cimag(zh[i]), "im");
+    }
+    free(zh);
+    fclose(save_file);
     return 0;
 }
 
@@ -151,52 +164,42 @@ run_case (int gs, int div, size_t nf)
 }
 
 /**
-Run cases GS10, GS20, GS30, GS60 and GS120, all with segments of length 10/3 m
-and 100 frequencies.
+Run cases GS10, GS20, GS30, GS60 and GS120, all with segments of length
+(10/Lmax) meters and nf frequencies.
 */
 int
 sweep ()
 {
     printf("Making a sweep of many cases.\n");
     size_t nf = 100;
-    clock_t begin, end;
-    double time_spent;
-    int div = 3;
+    double begin;  // to estimate time until completion
+    double len = 1.0;  // Lmax
+    int div = ceil(10.0 / len);
     // ===================================================
     printf("computing GS10\n");
-    begin = clock();
+    begin = omp_get_wtime();
     run_case(10, div, nf);
-    end = clock();
-    time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
-    printf("GS10: end; elapsed time: %f s\n", time_spent);
+    printf("GS10: end; elapsed time: %f s\n", omp_get_wtime() - begin);
     // ===================================================
     printf("computing GS20\n");
-    begin = clock();
+    begin = omp_get_wtime();
     run_case(20, div, nf);
-    end = clock();
-    time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
-    printf("GS20: end; elapsed time: %f s\n", time_spent);
+    printf("GS20: end; elapsed time: %f s\n", omp_get_wtime() - begin);
     // ===================================================
     printf("computing GS30\n");
-    begin = clock();
+    begin = omp_get_wtime();
     run_case(30, div, nf);
-    end = clock();
-    time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
-    printf("GS30: end; elapsed time: %f s\n", time_spent);
+    printf("GS30: end; elapsed time: %f s\n", omp_get_wtime() - begin);
     // ===================================================
     printf("computing GS60\n");
-    begin = clock();
+    begin = omp_get_wtime();
     run_case(60, div, nf);
-    end = clock();
-    time_spent = (double) (end - begin)/CLOCKS_PER_SEC;
-    printf("GS60: end; elapsed time: %f s\n", time_spent);
+    printf("GS60: end; elapsed time: %f s\n", omp_get_wtime() - begin);
     // ===================================================
     printf("computing GS120\n");
-    begin = clock();
+    begin = omp_get_wtime();
     run_case(120, div, nf);
-    end = clock();
-    time_spent = (double) (end - begin)/CLOCKS_PER_SEC/60;
-    printf("GS120: end; elapsed time: %f min.\n", time_spent);
+    printf("GS120: end; elapsed time: %f s\n", omp_get_wtime() - begin);
     // ===================================================
     return 0;
 }
@@ -219,37 +222,11 @@ main (int argc, char *argv[])
     printf("gs  = %i x %i m^2\n", gs, gs);
     printf("len = %.2f m\n", len);
     printf("nf  = %i\n", nf);
-    clock_t begin, end;
     double time_spent;
-    begin = clock();
+    double begin = omp_get_wtime();
     int div = ceil(10/len);
     run_case(gs, div, nf);
-    end = clock();
-    time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
+    time_spent = (double) (omp_get_wtime() - begin);
     printf("elapsed time: %f s\n", time_spent);
     return 0;
 }
-
-/*
-Making a sweep of many cases.
-computing GS10
-Num. segments = 12
-Num. nodes = 12
-GS10: end; elapsed time: 0.121045 s
-computing GS20
-Num. segments = 36
-Num. nodes = 33
-GS20: end; elapsed time: 0.179825 s
-computing GS30
-Num. segments = 72
-Num. nodes = 64
-GS30: end; elapsed time: 0.729630 s
-computing GS60
-Num. segments = 252
-Num. nodes = 217
-GS60: end; elapsed time: 11.139102 s
-computing GS120
-Num. segments = 936
-Num. nodes = 793
-GS120: end; elapsed time: 5.550624 min.
-*/
