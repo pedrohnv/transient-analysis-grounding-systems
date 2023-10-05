@@ -71,7 +71,7 @@ run_case (double lmax, double sigma0)
    for (size_t i = 0; i < num_points; i++) {
        points[3*i + 0] = dr * i;
        points[3*i + 1] = 0.0;
-       points[3*i + 1] = 0.0;
+       points[3*i + 2] = 0.0;
    }
 
     // malloc matrices =========================================================
