@@ -64,11 +64,10 @@ electrodes_file (const char file_name[], Electrode* electrodes,
             printf("error reading line %i of file %s\n", (int) (i+1), file_name);
             break;
         }
-        success = populate_electrode(&(electrodes[i]), start_point, end_point, radius);
-        if (success != 0) {
+        pop_error = populate_electrode(&(electrodes[i]), start_point, end_point, radius);
+        if (pop_error != 0) {
             printf("Bad input: could not create electrode %i from file %s\n",
                    (int) (i+1), file_name);
-            pop_error = success;
             break;
         }
     }
@@ -90,8 +89,8 @@ nodes_file (const char file_name[], double* nodes, size_t num_nodes)
     }
     int success = 3;
     for (size_t i = 0; i < num_nodes; i++) {
-        success = fscanf(stream, "%lf, %lf, %lf", &nodes[i*3],
-                         &nodes[i*3 + 1], &nodes[i*3 + 2]);
+        success = fscanf(stream, "%lf, %lf, %lf",
+                         &nodes[i*3], &nodes[i*3 + 1], &nodes[i*3 + 2]);
         if (success != 3) {
             printf("error reading line %i of file %s\n", (int) (i+1), file_name);
             break;
