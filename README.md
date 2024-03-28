@@ -1,3 +1,5 @@
+[See this Code Ocean capsule for a running example.](https://codeocean.com/capsule/0309688/tree)
+
 # TAGS
 Formely HP-HEM (High Performance implementation of the Hybrid Electromagnetic Model and its variants), but we changed the name to TAGS (Transient Analysis of Grounding Systems) to avoid any confusion with Hewlett-Packard Company.
 
